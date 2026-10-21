@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { getServices, getLocations, getServiceLocations, saveInquiry, getWhatsAppInquiryUrl } from '../services/dataService';
 import AvailabilityChecker from '../components/AvailabilityChecker';
 import { useSite } from '../context/SiteContext';
@@ -320,7 +320,7 @@ export default function Contact() {
                 Submit Inquiry <i className="fa-solid fa-paper-plane text-xs"></i>
               </button>
               <p className="text-center text-xs text-slate-400 font-semibold mt-3">
-                <i className="fa-solid fa-lock mr-1"></i> Your details are safe. We never share client data.
+                <i className="fa-solid fa-lock mr-1"></i> Your details are safe. Read our <Link to="/privacy" className="underline hover:text-slate-600 transition-colors">Privacy Policy</Link> and <Link to="/terms" className="underline hover:text-slate-600 transition-colors">Terms</Link>.
               </p>
             </div>
           </form>

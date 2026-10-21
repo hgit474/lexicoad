@@ -196,8 +196,8 @@ export default function Footer() {
             © 2026 {settings.site_name || 'Laxico Advertising Pvt. Ltd.'} • GST {settings.gst_number || '29CTIPS2521P1ZZ'} • All rights reserved.
           </div>
           <div className="flex gap-4">
-            <span className="hover:text-slate-300 cursor-pointer">Privacy</span>
-            <span className="hover:text-slate-300 cursor-pointer">Terms</span>
+            <Link to="/privacy" className="hover:text-slate-300 transition-colors">Privacy</Link>
+            <Link to="/terms" className="hover:text-slate-300 transition-colors">Terms</Link>
             <span className="text-slate-300">Made for outdoor impact • v3.2</span>
           </div>
         </div>

@@ -16,6 +16,8 @@ import ServiceDetails from './pages/ServiceDetails';
 import Portfolio from './pages/Portfolio';
 import Contact from './pages/Contact';
 import About from './pages/About';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
 
 // Admin Pages
 import AdminLayout from './pages/admin/AdminLayout';
@@ -74,6 +76,8 @@ function RouteMetadataUpdater() {
       '/portfolio': 'Portfolio & Live Campaign Gallery — Laxico Advertising',
       '/contact': 'Request Media Plan & Pricing Quote — Laxico Advertising',
       '/about': 'About Laxico Advertising — India-Wide Outdoor Network',
+      '/terms': 'Terms & Conditions — Laxico Advertising',
+      '/privacy': 'Privacy Policy — Laxico Advertising',
       '/lexico': 'Admin Portal Login — Laxico Advertising'
     };
 
@@ -135,6 +139,8 @@ export default function App() {
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
         </Route>
 
         {/* Admin Login Route (/lexico) */}
