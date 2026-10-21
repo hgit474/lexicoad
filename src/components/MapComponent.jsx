@@ -61,7 +61,7 @@ export default function MapComponent({
 
   const filteredLocations = activeCity === 'All' 
     ? locations 
-    : locations.filter(loc => loc.city.toLowerCase() === activeCity.toLowerCase());
+    : locations.filter(loc => (loc.city || '').toLowerCase() === activeCity.toLowerCase());
 
   const currentCenter = cityCoordinates[activeCity] || cityCoordinates['All'];
   const currentZoom = getZoomLevel(activeCity);
@@ -119,8 +119,8 @@ export default function MapComponent({
           <MapRecenter center={currentCenter} zoom={currentZoom} />
 
           {filteredLocations.map((loc) => {
-            const lat = Number(loc.latitude);
-            const lng = Number(loc.longitude);
+            const lat = Number(loc.latitude ?? loc.lat);
+            const lng = Number(loc.longitude ?? loc.lng);
             if (isNaN(lat) || isNaN(lng)) return null;
 
             // Find services available at this location

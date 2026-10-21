@@ -27,6 +27,23 @@ export default function AdminAnalytics() {
     });
   }, []);
 
+  const [chartReady, setChartReady] = useState(Boolean(window.Chart));
+
+  // Detect deferred Chart.js CDN load
+  useEffect(() => {
+    if (window.Chart) {
+      setChartReady(true);
+      return;
+    }
+    const interval = setInterval(() => {
+      if (window.Chart) {
+        setChartReady(true);
+        clearInterval(interval);
+      }
+    }, 150);
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     if (!window.Chart || services.length === 0) return;
 
@@ -155,7 +172,7 @@ export default function AdminAnalytics() {
     return () => {
       Object.values(chartsRef.current).forEach(c => c?.destroy());
     };
-  }, [services, locations, campaigns, inquiries]);
+  }, [services, locations, campaigns, inquiries, chartReady]);
 
   const topLocations = [...locations].sort((a, b) => b.footfall - a.footfall).slice(0, 5);
 
