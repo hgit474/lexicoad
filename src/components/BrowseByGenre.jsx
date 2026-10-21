@@ -201,31 +201,33 @@ export default function BrowseByGenre({ activeGenre = 'All', onSelectGenre, serv
               key={genre.id}
               type="button"
               onClick={() => handleGenreClick(genre.id)}
-              className={`group relative flex flex-col items-center text-center p-4 sm:p-5 rounded-2xl border transition-all duration-200 ${
+              className={`group relative flex flex-col items-center text-center p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 h-full min-h-[148px] justify-between ${
                 isActive
                   ? 'bg-laxBlue-950 text-white border-laxBlue-950 shadow-lg -translate-y-1'
                   : 'bg-white text-laxBlue-950 border-blue-100/80 hover:border-laxBlue-400 hover:shadow-md hover:-translate-y-0.5'
               }`}
             >
               {badgeConfig?.active && (
-                <span className={`absolute top-2 right-2 text-[9px] font-black tracking-wide uppercase px-1.5 py-0.5 rounded-full ${getBadgeClasses(badgeConfig.color, isActive)}`}>
+                <span className={`absolute top-2 right-2 text-[9px] font-black tracking-wide uppercase px-1.5 py-0.5 rounded-full z-10 ${getBadgeClasses(badgeConfig.color, isActive)}`}>
                   {badgeConfig.text || 'HOT'}
                 </span>
               )}
 
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl transition-all duration-200 mb-3 ${
-                isActive
-                  ? 'bg-white/15 text-white'
-                  : 'bg-slate-50 text-laxBlue-800 group-hover:bg-red-50 group-hover:text-laxRed-600'
-              }`}>
-                <i className={genre.icon}></i>
+              <div className="flex flex-col items-center w-full">
+                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-lg sm:text-xl transition-all duration-200 mb-2.5 ${
+                  isActive
+                    ? 'bg-white/15 text-white'
+                    : 'bg-slate-50 text-laxBlue-800 group-hover:bg-red-50 group-hover:text-laxRed-600'
+                }`}>
+                  <i className={genre.icon}></i>
+                </div>
+
+                <div className="font-grotesk font-bold text-xs sm:text-[13px] tracking-wide leading-snug min-h-[34px] flex items-center justify-center text-center">
+                  {genre.name}
+                </div>
               </div>
 
-              <div className="font-grotesk font-bold text-xs sm:text-[13px] tracking-wide leading-snug">
-                {genre.name}
-              </div>
-
-              <div className={`text-[10px] font-semibold mt-1 line-clamp-1 transition ${
+              <div className={`text-[10px] font-semibold mt-1 line-clamp-1 transition text-center w-full ${
                 isActive ? 'text-blue-200' : 'text-slate-600'
               }`}>
                 {count !== null && count > 0 ? `${count} Media Sites` : genre.shortName}

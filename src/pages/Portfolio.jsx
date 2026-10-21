@@ -126,15 +126,18 @@ export default function Portfolio() {
           ))}
         </div>
 
-        {/* Masonry Gallery */}
-        <div className="gallery-masonry">
+        {/* Structured Grid Gallery */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
           {filteredCampaigns.map(c => {
             const s = services.find(x => x.id === c.service_id);
             const l = locations.find(x => x.id === c.location_id);
             return (
               <div
                 key={c.id}
-                className="masonry-item shadow-card group"
+                role="button"
+                tabIndex={0}
+                aria-label={`View campaign details for ${c.title}`}
+                className="group relative rounded-3xl overflow-hidden shadow-card border border-blue-100/70 bg-white h-[320px] sm:h-[350px] cursor-pointer card-hover flex flex-col justify-end text-left focus:outline-none focus:ring-2 focus:ring-laxBlue-600"
                 onClick={() =>
                   openLightbox(
                     c.artwork,
@@ -142,39 +145,68 @@ export default function Portfolio() {
                     `${c.client} • ${s?.name || ''} • ${l?.name || ''}`
                   )
                 }
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openLightbox(
+                      c.artwork,
+                      c.title,
+                      `${c.client} • ${s?.name || ''} • ${l?.name || ''}`
+                    );
+                  }
+                }}
               >
                 <img
                   src={c.artwork}
                   alt={c.title}
-                  className="w-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                  width="600"
+                  height="400"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   onError={(e) => {
                     e.target.src = `https://picsum.photos/seed/${c.id}/700/500`;
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-laxBlue-950/90 via-laxBlue-950/10 to-transparent opacity-90 transition-opacity group-hover:opacity-100"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-laxBlue-950/95 via-laxBlue-950/40 to-black/25 opacity-90 transition-opacity duration-300 group-hover:opacity-100"></div>
 
-                <span
-                  className={`chip absolute top-3 left-3 ${
-                    c.status === 'Live'
-                      ? 'bg-green-500 text-white'
-                      : c.status === 'Scheduled'
-                      ? 'bg-amber-400 text-black'
-                      : 'bg-white/90 text-laxBlue-900'
-                  }`}
-                >
-                  {c.status}
-                </span>
-
-                <div className="absolute bottom-0 p-5">
-                  <div className="text-[11px] font-extrabold tracking-widest text-red-300 uppercase">
+                {/* Top Badges */}
+                <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
+                  <span
+                    className={`chip shadow text-xs font-extrabold ${
+                      c.status === 'Live'
+                        ? 'bg-emerald-500 text-white'
+                        : c.status === 'Scheduled'
+                        ? 'bg-amber-400 text-laxBlue-950'
+                        : 'bg-white/95 text-laxBlue-950'
+                    }`}
+                  >
+                    {c.status === 'Live' && (
+                      <span className="w-2 h-2 rounded-full bg-white mr-1.5 animate-pulse inline-block"></span>
+                    )}
+                    {c.status}
+                  </span>
+                  <span className="text-[10px] font-extrabold tracking-wider uppercase px-3 py-1 rounded-full bg-black/45 backdrop-blur-md text-white border border-white/20">
                     {s?.type || 'CAMPAIGN'}
+                  </span>
+                </div>
+
+                {/* Bottom Details */}
+                <div className="relative z-10 p-5 sm:p-6">
+                  <div className="text-[11px] font-extrabold tracking-widest text-red-400 uppercase">
+                    {c.client || 'FEATURED BRAND'}
                   </div>
-                  <div className="text-white font-grotesk font-bold text-lg leading-tight mt-0.5">
+                  <div className="text-white font-grotesk font-bold text-xl leading-snug mt-1 group-hover:text-red-300 transition-colors drop-shadow-sm">
                     {c.title}
                   </div>
-                  <div className="text-blue-200 text-xs font-bold mt-1 flex items-center">
-                    <i className="fa-solid fa-location-dot mr-1 text-laxRed-500"></i>
-                    {l?.name || ''} • {fmtK(c.budget)}
+                  <div className="mt-3 pt-3 border-t border-white/15 flex items-center justify-between text-xs font-semibold text-blue-100">
+                    <div className="flex items-center gap-1.5 truncate max-w-[65%]">
+                      <i className="fa-solid fa-location-dot text-laxRed-500 shrink-0"></i>
+                      <span className="truncate">{l?.name || 'Prime Location'}</span>
+                    </div>
+                    <div className="font-grotesk font-bold text-sm text-white shrink-0 bg-white/10 px-2.5 py-0.5 rounded-lg border border-white/10">
+                      {fmtK(c.budget)}
+                    </div>
                   </div>
                 </div>
               </div>
