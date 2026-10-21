@@ -301,7 +301,7 @@ export default function AdminSettings() {
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-laxRed-500/20 text-laxRed-300 border border-laxRed-500/30">CMS</span>
                   </div>
                   <div className="text-xs text-slate-400 mt-0.5">
-                    Customize the tags, labels, and colors displayed on the 12 media channels in the "Browse Media by Genre" section.
+                    Customize the tags, labels, and colors displayed on the 15 media channels in the "Browse Media by Genre" section.
                   </div>
                 </div>
               </div>
