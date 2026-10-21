@@ -11,31 +11,12 @@ import {
   initialListings
 } from '../lib/initialData';
 
-const STORAGE_KEY = 'laxico_db_v3';
+const STORAGE_KEY = 'laxico_db_v4';
 
-const normalizeBusinessSettings = (settings = {}) => {
-  const normalized = { ...settings };
-  const oldPhones = ['+91 98110 24680', '011-4155 8899'];
-  const oldEmails = ['hello@laxicoads.in', 'sales@laxicoads.in'];
-
-  if (!normalized.phone || oldPhones.includes(normalized.phone)) normalized.phone = '9742313705';
-  if (!normalized.phone_alt || oldPhones.includes(normalized.phone_alt)) normalized.phone_alt = '9742313705';
-  if (!normalized.whatsapp || oldPhones.includes(normalized.whatsapp)) normalized.whatsapp = '9742313705';
-  if (!normalized.email || oldEmails.includes(normalized.email)) normalized.email = 'lexicoadvertising@gmail.com';
-  if (!normalized.email_sales || oldEmails.includes(normalized.email_sales)) normalized.email_sales = 'lexicoadvertising@gmail.com';
-  if (!normalized.udyam_number) normalized.udyam_number = 'UDYAM-KR-03-0664055';
-  if (!normalized.gst_number) normalized.gst_number = '29CTIPS2521P1ZZ';
-  if (!normalized.head_office || /Connaught Place|New Delhi/i.test(normalized.head_office)) {
-    normalized.head_office = 'No 1 Nandini Complex, Chandra Layout, Bangalore — 560040';
-  }
-  if (!normalized.map_link || /Connaught|New Delhi/i.test(normalized.map_link)) {
-    normalized.map_link = 'https://maps.google.com/?q=No+1+Nandini+Complex+Chandra+Layout+Bangalore+560040';
-  }
-  if (!normalized.logo_url || normalized.logo_url === '/logo.svg') normalized.logo_url = '/logo.png';
-  if (!normalized.favicon_url || normalized.favicon_url === '/logo.svg') normalized.favicon_url = '/logo.png';
-
-  return normalized;
-};
+const normalizeBusinessSettings = (settings = {}) => ({
+  ...initialSettings,
+  ...settings
+});
 // Upload to Supabase Storage when configured; keep the demo fully usable locally.
 export const uploadImage = async (file, folder = 'general') => {
   if (!file || !file.type?.startsWith('image/')) {
@@ -78,20 +59,30 @@ export const getLocalDB = () => {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      // Auto-migrate: ensure any newly added initial services exist
       let updated = false;
-      if (Array.isArray(parsed.services)) {
-        initialServices.forEach(initSvc => {
-          if (!parsed.services.some(s => s.id === initSvc.id)) {
-            parsed.services.push(initSvc);
-            updated = true;
-          }
-        });
-      }
-      if (!Array.isArray(parsed.listings)) {
-        parsed.listings = [...initialListings];
+      const collections = [
+        ['services', initialServices],
+        ['locations', initialLocations],
+        ['service_locations', initialServiceLocations],
+        ['campaigns', initialCampaigns],
+        ['inquiries', initialInquiries],
+        ['media', initialMedia],
+        ['clients', initialClients],
+        ['listings', initialListings]
+      ];
+
+      collections.forEach(([key, defaults]) => {
+        if (!Array.isArray(parsed[key]) || parsed[key].length === 0) {
+          parsed[key] = [...defaults];
+          updated = true;
+        }
+      });
+
+      if (!parsed.settings || typeof parsed.settings !== 'object') {
+        parsed.settings = { ...initialSettings };
         updated = true;
       }
+
       if (updated) {
         saveLocalDB(parsed);
       }
