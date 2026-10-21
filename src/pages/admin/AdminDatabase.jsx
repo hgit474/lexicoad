@@ -9,6 +9,7 @@ import {
   getListings,
   getLocalDB,
   exportMySQLDump,
+  exportPostgresDump,
   exportDatabase
 } from '../../services/dataService';
 import { useSite } from '../../context/SiteContext';
@@ -275,6 +276,20 @@ export default function AdminDatabase() {
       desc: 'id PK • site_name, contact info, udyam, gst, brand subtitle, faqs',
       count: 1,
       color: '#f59e0b'
+    },
+    {
+      icon: 'fa-users',
+      title: 'clients',
+      desc: 'id PK • name, contact_person, phone, email, notes, created_at',
+      count: counts.clients,
+      color: '#d97706'
+    },
+    {
+      icon: 'fa-rectangle-list',
+      title: 'listings',
+      desc: 'id PK • category, subcategory, title, location, price, media_type, reach',
+      count: counts.listings,
+      color: '#10b981'
     }
   ];
 
@@ -406,6 +421,11 @@ CREATE TABLE IF NOT EXISTS locations (
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleDownloadPostgres = async () => {
+    await exportPostgresDump();
+    showToast('PostgreSQL (Supabase) SQL dump downloaded', 'success');
+  };
+
   const handleDownloadMySQL = async () => {
     await exportMySQLDump();
     showToast('MySQL 8.0 SQL dump downloaded', 'success');
@@ -416,7 +436,7 @@ CREATE TABLE IF NOT EXISTS locations (
     showToast('Database exported as JSON', 'success');
   };
 
-  const erdNodes = ['Clients', 'Placements', 'Services', 'Service_Locations', 'Locations', 'Inquiries', 'Media'];
+  const erdNodes = ['Listings', 'Clients', 'Placements', 'Services', 'Service_Locations', 'Locations', 'Inquiries', 'Media'];
 
   return (
     <div className="space-y-6 w-full max-w-full overflow-hidden">
@@ -425,14 +445,24 @@ CREATE TABLE IF NOT EXISTS locations (
         <div>
           <h2 className="text-white font-grotesk font-bold text-xl">Database Architecture & Schema</h2>
           <p className="text-slate-400 text-xs font-semibold mt-0.5">
-            Relational MySQL 8.0 & Supabase storage engine with 8 production tables.
+            Relational PostgreSQL (Supabase) & MySQL 8.0 database engine with 10 production tables.
           </p>
         </div>
 
         <div className="flex flex-wrap gap-2.5">
           <button
-            onClick={handleDownloadMySQL}
+            onClick={handleDownloadPostgres}
             className="grad-btn text-white text-xs font-extrabold px-4 py-2.5 rounded-xl flex items-center gap-2 shadow hover:shadow-lg transition"
+            title="Download PostgreSQL .sql for Supabase"
+          >
+            <i className="fa-solid fa-cloud"></i>
+            <span>Download Postgres .sql</span>
+          </button>
+
+          <button
+            onClick={handleDownloadMySQL}
+            className="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 transition border border-white/10"
+            title="Download MySQL 8.0 .sql"
           >
             <i className="fa-solid fa-database"></i>
             <span>Download MySQL .sql</span>
@@ -440,7 +470,7 @@ CREATE TABLE IF NOT EXISTS locations (
 
           <button
             onClick={handleDownloadJSON}
-            className="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 transition"
+            className="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 transition border border-white/10"
           >
             <i className="fa-solid fa-file-code"></i>
             <span>Export JSON</span>

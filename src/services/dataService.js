@@ -215,6 +215,76 @@ export const exportMySQLDump = async () => {
   return true;
 };
 
+// Export database as PostgreSQL (Supabase) .sql dump
+export const exportPostgresDump = async () => {
+  const db = await getAllData();
+  const escapeVal = (val) => {
+    if (val === null || val === undefined) return 'NULL';
+    if (typeof val === 'number') return val;
+    if (typeof val === 'boolean') return val ? 'TRUE' : 'FALSE';
+    if (typeof val === 'object') return `'${JSON.stringify(val).replace(/'/g, "''")}'::jsonb`;
+    return `'${String(val).replace(/'/g, "''")}'`;
+  };
+
+  let sql = `-- ==============================================================================\n`;
+  sql += `-- Laxico Advertising • PostgreSQL Production Database Dump (Supabase)\n`;
+  sql += `-- Dialect: PostgreSQL 14+ / Supabase Engine\n`;
+  sql += `-- Generated at: ${new Date().toISOString()}\n`;
+  sql += `-- ==============================================================================\n\n`;
+
+  // Services
+  if (db.services && db.services.length) {
+    sql += `-- 1. Services Table Data\n`;
+    db.services.forEach(s => {
+      sql += `INSERT INTO services (id, name, type, genre, sub_type, chain_or_brand, audience_metric, min_spend, price, rating, popularity, status, dims, durations, cities, image, description) VALUES (${escapeVal(s.id)}, ${escapeVal(s.name)}, ${escapeVal(s.type)}, ${escapeVal(s.genre || s.type)}, ${escapeVal(s.sub_type || '')}, ${escapeVal(s.chain_or_brand || '')}, ${escapeVal(s.audience_metric || '')}, ${escapeVal(s.min_spend || s.price)}, ${escapeVal(s.price)}, ${escapeVal(s.rating)}, ${escapeVal(s.popularity)}, ${escapeVal(s.status)}, ${escapeVal(s.dims)}, ${escapeVal(s.durations)}, ${escapeVal(s.cities)}, ${escapeVal(s.image)}, ${escapeVal(s.description)}) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price, min_spend = EXCLUDED.min_spend;\n`;
+    });
+    sql += `\n`;
+  }
+
+  // Locations
+  if (db.locations && db.locations.length) {
+    sql += `-- 2. Locations Table Data\n`;
+    db.locations.forEach(l => {
+      sql += `INSERT INTO locations (id, name, city, zone, footfall, status, price_mult, lat, lng, address) VALUES (${escapeVal(l.id)}, ${escapeVal(l.name)}, ${escapeVal(l.city)}, ${escapeVal(l.zone)}, ${escapeVal(l.footfall)}, ${escapeVal(l.status)}, ${escapeVal(l.price_mult || 1)}, ${escapeVal(l.lat)}, ${escapeVal(l.lng)}, ${escapeVal(l.address)}) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, footfall = EXCLUDED.footfall;\n`;
+    });
+    sql += `\n`;
+  }
+
+  // Service Locations Pivot
+  if (db.service_locations && db.service_locations.length) {
+    sql += `-- 3. Service Locations Pivot\n`;
+    db.service_locations.forEach(sl => {
+      sql += `INSERT INTO service_locations (id, service_id, location_id) VALUES (${escapeVal(sl.id)}, ${escapeVal(sl.service_id)}, ${escapeVal(sl.location_id)}) ON CONFLICT (id) DO NOTHING;\n`;
+    });
+    sql += `\n`;
+  }
+
+  // Inquiries
+  if (db.inquiries && db.inquiries.length) {
+    sql += `-- 4. Inquiries Table Data\n`;
+    db.inquiries.forEach(i => {
+      sql += `INSERT INTO inquiries (id, name, phone, email, company, service_id, location_id, duration, budget, has_artwork, message, stage) VALUES (${escapeVal(i.id)}, ${escapeVal(i.name)}, ${escapeVal(i.phone)}, ${escapeVal(i.email)}, ${escapeVal(i.company)}, ${escapeVal(i.service_id)}, ${escapeVal(i.location_id)}, ${escapeVal(i.duration)}, ${escapeVal(i.budget)}, ${escapeVal(i.has_artwork)}, ${escapeVal(i.message)}, ${escapeVal(i.stage || 'New')}) ON CONFLICT (id) DO NOTHING;\n`;
+    });
+    sql += `\n`;
+  }
+
+  // Listings (Admin Excel Managed)
+  if (db.listings && db.listings.length) {
+    sql += `-- 5. Listings Table Data (Excel Managed Inventory)\n`;
+    db.listings.forEach(l => {
+      sql += `INSERT INTO listings (id, category, subcategory, title, location, price, media_type, reach, description, image_url) VALUES (${escapeVal(l.id)}, ${escapeVal(l.category)}, ${escapeVal(l.subcategory)}, ${escapeVal(l.title)}, ${escapeVal(l.location)}, ${escapeVal(l.price)}, ${escapeVal(l.media_type)}, ${escapeVal(l.reach)}, ${escapeVal(l.description)}, ${escapeVal(l.image_url)}) ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, price = EXCLUDED.price;\n`;
+    });
+    sql += `\n`;
+  }
+
+  const blob = new Blob([sql], { type: 'application/sql' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'lexicoad_postgres.sql';
+  a.click();
+  return true;
+};
+
 // Get all data
 export const getAllData = async () => {
   const settings = await getSiteSettings();

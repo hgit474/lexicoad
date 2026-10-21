@@ -1,9 +1,9 @@
-# Laxico Advertising — Supabase Database
+# Laxico Advertising — PostgreSQL Database (Supabase)
 
-This directory contains the production-ready PostgreSQL schema and seed dataset for Supabase.
+This directory contains the production-ready PostgreSQL 14+ schema and seed dataset for Supabase.
 
 ## Files
-- `schema.sql`: Complete PostgreSQL DDL creating all 10 tables, Row Level Security (RLS) policies, storage buckets for media uploads, and seed records.
+- `postgres.sql` / `schema.sql`: Complete PostgreSQL DDL creating all 10 tables, Row Level Security (RLS) policies, storage buckets for media uploads, and seed records.
 
 ## Database Tables
 1. `site_settings`: CMS metadata, brand details, contact numbers, and office locations.

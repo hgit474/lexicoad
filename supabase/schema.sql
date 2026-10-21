@@ -1,7 +1,8 @@
 -- ==============================================================================
--- POSTGRESQL SCHEMA FOR SUPABASE
--- NOTE: THIS SCRIPT IS WRITTEN IN POSTGRESQL DIALECT FOR SUPABASE.
+-- POSTGRESQL PRODUCTION DATABASE (SUPABASE)
+-- NOTE: THIS SCRIPT IS WRITTEN IN POSTGRESQL (14+) DIALECT FOR SUPABASE.
 -- DO NOT RUN THIS IN MYSQL. (FOR MYSQL, USE mysql/schema.sql).
+-- Contains 10 Relational Production Tables, RLS, Storage Buckets & Seed Data.
 -- ==============================================================================
 
 -- 1. SITE_SETTINGS TABLE (Full CMS: Logo, Favicon, Name, Phone, Email, etc.)

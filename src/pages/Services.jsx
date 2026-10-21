@@ -15,6 +15,8 @@ export default function Services() {
   const [activeGenre, setActiveGenre] = useState(initialType);
   const [selectedCity, setSelectedCity] = useState(searchParams.get('city') || 'All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [citySearchQuery, setCitySearchQuery] = useState('');
+  const [subTypeSearchQuery, setSubTypeSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('popular');
   const [maxBudget, setMaxBudget] = useState(100000);
   const [selectedSubType, setSelectedSubType] = useState('All');
@@ -77,6 +79,24 @@ export default function Services() {
       .filter(Boolean);
     return ['All', ...new Set(types)];
   }, [services, activeGenre]);
+
+  const filteredCityOptions = useMemo(() => {
+    if (!citySearchQuery.trim()) return cityOptions;
+    const q = citySearchQuery.toLowerCase().trim();
+    return cityOptions.filter(c => {
+      if (c === 'All') return 'all locations'.includes(q);
+      return c.toLowerCase().includes(q);
+    });
+  }, [cityOptions, citySearchQuery]);
+
+  const filteredSubTypeOptions = useMemo(() => {
+    if (!subTypeSearchQuery.trim()) return subTypeOptions;
+    const q = subTypeSearchQuery.toLowerCase().trim();
+    return subTypeOptions.filter(opt => {
+      if (opt === 'All') return 'all ad options'.includes(q);
+      return opt.toLowerCase().includes(q);
+    });
+  }, [subTypeOptions, subTypeSearchQuery]);
 
   const filteredServices = useMemo(() => {
     return services.filter(s => {
@@ -148,6 +168,8 @@ export default function Services() {
     setSelectedSubType('All');
     setMaxBudget(100000);
     setSearchQuery('');
+    setCitySearchQuery('');
+    setSubTypeSearchQuery('');
     setCurrentPage(1);
     searchParams.delete('type');
     searchParams.delete('genre');
@@ -270,56 +292,145 @@ export default function Services() {
 
             {/* City Selector */}
             <div className="mb-6">
-              <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">
-                Location / City
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
+                  Location / City
+                </label>
+                {citySearchQuery && (
+                  <span className="text-[10px] text-slate-400 font-bold">
+                    {filteredCityOptions.length} found
+                  </span>
+                )}
+              </div>
+
+              {/* Search Bar for City Filter Options */}
+              <div className="relative mb-2.5">
+                <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input
+                  type="text"
+                  value={citySearchQuery}
+                  onChange={e => setCitySearchQuery(e.target.value)}
+                  placeholder="Search city..."
+                  aria-label="Search city filter options"
+                  className="w-full pl-8 pr-7 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-laxBlue-950 focus:bg-white focus:ring-1 focus:ring-laxBlue-950/20 transition"
+                />
+                {citySearchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setCitySearchQuery('')}
+                    aria-label="Clear city search"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+                  >
+                    <i className="fa-solid fa-xmark text-xs"></i>
+                  </button>
+                )}
+              </div>
+
               <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1">
-                {cityOptions.map(city => {
-                  const isChecked = selectedCity === city;
-                  return (
+                {filteredCityOptions.length === 0 ? (
+                  <div className="py-3 px-2 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                    <p className="text-[11px] text-slate-500 font-medium">No cities match "{citySearchQuery}"</p>
                     <button
-                      key={city}
                       type="button"
-                      onClick={() => setSelectedCity(city)}
-                      className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition ${
-                        isChecked
-                          ? 'bg-laxBlue-950 text-white font-bold'
-                          : 'text-slate-700 hover:bg-slate-100'
-                      }`}
+                      onClick={() => setCitySearchQuery('')}
+                      className="mt-1 text-[11px] font-bold text-laxRed-600 hover:underline"
                     >
-                      <span>{city === 'All' ? 'All Locations' : city}</span>
-                      {isChecked && <i className="fa-solid fa-check text-[10px]"></i>}
+                      Clear search
                     </button>
-                  );
-                })}
+                  </div>
+                ) : (
+                  filteredCityOptions.map(city => {
+                    const isChecked = selectedCity === city;
+                    return (
+                      <button
+                        key={city}
+                        type="button"
+                        onClick={() => setSelectedCity(city)}
+                        className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition ${
+                          isChecked
+                            ? 'bg-laxBlue-950 text-white font-bold'
+                            : 'text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>{city === 'All' ? 'All Locations' : city}</span>
+                        {isChecked && <i className="fa-solid fa-check text-[10px]"></i>}
+                      </button>
+                    );
+                  })
+                )}
               </div>
             </div>
 
             {/* Ad Options / Sub-Types */}
             {subTypeOptions.length > 2 && (
               <div className="mb-6">
-                <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">
-                  Ad Option / Format
-                </label>
-                <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
-                  {subTypeOptions.map(opt => {
-                    const isChecked = selectedSubType === opt;
-                    return (
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
+                    Ad Option / Format
+                  </label>
+                  {subTypeSearchQuery && (
+                    <span className="text-[10px] text-slate-400 font-bold">
+                      {filteredSubTypeOptions.length} found
+                    </span>
+                  )}
+                </div>
+
+                {subTypeOptions.length > 4 && (
+                  <div className="relative mb-2.5">
+                    <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input
+                      type="text"
+                      value={subTypeSearchQuery}
+                      onChange={e => setSubTypeSearchQuery(e.target.value)}
+                      placeholder="Search format..."
+                      aria-label="Search format filter options"
+                      className="w-full pl-8 pr-7 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-laxBlue-950 focus:bg-white focus:ring-1 focus:ring-laxBlue-950/20 transition"
+                    />
+                    {subTypeSearchQuery && (
                       <button
-                        key={opt}
                         type="button"
-                        onClick={() => setSelectedSubType(opt)}
-                        className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition ${
-                          isChecked
-                            ? 'bg-laxRed-600 text-white font-bold'
-                            : 'text-slate-700 hover:bg-slate-100'
-                        }`}
+                        onClick={() => setSubTypeSearchQuery('')}
+                        aria-label="Clear format search"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
                       >
-                        <span className="truncate">{opt === 'All' ? 'All Ad Options' : opt}</span>
-                        {isChecked && <i className="fa-solid fa-check text-[10px]"></i>}
+                        <i className="fa-solid fa-xmark text-xs"></i>
                       </button>
-                    );
-                  })}
+                    )}
+                  </div>
+                )}
+
+                <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                  {filteredSubTypeOptions.length === 0 ? (
+                    <div className="py-3 px-2 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                      <p className="text-[11px] text-slate-500 font-medium">No format matches "{subTypeSearchQuery}"</p>
+                      <button
+                        type="button"
+                        onClick={() => setSubTypeSearchQuery('')}
+                        className="mt-1 text-[11px] font-bold text-laxRed-600 hover:underline"
+                      >
+                        Clear search
+                      </button>
+                    </div>
+                  ) : (
+                    filteredSubTypeOptions.map(opt => {
+                      const isChecked = selectedSubType === opt;
+                      return (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => setSelectedSubType(opt)}
+                          className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition ${
+                            isChecked
+                              ? 'bg-laxRed-600 text-white font-bold'
+                              : 'text-slate-700 hover:bg-slate-100'
+                          }`}
+                        >
+                          <span className="truncate">{opt === 'All' ? 'All Ad Options' : opt}</span>
+                          {isChecked && <i className="fa-solid fa-check text-[10px]"></i>}
+                        </button>
+                      );
+                    })
+                  )}
                 </div>
               </div>
             )}

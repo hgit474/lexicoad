@@ -83,7 +83,7 @@ export default function AdminLayout() {
     if (p.includes('/admin/inquiries')) return { title: 'Inquiry / Lead Management', sub: 'Pipeline, stages & follow-ups' };
     if (p.includes('/admin/media')) return { title: 'Media Library', sub: 'Showcase & campaign images' };
     if (p.includes('/admin/analytics')) return { title: 'Analytics', sub: 'Popularity, revenue & occupancy' };
-    if (p.includes('/admin/database')) return { title: 'Database Structure', sub: '8 tables • live row counts & schema' };
+    if (p.includes('/admin/database')) return { title: 'Database Structure', sub: '10 tables • live row counts & schema' };
     if (p.includes('/admin/settings')) return { title: 'CMS & Site Settings', sub: 'Update logo, favicon, site name, contact info & Supabase' };
     return { title: 'Dashboard', sub: 'Live overview of services, campaigns & revenue' };
   };
