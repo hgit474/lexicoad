@@ -1,4 +1,5 @@
-/robots.txt    /robots.txt    200
-/sitemap.xml   /sitemap.xml   200
-/logo.png      /logo.png      200
-/*             /index.html    200
+/robots.txt         /robots.txt         200
+/sitemap*.xml       /sitemap*.xml       200
+/llms.txt           /llms.txt           200
+/logo.png           /logo.png           200
+/*                  /index.html         200

@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- MYSQL 8.0+ SCHEMA (FOR MYSQL / PHPMYADMIN / AWS RDS)
 -- NOTE: THIS SCRIPT IS WRITTEN FOR MYSQL ONLY.
--- DO NOT RUN THIS IN SUPABASE. (FOR SUPABASE, USE supabase/postgresql_schema.sql).
+-- DO NOT RUN THIS IN SUPABASE. (FOR SUPABASE, USE supabase/schema.sql).
 -- ==============================================================================
 
 SET NAMES utf8mb4;
