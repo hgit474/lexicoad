@@ -899,3 +899,55 @@ export const deleteListing = async (id) => {
   return true;
 };
 
+export const deleteListingsBulk = async (ids) => {
+  if (!Array.isArray(ids) || ids.length === 0) return true;
+  const idSet = new Set(ids);
+  const db = getLocalDB();
+  db.listings = (db.listings || []).filter(l => !idSet.has(l.id));
+  saveLocalDB(db);
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      await supabase.from('listings').delete().in('id', ids);
+    } catch (err) {
+      console.warn('Supabase deleteListingsBulk failed:', err);
+    }
+  }
+  return true;
+};
+
+export const clearAllListings = async () => {
+  const db = getLocalDB();
+  db.listings = [];
+  saveLocalDB(db);
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      const { error } = await supabase.from('listings').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      if (error) console.warn('Supabase clearAllListings error:', error);
+    } catch (err) {
+      console.warn('Supabase clearAllListings failed:', err);
+    }
+  }
+  return true;
+};
+
+export const rollbackToExampleListings = async () => {
+  const db = getLocalDB();
+  const demoListings = Array.isArray(initialListings) ? [...initialListings] : [];
+  db.listings = demoListings;
+  saveLocalDB(db);
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      await supabase.from('listings').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      if (demoListings.length > 0) {
+        await supabase.from('listings').upsert(demoListings);
+      }
+    } catch (err) {
+      console.warn('Supabase rollbackToExampleListings failed:', err);
+    }
+  }
+  return demoListings;
+};
+

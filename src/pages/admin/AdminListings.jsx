@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useOutletContext } from 'react-router-dom';
 import { useSite } from '../../context/SiteContext';
 import {
   getListings,
   saveListing,
   deleteListing,
+  deleteListingsBulk,
+  clearAllListings,
+  rollbackToExampleListings,
   uploadImage
 } from '../../services/dataService';
 import { downloadListingsTemplate } from '../../lib/excelTemplate';
@@ -12,6 +15,7 @@ import { downloadListingsTemplate } from '../../lib/excelTemplate';
 export default function AdminListings() {
   const { showToast } = useSite();
   const location = useLocation();
+  const outletCtx = useOutletContext();
 
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,6 +30,17 @@ export default function AdminListings() {
   const [editingItem, setEditingItem] = useState(null);
   const [saving, setSaving] = useState(false);
   const [uploadingImg, setUploadingImg] = useState(false);
+
+  // Double Warning Wipe State & Rollback State
+  const [wipeModalOpen, setWipeModalOpen] = useState(false);
+  const [wipeStep, setWipeStep] = useState(1); // 1 or 2
+  const [wipeConfirmText, setWipeConfirmText] = useState('');
+  const [wiping, setWiping] = useState(false);
+  const [rollingBack, setRollingBack] = useState(false);
+
+  // Bulk Selection State
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [deletingBulk, setDeletingBulk] = useState(false);
 
   // Form State
   const defaultForm = {
@@ -184,6 +199,90 @@ export default function AdminListings() {
     }
   };
 
+  const handleConfirmWipe = async () => {
+    if (wipeConfirmText.trim() !== 'DELETE') return;
+    setWiping(true);
+    try {
+      await clearAllListings();
+      setListings([]);
+      setWipeModalOpen(false);
+      setWipeStep(1);
+      setWipeConfirmText('');
+      showToast('All listings and mock data permanently wiped from database!', 'success');
+      if (outletCtx?.refreshCounts) {
+        outletCtx.refreshCounts();
+      }
+    } catch (err) {
+      console.error('Failed to wipe listings:', err);
+      showToast('Failed to wipe listings from database', 'error');
+    } finally {
+      setWiping(false);
+    }
+  };
+
+  const handleRollback = async () => {
+    if (!window.confirm('Restore official curated example listings? This will seed the database with the official demo properties.')) {
+      return;
+    }
+    setRollingBack(true);
+    try {
+      const restored = await rollbackToExampleListings();
+      setListings(restored);
+      showToast(`Restored ${restored.length} official example listings!`, 'success');
+      if (outletCtx?.refreshCounts) {
+        outletCtx.refreshCounts();
+      }
+    } catch (err) {
+      console.error('Failed to rollback listings:', err);
+      showToast('Failed to rollback listings', 'error');
+    } finally {
+      setRollingBack(false);
+    }
+  };
+
+  const handleToggleSelectAll = () => {
+    if (selectedIds.size === filteredListings.length && filteredListings.length > 0) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredListings.map(l => l.id)));
+    }
+  };
+
+  const handleToggleSelectOne = (id) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const handleDeleteSelected = async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    if (!window.confirm(`Are you sure you want to permanently delete ${ids.length} selected listing(s)?`)) {
+      return;
+    }
+    setDeletingBulk(true);
+    try {
+      await deleteListingsBulk(ids);
+      setListings(prev => prev.filter(l => !selectedIds.has(l.id)));
+      setSelectedIds(new Set());
+      showToast(`Successfully deleted ${ids.length} listing(s)`, 'success');
+      if (outletCtx?.refreshCounts) {
+        outletCtx.refreshCounts();
+      }
+    } catch (err) {
+      console.error('Failed to delete selected listings:', err);
+      showToast('Failed to delete selected listings', 'error');
+    } finally {
+      setDeletingBulk(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header Bar */}
@@ -200,23 +299,63 @@ export default function AdminListings() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Delete Selected Button */}
+          {selectedIds.size > 0 && (
+            <button
+              onClick={handleDeleteSelected}
+              disabled={deletingBulk}
+              className="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-extrabold px-3 py-2 rounded-xl transition shadow-lg animate-pulse"
+              title="Delete selected listings"
+            >
+              <i className={`fa-solid ${deletingBulk ? 'fa-circle-notch fa-spin' : 'fa-trash'}`}></i>
+              <span>Delete Selected ({selectedIds.size})</span>
+            </button>
+          )}
+
+          {/* Rollback to Example Listings */}
+          <button
+            onClick={handleRollback}
+            disabled={rollingBack}
+            className="inline-flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-bold px-3 py-2 rounded-xl transition shadow"
+            title="Restore default example listings & templates"
+          >
+            <i className={`fa-solid ${rollingBack ? 'fa-circle-notch fa-spin' : 'fa-rotate-left'}`}></i>
+            <span>{rollingBack ? 'Restoring...' : 'Rollback to Examples'}</span>
+          </button>
+
+          {/* Wipe All Fake Listings (Double Warning) */}
+          <button
+            onClick={() => {
+              setWipeStep(1);
+              setWipeConfirmText('');
+              setWipeModalOpen(true);
+            }}
+            className="inline-flex items-center gap-1.5 bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 text-xs font-bold px-3 py-2 rounded-xl transition shadow"
+            title="Wipe all listings with double confirmation warning"
+          >
+            <i className="fa-solid fa-trash-can"></i>
+            <span>Wipe All</span>
+          </button>
+
           <button
             onClick={() => downloadListingsTemplate()}
-            className="inline-flex items-center gap-2 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-bold px-3.5 py-2.5 rounded-xl transition shadow"
+            className="inline-flex items-center gap-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-bold px-3 py-2 rounded-xl transition shadow"
             title="Download formatted .xlsx template"
           >
             <i className="fa-solid fa-file-excel"></i> Template
           </button>
+
           <Link
             to="/admin/upload-services"
-            className="inline-flex items-center gap-2 bg-laxBlue-600/30 hover:bg-laxBlue-600/50 text-blue-200 border border-blue-500/30 text-xs font-bold px-3.5 py-2.5 rounded-xl transition"
+            className="inline-flex items-center gap-1.5 bg-laxBlue-600/30 hover:bg-laxBlue-600/50 text-blue-200 border border-blue-500/30 text-xs font-bold px-3 py-2 rounded-xl transition"
           >
             <i className="fa-solid fa-cloud-arrow-up"></i> Upload Excel
           </Link>
+
           <button
             onClick={openAddModal}
-            className="grad-btn text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow transition inline-flex items-center gap-1.5"
+            className="grad-btn text-white font-extrabold text-xs px-3.5 py-2 rounded-xl shadow transition inline-flex items-center gap-1.5"
           >
             <i className="fa-solid fa-plus"></i> Add Listing
           </button>
@@ -304,6 +443,15 @@ export default function AdminListings() {
         <table className="w-full text-left border-collapse text-xs">
           <thead>
             <tr className="border-b border-white/10 text-slate-400 font-bold bg-[#040A29]/80 uppercase tracking-wider text-[11px]">
+              <th className="py-3.5 px-3 w-10 text-center">
+                <input
+                  type="checkbox"
+                  checked={filteredListings.length > 0 && selectedIds.size === filteredListings.length}
+                  onChange={handleToggleSelectAll}
+                  className="cursor-pointer rounded accent-laxRed-500 w-4 h-4"
+                  title="Select / Deselect all visible"
+                />
+              </th>
               <th className="py-3.5 px-4">Listing / Title</th>
               <th className="py-3.5 px-4">Category</th>
               <th className="py-3.5 px-4">Subcategory</th>
@@ -317,14 +465,14 @@ export default function AdminListings() {
           <tbody className="divide-y divide-white/5 font-medium">
             {loading ? (
               <tr>
-                <td colSpan="8" className="py-12 text-center text-slate-400">
+                <td colSpan="9" className="py-12 text-center text-slate-400">
                   <i className="fa-solid fa-circle-notch fa-spin text-xl mb-2 block text-laxBlue-400"></i>
                   Loading listings from Supabase...
                 </td>
               </tr>
             ) : filteredListings.length === 0 ? (
               <tr>
-                <td colSpan="8" className="py-12 text-center text-slate-400">
+                <td colSpan="9" className="py-12 text-center text-slate-400">
                   <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mx-auto text-xl mb-2 text-slate-500">
                     <i className="fa-solid fa-filter-circle-xmark"></i>
                   </div>
@@ -341,7 +489,20 @@ export default function AdminListings() {
               </tr>
             ) : (
               filteredListings.map(item => (
-                <tr key={item.id} className="hover:bg-white/[0.03] transition">
+                <tr
+                  key={item.id}
+                  className={`hover:bg-white/[0.03] transition ${
+                    selectedIds.has(item.id) ? 'bg-red-500/[0.07]' : ''
+                  }`}
+                >
+                  <td className="py-3.5 px-3 text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(item.id)}
+                      onChange={() => handleToggleSelectOne(item.id)}
+                      className="cursor-pointer rounded accent-laxRed-500 w-4 h-4"
+                    />
+                  </td>
                   {/* Title & Image */}
                   <td className="py-3.5 px-4">
                     <div className="flex items-center gap-3 min-w-[220px]">
@@ -662,6 +823,125 @@ export default function AdminListings() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* DOUBLE WARNING WIPE MODAL */}
+      {wipeModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#071343] border border-red-500/40 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl relative">
+            <button
+              onClick={() => {
+                setWipeModalOpen(false);
+                setWipeStep(1);
+                setWipeConfirmText('');
+              }}
+              className="absolute top-5 right-5 text-slate-400 hover:text-white text-lg"
+            >
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+
+            {wipeStep === 1 ? (
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 rounded-2xl bg-red-500/20 text-red-400 border border-red-500/30 flex items-center justify-center mx-auto text-3xl">
+                  <i className="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                  <div className="inline-block px-3 py-1 rounded-full bg-red-500/20 text-red-300 text-[11px] font-extrabold tracking-wider uppercase mb-2">
+                    Warning Step 1 of 2
+                  </div>
+                  <h3 className="font-grotesk font-bold text-xl sm:text-2xl text-white">
+                    Clear All Listings & Fake Data?
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
+                    This will permanently delete all <strong className="text-red-400 font-bold">{listings.length} listings</strong> from both your Supabase / PostgreSQL database and local storage. Public service category pages will be emptied.
+                  </p>
+                </div>
+
+                <div className="bg-red-950/40 border border-red-500/30 rounded-xl p-3 text-left text-xs text-red-200/90 flex items-start gap-2.5">
+                  <i className="fa-solid fa-circle-info text-red-400 mt-0.5 shrink-0"></i>
+                  <span>
+                    You can always use <strong>"Rollback to Examples"</strong> later if you need to restore the official sample dataset.
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => setWipeModalOpen(false)}
+                    className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-white/10 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setWipeStep(2)}
+                    className="px-5 py-2.5 rounded-xl text-xs font-extrabold bg-red-600 hover:bg-red-500 text-white shadow-lg transition flex items-center gap-1.5"
+                  >
+                    <span>Proceed to Final Warning</span>
+                    <i className="fa-solid fa-arrow-right text-[10px]"></i>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 rounded-2xl bg-red-600 text-white flex items-center justify-center mx-auto text-3xl animate-pulse shadow-lg shadow-red-900/60">
+                  <i className="fa-solid fa-skull-crossbones"></i>
+                </div>
+                <div>
+                  <div className="inline-block px-3 py-1 rounded-full bg-red-600/30 text-red-200 border border-red-500/50 text-[11px] font-extrabold tracking-wider uppercase mb-2">
+                    Final Confirmation Step 2 of 2
+                  </div>
+                  <h3 className="font-grotesk font-bold text-xl sm:text-2xl text-white">
+                    Are you absolutely sure?
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
+                    This action is <strong className="text-red-400">IRREVERSIBLE</strong>. Type <span className="font-mono bg-black/40 px-2 py-0.5 rounded text-red-300 font-bold border border-red-500/30">DELETE</span> below to confirm permanent deletion.
+                  </p>
+                </div>
+
+                <div className="pt-2">
+                  <input
+                    type="text"
+                    value={wipeConfirmText}
+                    onChange={(e) => setWipeConfirmText(e.target.value)}
+                    placeholder="Type DELETE to confirm"
+                    autoFocus
+                    className="w-full bg-[#040A29] border-2 border-red-500/50 focus:border-red-400 rounded-xl py-3 px-4 text-center font-mono text-sm text-white placeholder-slate-500 outline-none"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between gap-3 pt-3 border-t border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWipeStep(1);
+                      setWipeConfirmText('');
+                    }}
+                    className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-white/10 transition"
+                  >
+                    ← Back
+                  </button>
+                  <button
+                    type="button"
+                    disabled={wipeConfirmText.trim() !== 'DELETE' || wiping}
+                    onClick={handleConfirmWipe}
+                    className="px-6 py-2.5 rounded-xl text-xs font-extrabold bg-red-600 hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed text-white shadow-xl transition flex items-center gap-2"
+                  >
+                    {wiping ? (
+                      <>
+                        <i className="fa-solid fa-circle-notch fa-spin"></i> Wiping Database...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa-solid fa-trash-can"></i> Permanently Wipe All Listings
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

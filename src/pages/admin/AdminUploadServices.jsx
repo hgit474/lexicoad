@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useNavigate, useOutletContext } from 'react-router-dom';
 import { useSite } from '../../context/SiteContext';
-import { bulkInsertListings } from '../../services/dataService';
+import { bulkInsertListings, clearAllListings, rollbackToExampleListings } from '../../services/dataService';
 import { downloadListingsTemplate, parseListingsExcel } from '../../lib/excelTemplate';
 
 export default function AdminUploadServices() {
@@ -13,16 +13,47 @@ export default function AdminUploadServices() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [parsing, setParsing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isInserted, setIsInserted] = useState(false);
   const [parseResult, setParseResult] = useState(null);
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'success' | 'error'
 
-  const handleDrag = (e) => {
+  // Double Warning Wipe State & Rollback State
+  const [wipeModalOpen, setWipeModalOpen] = useState(false);
+  const [wipeStep, setWipeStep] = useState(1);
+  const [wipeConfirmText, setWipeConfirmText] = useState('');
+  const [wiping, setWiping] = useState(false);
+  const [rollingBack, setRollingBack] = useState(false);
+
+  const dragCounter = useRef(0);
+  const fileInputRef = useRef(null);
+
+  const handleDragEnter = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
+    dragCounter.current += 1;
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
       setDragActive(true);
-    } else if (e.type === 'dragleave') {
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      e.dataTransfer.dropEffect = 'copy';
+    } catch {}
+    if (!dragActive) {
+      setDragActive(true);
+    }
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current -= 1;
+    if (dragCounter.current <= 0) {
       setDragActive(false);
+      dragCounter.current = 0;
     }
   };
 
@@ -30,8 +61,10 @@ export default function AdminUploadServices() {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileSelected(e.dataTransfer.files[0]);
+    dragCounter.current = 0;
+    const dt = e.dataTransfer;
+    if (dt && dt.files && dt.files.length > 0) {
+      handleFileSelected(dt.files[0]);
     }
   };
 
@@ -42,49 +75,61 @@ export default function AdminUploadServices() {
   };
 
   const handleFileSelected = (file) => {
+    if (!file) return;
     const name = file.name.toLowerCase();
     if (!name.endsWith('.xlsx') && !name.endsWith('.xls')) {
       showToast('Please upload an Excel spreadsheet (.xlsx or .xls)', 'error');
       return;
     }
     setSelectedFile(file);
+    setIsInserted(false);
     setParseResult(null);
+    parseFile(file);
   };
 
-  const handleProcessFile = async () => {
-    if (!selectedFile) {
-      showToast('Please choose an Excel file first', 'warning');
-      return;
-    }
-
+  const parseFile = async (file) => {
     setParsing(true);
     try {
-      const buffer = await selectedFile.arrayBuffer();
+      const buffer = await file.arrayBuffer();
       const result = await parseListingsExcel(buffer);
       setParseResult(result);
       setParsing(false);
-
       if (result.validRows.length > 0) {
-        setUploading(true);
-        const insertRes = await bulkInsertListings(result.validRows);
-        setUploading(false);
-
-        if (insertRes.success) {
-          showToast(`Successfully inserted ${result.validRows.length} listings into Supabase/database!`, 'success');
-          if (outletCtx?.refreshCounts) {
-            outletCtx.refreshCounts();
-          }
-        } else {
-          showToast(`Bulk insert warning: ${insertRes.error || 'Check database connection'}`, 'warning');
-        }
+        showToast(`Parsed ${result.totalCount} rows: ${result.successCount} valid, ${result.errorCount} errors. Ready to insert!`, 'info');
       } else {
         showToast('No valid rows found in file. Please correct the validation errors below.', 'error');
       }
     } catch (err) {
       setParsing(false);
-      setUploading(false);
-      console.error('Error processing Excel file:', err);
+      console.error('Error parsing Excel file:', err);
       showToast(err.message || 'Failed to parse Excel file', 'error');
+    }
+  };
+
+  const handleBulkInsert = async () => {
+    if (!parseResult || parseResult.validRows.length === 0) {
+      showToast('No valid rows to insert', 'warning');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const insertRes = await bulkInsertListings(parseResult.validRows);
+      setUploading(false);
+
+      if (insertRes.success) {
+        setIsInserted(true);
+        showToast(`Successfully inserted ${parseResult.validRows.length} listings into Supabase & MySQL!`, 'success');
+        if (outletCtx?.refreshCounts) {
+          outletCtx.refreshCounts();
+        }
+      } else {
+        showToast(`Bulk insert warning: ${insertRes.error || 'Check database connection'}`, 'warning');
+      }
+    } catch (err) {
+      setUploading(false);
+      console.error('Error inserting listings:', err);
+      showToast(err.message || 'Failed to insert listings', 'error');
     }
   };
 
@@ -93,11 +138,83 @@ export default function AdminUploadServices() {
     showToast('Excel template downloaded! Fill and upload.', 'info');
   };
 
+  const handleClearFile = () => {
+    setSelectedFile(null);
+    setParseResult(null);
+    setIsInserted(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    showToast('File and parsed preview cleared', 'info');
+  };
+
+  const handleRemoveRow = (rowNumber) => {
+    if (!parseResult) return;
+    const newRows = parseResult.rows.filter(r => r.rowNumber !== rowNumber);
+    const valid = newRows.filter(r => r.isValid).map(r => r.data);
+    const successCount = newRows.filter(r => r.isValid).length;
+    const errorCount = newRows.filter(r => !r.isValid).length;
+    setParseResult({
+      ...parseResult,
+      totalCount: newRows.length,
+      successCount,
+      errorCount,
+      rows: newRows,
+      validRows: valid
+    });
+    showToast(`Removed row #${rowNumber} from batch preview`, 'info');
+  };
+
   const displayedRows = () => {
     if (!parseResult) return [];
     if (activeTab === 'success') return parseResult.rows.filter(r => r.isValid);
     if (activeTab === 'error') return parseResult.rows.filter(r => !r.isValid);
     return parseResult.rows;
+  };
+
+  const handleConfirmWipe = async () => {
+    if (wipeConfirmText.trim() !== 'DELETE') return;
+    setWiping(true);
+    try {
+      await clearAllListings();
+      setSelectedFile(null);
+      setParseResult(null);
+      setIsInserted(false);
+      setWipeModalOpen(false);
+      setWipeStep(1);
+      setWipeConfirmText('');
+      showToast('All listings and mock data permanently wiped from database!', 'success');
+      if (outletCtx?.refreshCounts) {
+        outletCtx.refreshCounts();
+      }
+    } catch (err) {
+      console.error('Failed to wipe listings:', err);
+      showToast('Failed to wipe listings from database', 'error');
+    } finally {
+      setWiping(false);
+    }
+  };
+
+  const handleRollback = async () => {
+    if (!window.confirm('Restore official curated example listings? This will seed the database with the official demo properties.')) {
+      return;
+    }
+    setRollingBack(true);
+    try {
+      const restored = await rollbackToExampleListings();
+      setSelectedFile(null);
+      setParseResult(null);
+      setIsInserted(false);
+      showToast(`Restored ${restored.length} official example listings!`, 'success');
+      if (outletCtx?.refreshCounts) {
+        outletCtx.refreshCounts();
+      }
+    } catch (err) {
+      console.error('Failed to rollback listings:', err);
+      showToast('Failed to rollback listings', 'error');
+    } finally {
+      setRollingBack(false);
+    }
   };
 
   return (
@@ -117,17 +234,43 @@ export default function AdminUploadServices() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Rollback to Example Listings */}
+          <button
+            onClick={handleRollback}
+            disabled={rollingBack}
+            className="inline-flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-bold px-3 py-2 rounded-xl transition shadow"
+            title="Restore default example listings & templates"
+          >
+            <i className={`fa-solid ${rollingBack ? 'fa-circle-notch fa-spin' : 'fa-rotate-left'}`}></i>
+            <span>{rollingBack ? 'Restoring...' : 'Rollback Examples'}</span>
+          </button>
+
+          {/* Wipe All Listings (Double Warning) */}
+          <button
+            onClick={() => {
+              setWipeStep(1);
+              setWipeConfirmText('');
+              setWipeModalOpen(true);
+            }}
+            className="inline-flex items-center gap-1.5 bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 text-xs font-bold px-3 py-2 rounded-xl transition shadow"
+            title="Wipe all listings with double confirmation warning"
+          >
+            <i className="fa-solid fa-trash-can"></i>
+            <span>Wipe All</span>
+          </button>
+
           <button
             onClick={handleDownloadTemplate}
-            className="inline-flex items-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold px-4 py-2.5 rounded-xl transition shadow"
+            className="inline-flex items-center gap-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold px-3 py-2 rounded-xl transition shadow"
             title="Download formatted .xlsx sample template"
           >
-            <i className="fa-solid fa-download"></i> Download Excel Template
+            <i className="fa-solid fa-download"></i> Template (.xlsx)
           </button>
+
           <Link
             to="/admin/listings"
-            className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white border border-white/10 text-xs font-bold px-4 py-2.5 rounded-xl transition"
+            className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white border border-white/10 text-xs font-bold px-3 py-2 rounded-xl transition"
           >
             <i className="fa-solid fa-list-check"></i> Manage Listings
           </Link>
@@ -136,16 +279,20 @@ export default function AdminUploadServices() {
 
       {/* Upload Drop Zone Card */}
       <div className="bg-[#071343]/50 border border-white/10 rounded-3xl p-6 sm:p-8">
-        <form
-          onDragEnter={handleDrag}
-          onSubmit={(e) => e.preventDefault()}
-          className={`border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center transition-all ${
+        <div
+          onDragEnter={handleDragEnter}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
+          className={`border-2 border-dashed rounded-3xl p-8 sm:p-12 text-center transition-all cursor-pointer relative select-none ${
             dragActive
-              ? 'border-laxBlue-400 bg-laxBlue-500/10 scale-[1.01]'
-              : 'border-white/15 hover:border-white/30 bg-[#040A29]/40'
+              ? 'border-emerald-400 bg-emerald-500/20 ring-4 ring-emerald-500/30 scale-[1.01] shadow-2xl'
+              : 'border-white/20 hover:border-white/40 bg-[#040A29]/50 hover:bg-[#040A29]/70'
           }`}
         >
           <input
+            ref={fileInputRef}
             type="file"
             id="excelFileInput"
             accept=".xlsx, .xls"
@@ -153,52 +300,85 @@ export default function AdminUploadServices() {
             className="hidden"
           />
 
-          <div className="w-16 h-16 rounded-2xl bg-emerald-500/15 border border-emerald-400/30 text-emerald-400 flex items-center justify-center mx-auto text-2xl mb-4 shadow-lg shadow-emerald-950/40">
-            <i className="fa-solid fa-file-excel"></i>
-          </div>
+          <div className={dragActive ? 'pointer-events-none' : ''}>
+            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto text-2xl mb-4 shadow-lg transition-transform duration-300 ${
+              dragActive
+                ? 'bg-emerald-500 text-white scale-110 animate-bounce shadow-emerald-500/50'
+                : 'bg-emerald-500/15 border border-emerald-400/30 text-emerald-400'
+            }`}>
+              <i className="fa-solid fa-file-excel"></i>
+            </div>
 
-          <h3 className="text-base sm:text-lg font-grotesk font-bold text-white">
-            {selectedFile ? selectedFile.name : 'Select or drop your Excel file here'}
-          </h3>
+            <h3 className="text-base sm:text-lg font-grotesk font-bold text-white">
+              {dragActive
+                ? 'Drop your Excel file here now!'
+                : selectedFile
+                  ? selectedFile.name
+                  : 'Select or drop your Excel file here'}
+            </h3>
 
-          <p className="text-slate-400 text-xs mt-1.5 max-w-md mx-auto">
-            {selectedFile
-              ? `${(selectedFile.size / 1024).toFixed(1)} KB • Ready for validation and Supabase bulk insert`
-              : 'Supports Microsoft Excel .xlsx and .xls formats with standard column headers'}
-          </p>
+            <p className="text-slate-400 text-xs mt-1.5 max-w-md mx-auto">
+              {selectedFile
+                ? `${(selectedFile.size / 1024).toFixed(1)} KB • ${parsing ? 'Analyzing spreadsheet...' : 'File analyzed & ready'}`
+                : 'Drag and drop .xlsx or .xls here, or click anywhere to browse'}
+            </p>
 
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <label
-              htmlFor="excelFileInput"
-              className="cursor-pointer bg-white/10 hover:bg-white/20 text-white font-bold text-xs px-5 py-2.5 rounded-xl border border-white/15 transition inline-flex items-center gap-2"
-            >
-              <i className="fa-solid fa-folder-open"></i> {selectedFile ? 'Change File' : 'Browse File'}
-            </label>
-
-            {selectedFile && (
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <button
                 type="button"
-                onClick={handleProcessFile}
-                disabled={parsing || uploading}
-                className="grad-btn text-white font-extrabold text-xs px-6 py-2.5 rounded-xl shadow-lg transition inline-flex items-center gap-2 disabled:opacity-50"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+                className="bg-white/10 hover:bg-white/20 text-white font-bold text-xs px-5 py-2.5 rounded-xl border border-white/15 transition inline-flex items-center gap-2"
               >
-                {parsing ? (
-                  <>
-                    <i className="fa-solid fa-circle-notch fa-spin"></i> Parsing Excel...
-                  </>
-                ) : uploading ? (
-                  <>
-                    <i className="fa-solid fa-circle-notch fa-spin"></i> Bulk Inserting to Supabase...
-                  </>
-                ) : (
-                  <>
-                    <i className="fa-solid fa-cloud-arrow-up"></i> Parse & Upload to Supabase
-                  </>
-                )}
+                <i className="fa-solid fa-folder-open"></i> {selectedFile ? 'Change File' : 'Browse File'}
               </button>
-            )}
+
+              {selectedFile && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleClearFile();
+                  }}
+                  className="bg-red-500/15 hover:bg-red-500/30 text-red-300 font-bold text-xs px-4 py-2.5 rounded-xl border border-red-500/30 transition inline-flex items-center gap-1.5"
+                  title="Remove uploaded file and reset preview"
+                >
+                  <i className="fa-solid fa-trash-can"></i> Remove File
+                </button>
+              )}
+
+              {parseResult && parseResult.validRows.length > 0 && !isInserted && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleBulkInsert();
+                  }}
+                  disabled={uploading}
+                  className="grad-btn text-white font-extrabold text-xs px-6 py-2.5 rounded-xl shadow-lg transition inline-flex items-center gap-2 disabled:opacity-50"
+                >
+                  {uploading ? (
+                    <>
+                      <i className="fa-solid fa-circle-notch fa-spin"></i> Bulk Inserting...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fa-solid fa-cloud-arrow-up"></i> Insert {parseResult.validRows.length} Valid Listings
+                    </>
+                  )}
+                </button>
+              )}
+
+              {isInserted && (
+                <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2">
+                  <i className="fa-solid fa-circle-check"></i> Inserted into Database!
+                </span>
+              )}
+            </div>
           </div>
-        </form>
+        </div>
 
         {/* Expected Schema Pill Bar */}
         <div className="mt-6 pt-5 border-t border-white/10">
@@ -337,6 +517,7 @@ export default function AdminUploadServices() {
                   <th className="py-3 px-4">Price</th>
                   <th className="py-3 px-4">Media Type</th>
                   <th className="py-3 px-4">Validation Notes</th>
+                  <th className="py-3 px-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 font-medium">
@@ -399,6 +580,16 @@ export default function AdminUploadServices() {
                         </ul>
                       )}
                     </td>
+                    <td className="py-3 px-4 text-right">
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveRow(row.rowNumber)}
+                        className="w-7 h-7 rounded-lg bg-red-500/15 hover:bg-red-500/30 text-red-300 inline-flex items-center justify-center transition"
+                        title={`Remove row #${row.rowNumber} from batch`}
+                      >
+                        <i className="fa-solid fa-trash-can text-[11px]"></i>
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -428,6 +619,125 @@ export default function AdminUploadServices() {
                 View in Manage Listings <i className="fa-solid fa-arrow-right text-[11px]"></i>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* DOUBLE WARNING WIPE MODAL */}
+      {wipeModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#071343] border border-red-500/40 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl relative">
+            <button
+              onClick={() => {
+                setWipeModalOpen(false);
+                setWipeStep(1);
+                setWipeConfirmText('');
+              }}
+              className="absolute top-5 right-5 text-slate-400 hover:text-white text-lg"
+            >
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+
+            {wipeStep === 1 ? (
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 rounded-2xl bg-red-500/20 text-red-400 border border-red-500/30 flex items-center justify-center mx-auto text-3xl">
+                  <i className="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                  <div className="inline-block px-3 py-1 rounded-full bg-red-500/20 text-red-300 text-[11px] font-extrabold tracking-wider uppercase mb-2">
+                    Warning Step 1 of 2
+                  </div>
+                  <h3 className="font-grotesk font-bold text-xl sm:text-2xl text-white">
+                    Clear All Listings & Fake Data?
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
+                    This will permanently delete all listings from both your Supabase / PostgreSQL database and local storage. Public service category pages will be emptied.
+                  </p>
+                </div>
+
+                <div className="bg-red-950/40 border border-red-500/30 rounded-xl p-3 text-left text-xs text-red-200/90 flex items-start gap-2.5">
+                  <i className="fa-solid fa-circle-info text-red-400 mt-0.5 shrink-0"></i>
+                  <span>
+                    You can always use <strong>"Rollback Examples"</strong> to restore the official sample listings anytime.
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => setWipeModalOpen(false)}
+                    className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-white/10 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setWipeStep(2)}
+                    className="px-5 py-2.5 rounded-xl text-xs font-extrabold bg-red-600 hover:bg-red-500 text-white shadow-lg transition flex items-center gap-1.5"
+                  >
+                    <span>Proceed to Final Warning</span>
+                    <i className="fa-solid fa-arrow-right text-[10px]"></i>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 rounded-2xl bg-red-600 text-white flex items-center justify-center mx-auto text-3xl animate-pulse shadow-lg shadow-red-900/60">
+                  <i className="fa-solid fa-skull-crossbones"></i>
+                </div>
+                <div>
+                  <div className="inline-block px-3 py-1 rounded-full bg-red-600/30 text-red-200 border border-red-500/50 text-[11px] font-extrabold tracking-wider uppercase mb-2">
+                    Final Confirmation Step 2 of 2
+                  </div>
+                  <h3 className="font-grotesk font-bold text-xl sm:text-2xl text-white">
+                    Are you absolutely sure?
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
+                    This action is <strong className="text-red-400">IRREVERSIBLE</strong>. Type <span className="font-mono bg-black/40 px-2 py-0.5 rounded text-red-300 font-bold border border-red-500/30">DELETE</span> below to confirm permanent deletion.
+                  </p>
+                </div>
+
+                <div className="pt-2">
+                  <input
+                    type="text"
+                    value={wipeConfirmText}
+                    onChange={(e) => setWipeConfirmText(e.target.value)}
+                    placeholder="Type DELETE to confirm"
+                    autoFocus
+                    className="w-full bg-[#040A29] border-2 border-red-500/50 focus:border-red-400 rounded-xl py-3 px-4 text-center font-mono text-sm text-white placeholder-slate-500 outline-none"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between gap-3 pt-3 border-t border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWipeStep(1);
+                      setWipeConfirmText('');
+                    }}
+                    className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-white/10 transition"
+                  >
+                    ← Back
+                  </button>
+                  <button
+                    type="button"
+                    disabled={wipeConfirmText.trim() !== 'DELETE' || wiping}
+                    onClick={handleConfirmWipe}
+                    className="px-6 py-2.5 rounded-xl text-xs font-extrabold bg-red-600 hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed text-white shadow-xl transition flex items-center gap-2"
+                  >
+                    {wiping ? (
+                      <>
+                        <i className="fa-solid fa-circle-notch fa-spin"></i> Wiping Database...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa-solid fa-trash-can"></i> Permanently Wipe All Listings
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
