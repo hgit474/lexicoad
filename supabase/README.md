@@ -3,7 +3,7 @@
 This directory contains the production-ready PostgreSQL schema and seed dataset for Supabase.
 
 ## Files
-- `schema.sql`: Complete PostgreSQL DDL creating all 8 tables, Row Level Security (RLS) policies, storage buckets for media uploads, and seed records.
+- `schema.sql`: Complete PostgreSQL DDL creating all 10 tables, Row Level Security (RLS) policies, storage buckets for media uploads, and seed records.
 
 ## Database Tables
 1. `site_settings`: CMS metadata, brand details, contact numbers, and office locations.

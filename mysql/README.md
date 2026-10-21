@@ -3,7 +3,7 @@
 This directory contains the production-ready relational database schema and seed dataset for MySQL 8.0+.
 
 ## Files
-- `schema.sql`: Complete MySQL 8.0 DDL (InnoDB, `utf8mb4_unicode_ci`) creating all 8 relational tables with foreign key constraints, indexes, and seed records.
+- `schema.sql`: Complete MySQL 8.0 DDL (InnoDB, `utf8mb4_unicode_ci`) creating all 10 relational tables with foreign key constraints, indexes, and seed records.
 
 ## Database Tables
 1. `site_settings`: CMS metadata, brand details, contact numbers, and office locations.

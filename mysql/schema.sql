@@ -264,7 +264,11 @@ INSERT INTO `site_settings` (
   `id`, `site_name`, `tagline`, `featured_brands`, `brand_subtitle`,
   `logo_text`, `logo_subtext`, `logo_badge`, `logo_url`, `favicon_url`,
   `phone`, `phone_alt`, `whatsapp`, `email`, `email_sales`,
-  `udyam_number`, `gst_number`, `head_office`, `cities`, `active_sites_count`
+  `udyam_number`, `gst_number`,
+  `about_label`, `about_title`, `about_description`, `about_years`, `about_team_count`, `about_ad_spend`, `about_mission`, `about_vision`, `about_retention_title`, `about_retention_description`, `about_image_1`, `about_image_2`,
+  `contact_label`, `contact_title`, `contact_description`, `contact_response_title`, `contact_approved_title`, `contact_faqs`,
+  `support_hours`, `head_office`, `office_mumbai`, `office_bengaluru`, `map_link`, `cities`, `active_sites_count`, `campaigns_count`, `locations_count`, `retention_rate`,
+  `social_links`, `genre_badges`
 ) VALUES (
   'default',
   'Laxico Advertising',
@@ -283,9 +287,36 @@ INSERT INTO `site_settings` (
   'lexicoadvertising@gmail.com',
   'UDYAM-KR-03-0664055',
   '29CTIPS2521P1ZZ',
+  'Since 2025',
+  'About Laxico & Contact',
+  'From 3 billboards on NH-8 to India''s most data-driven outdoor network — we blend prime media ownership with performance tracking every CMO loves.',
+  '16+',
+  '40+',
+  '₹120Cr',
+  'Make outdoor advertising as measurable and effortless as digital — with verified footfall, transparent pricing and photo-proof of every display.',
+  'A Laxico screen within 10 minutes of every urban Indian — powering local businesses and national brands alike across 50 cities by 2030.',
+  'Why clients stay',
+  '98% retention. Single-point ownership, in-house printing, night monitoring patrols and a client dashboard with live display photos.',
+  'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=700&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=700&auto=format&fit=crop',
+  'Get a quote',
+  'Contact / Inquiry',
+  'Select your service & location. Our strategist replies with photos, footfall & pricing within 4 working hours.',
+  '4-hr response',
+  '100% Approved',
+  '[{"q": "How fast can my ad go live?", "a": "48 hours from artwork approval — including printing, mounting and illumination. Airport & metro sites may need 72 hrs for security clearance."}, {"q": "Are your sites government-approved?", "a": "Yes. Every Laxico site carries MCD / DMRC / AAI / railway approvals. We share permit copies with your invoice."}, {"q": "Do you handle printing?", "a": "In-house plant in Delhi. 720 DPI flex, vinyl & backlit from ₹8,500 per site with free installation."}, {"q": "How do I get proof my ad is displayed?", "a": "Geo-tagged day + night photos every week on WhatsApp, plus a completion report with traffic data."}, {"q": "What is the minimum booking?", "a": "Street kiosks: 20 poles / 1 month. Billboards & transit: 1 site / 1 month. LEDs: 1 week."}]',
+  'Mon–Sat • 10:00 AM – 7:00 PM IST',
   'No 1 Nandini Complex, Chandra Layout, Bangalore — 560040',
+  'BKC Office, Bandra Kurla Complex, Mumbai — 400051',
+  'HSR Office, Sector 1, HSR Layout, Bengaluru — 560102',
+  'https://maps.google.com/?q=No+1+Nandini+Complex+Chandra+Layout+Bangalore+560040',
   'Delhi • Mumbai • Bengaluru • Hyderabad',
-  '248'
+  '248',
+  1250,
+  248,
+  98,
+  '{"facebook": "https://facebook.com", "instagram": "https://instagram.com", "twitter": "https://twitter.com", "youtube": "https://youtube.com"}',
+  '{"Airport": {"active": true, "text": "HOT", "color": "red"}, "Cinema": {"active": true, "text": "HOT", "color": "red"}, "Digital": {"active": true, "text": "HOT", "color": "red"}, "Outdoor": {"active": true, "text": "HOT", "color": "red"}, "Transit": {"active": true, "text": "HOT", "color": "red"}, "Retail": {"active": false, "text": "POPULAR", "color": "purple"}, "Street Furniture": {"active": false, "text": "TRENDING", "color": "amber"}, "BTL": {"active": false, "text": "NEW", "color": "emerald"}, "Print": {"active": false, "text": "CLASSIC", "color": "blue"}, "Radio": {"active": false, "text": "TRENDING", "color": "amber"}, "Sports": {"active": false, "text": "HOT", "color": "red"}, "Television": {"active": false, "text": "PRIME", "color": "purple"}, "Socialmedia": {"active": true, "text": "TRENDING", "color": "red"}, "Development": {"active": true, "text": "NEW", "color": "emerald"}, "Drone Marketing": {"active": true, "text": "HOT", "color": "purple"}}'
 ) ON DUPLICATE KEY UPDATE `updated_at` = NOW();
 
 -- 2. Media Genres Seed

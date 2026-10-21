@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS site_settings (
     locations_count INTEGER DEFAULT 248,
     retention_rate INTEGER DEFAULT 98,
     social_links JSONB DEFAULT '{"facebook": "https://facebook.com", "instagram": "https://instagram.com", "twitter": "https://twitter.com", "youtube": "https://youtube.com"}'::jsonb,
+    genre_badges JSONB DEFAULT '{}'::jsonb,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -332,28 +333,41 @@ CREATE POLICY "Public read media" ON media FOR SELECT USING (true);
 CREATE POLICY "Public write media" ON media FOR ALL USING (true) WITH CHECK (true);
 
 -- SEED: site_settings
-INSERT INTO site_settings (id, site_name, tagline, brand_subtitle, logo_text, logo_badge, logo_url, favicon_url, phone, phone_alt, whatsapp, email, email_sales, udyam_number, gst_number, about_label, head_office, office_mumbai, office_bengaluru, map_link, cities, active_sites_count, campaigns_count, locations_count, retention_rate)
-VALUES ('default', 'Laxico Advertising', 'Billboard & Poster Placements Across India', 'OUTDOOR • TRANSIT • DIGITAL', 'LAXICO', 'L', '/logo.png', '/logo.png', '9742313705', '9742313705', '9742313705', 'lexicoadvertising@gmail.com', 'lexicoadvertising@gmail.com', 'UDYAM-KR-03-0664055', '29CTIPS2521P1ZZ', 'Since 2025', 'No 1 Nandini Complex, Chandra Layout, Bangalore 560040', 'BKC Office, Bandra Kurla Complex, Mumbai — 400051', 'HSR Office, Sector 1, HSR Layout, Bengaluru — 560102', 'https://maps.google.com/?q=No+1+Nandini+Complex+Chandra+Layout+Bangalore+560040', 'Delhi • Mumbai • Bengaluru • Hyderabad', '248', 1250, 248, 98)
-ON CONFLICT (id) DO NOTHING;
+INSERT INTO site_settings (
+  id, site_name, tagline, featured_brands, brand_subtitle, logo_text, logo_subtext, logo_badge, logo_url, favicon_url,
+  phone, phone_alt, whatsapp, email, email_sales, udyam_number, gst_number,
+  about_label, about_title, about_description, about_years, about_team_count, about_ad_spend, about_mission, about_vision, about_retention_title, about_retention_description, about_image_1, about_image_2,
+  contact_label, contact_title, contact_description, contact_response_title, contact_approved_title, contact_faqs,
+  support_hours, head_office, office_mumbai, office_bengaluru, map_link, cities, active_sites_count, campaigns_count, locations_count, retention_rate,
+  social_links, genre_badges
+) VALUES (
+  'default', 'Laxico Advertising', 'Billboard & Poster Placements Across India', 'NIKE, ZOMATO, SAMSUNG, HDFC BANK, COCA-COLA, AMAZON, TATA, SWIGGY, BOAT, MYNTRA', 'OUTDOOR • TRANSIT • DIGITAL', 'LAXICO', 'ADS', 'L', '/logo.png', '/logo.png',
+  '9742313705', '9742313705', '9742313705', 'lexicoadvertising@gmail.com', 'lexicoadvertising@gmail.com', 'UDYAM-KR-03-0664055', '29CTIPS2521P1ZZ',
+  'Since 2025', 'About Laxico & Contact', 'From 3 billboards on NH-8 to India''s most data-driven outdoor network — we blend prime media ownership with performance tracking every CMO loves.', '16+', '40+', '₹120Cr', 'Make outdoor advertising as measurable and effortless as digital — with verified footfall, transparent pricing and photo-proof of every display.', 'A Laxico screen within 10 minutes of every urban Indian — powering local businesses and national brands alike across 50 cities by 2030.', 'Why clients stay', '98% retention. Single-point ownership, in-house printing, night monitoring patrols and a client dashboard with live display photos.', 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=700&auto=format&fit=crop', 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=700&auto=format&fit=crop',
+  'Get a quote', 'Contact / Inquiry', 'Select your service & location. Our strategist replies with photos, footfall & pricing within 4 working hours.', '4-hr response', '100% Approved', '[{"q": "How fast can my ad go live?", "a": "48 hours from artwork approval — including printing, mounting and illumination. Airport & metro sites may need 72 hrs for security clearance."}, {"q": "Are your sites government-approved?", "a": "Yes. Every Laxico site carries MCD / DMRC / AAI / railway approvals. We share permit copies with your invoice."}, {"q": "Do you handle printing?", "a": "In-house plant in Delhi. 720 DPI flex, vinyl & backlit from ₹8,500 per site with free installation."}, {"q": "How do I get proof my ad is displayed?", "a": "Geo-tagged day + night photos every week on WhatsApp, plus a completion report with traffic data."}, {"q": "What is the minimum booking?", "a": "Street kiosks: 20 poles / 1 month. Billboards & transit: 1 site / 1 month. LEDs: 1 week."}]'::jsonb,
+  'Mon–Sat • 10:00 AM – 7:00 PM IST', 'No 1 Nandini Complex, Chandra Layout, Bangalore — 560040', 'BKC Office, Bandra Kurla Complex, Mumbai — 400051', 'HSR Office, Sector 1, HSR Layout, Bengaluru — 560102', 'https://maps.google.com/?q=No+1+Nandini+Complex+Chandra+Layout+Bangalore+560040', 'Delhi • Mumbai • Bengaluru • Hyderabad', '248', 1250, 248, 98,
+  '{"facebook": "https://facebook.com", "instagram": "https://instagram.com", "twitter": "https://twitter.com", "youtube": "https://youtube.com"}'::jsonb,
+  '{"Airport": {"active": true, "text": "HOT", "color": "red"}, "Cinema": {"active": true, "text": "HOT", "color": "red"}, "Digital": {"active": true, "text": "HOT", "color": "red"}, "Outdoor": {"active": true, "text": "HOT", "color": "red"}, "Transit": {"active": true, "text": "HOT", "color": "red"}, "Retail": {"active": false, "text": "POPULAR", "color": "purple"}, "Street Furniture": {"active": false, "text": "TRENDING", "color": "amber"}, "BTL": {"active": false, "text": "NEW", "color": "emerald"}, "Print": {"active": false, "text": "CLASSIC", "color": "blue"}, "Radio": {"active": false, "text": "TRENDING", "color": "amber"}, "Sports": {"active": false, "text": "HOT", "color": "red"}, "Television": {"active": false, "text": "PRIME", "color": "purple"}, "Socialmedia": {"active": true, "text": "TRENDING", "color": "red"}, "Development": {"active": true, "text": "NEW", "color": "emerald"}, "Drone Marketing": {"active": true, "text": "HOT", "color": "purple"}}'::jsonb
+) ON CONFLICT (id) DO UPDATE SET updated_at = now();
 
--- SEED: media_genres (The Media Ant 12 Channels)
+-- SEED: media_genres (The Media Ant 12 Channels + Modern Channels)
 INSERT INTO media_genres (id, name, short_name, icon, tagline, is_popular, sort_order) VALUES
-('airport', 'Airport Advertising', 'Airport', 'fa-plane-departure', 'T1, T2 & T3 Lounges, Baggage Belts & Aerobridges', true, 1),
-('cinema', 'Cinema Advertising', 'Cinema', 'fa-film', 'PVR INOX & Cinepolis On-Screen Slides & 30s Ad Videos', true, 2),
-('dooh', 'Digital Outdoor (DOOH)', 'DOOH', 'fa-tv', 'High-impact Digital LED Screens at Prime Junctions', true, 3),
-('outdoor', 'Traditional Outdoor', 'Outdoor', 'fa-billboard', 'Billboards, Unipoles & Hoardings with Max Footfall', true, 4),
-('transit', 'Transit Advertising', 'Transit', 'fa-train-subway', 'Metro Trains, DTC/BEST Buses, Auto Rickshaws & Cabs', true, 5),
-('retail', 'Mall & Retail Media', 'Retail', 'fa-shop', 'Shopping Malls, Food Courts & Hypermarkets', false, 6),
-('street', 'Street Furniture', 'Street', 'fa-road', 'Bus Shelters, Foot Over Bridges & Utility Kiosks', false, 7),
-('btl', 'BTL & Experiential', 'BTL', 'fa-bullhorn', 'Society Activations, Tech Parks & Brand Stalls', false, 8),
-('print', 'Newspaper & Print', 'Print', 'fa-newspaper', 'Leading National Dailies, Inserts & Magazines', false, 9),
-('radio', 'Radio Advertising', 'Radio', 'fa-radio', 'Mirchi, Red FM, Radio City Prime RJ Mentions & Jingles', false, 10),
-('sports', 'Sports & Arena', 'Sports', 'fa-baseball-bat-ball', 'Stadium Perimeter LED Boards & Cricket Screen Ads', false, 11),
-('tv', 'Television (CTV & OTT)', 'TV / OTT', 'fa-display', 'Linear Cable & Connected TV Pre-Roll Ads', false, 12),
-('socialmedia', 'Social Media Marketing', 'Social Media', 'fa-hashtag', 'Meta, Instagram, YouTube & Influencer ads', true, 13),
-('development', 'Development & Ad Tech', 'Development', 'fa-code', 'High-conversion web, landing pages & ad tech', true, 14),
-('drones', 'Drone Marketing', 'Drones', 'fa-helicopter', 'Sky light shows & aerial drone brand formations', true, 15)
-ON CONFLICT (id) DO NOTHING;
+('Airport', 'Airport Advertising', 'Airport', 'fa-solid fa-plane-departure', 'T1, T2 & T3 Lounges, Baggage Belts & Aerobridges', true, 1),
+('Cinema', 'Cinema Advertising', 'Cinema', 'fa-solid fa-film', 'PVR INOX & Cinepolis On-Screen Slides & 30s Ad Videos', true, 2),
+('Digital', 'Digital Outdoor (DOOH)', 'Digital', 'fa-solid fa-desktop', 'High-impact Digital LED Screens at Prime Junctions', true, 3),
+('Outdoor', 'Traditional Outdoor', 'Outdoor', 'fa-solid fa-rectangle-ad', 'Billboards, Unipoles & Hoardings with Max Footfall', true, 4),
+('Transit', 'Transit Advertising', 'Transit', 'fa-solid fa-train-subway', 'Metro Trains, DTC/BEST Buses, Auto Rickshaws & Cabs', true, 5),
+('Retail', 'Mall & Retail Media', 'Retail', 'fa-solid fa-bag-shopping', 'Shopping Malls, Food Courts & Hypermarkets', false, 6),
+('Street Furniture', 'Street Furniture', 'Street Furniture', 'fa-solid fa-signs-post', 'Bus Shelters, Foot Over Bridges & Utility Kiosks', false, 7),
+('BTL', 'BTL & Experiential', 'BTL', 'fa-solid fa-bullhorn', 'Society Activations, Tech Parks & Brand Stalls', false, 8),
+('Print', 'Newspaper & Print', 'Print', 'fa-solid fa-newspaper', 'Leading National Dailies, Inserts & Magazines', false, 9),
+('Radio', 'Radio Advertising', 'Radio', 'fa-solid fa-radio', 'Mirchi, Red FM, Radio City Prime RJ Mentions & Jingles', false, 10),
+('Sports', 'Sports & Arena', 'Sports', 'fa-solid fa-baseball-bat-ball', 'Stadium Perimeter LED Boards & Cricket Screen Ads', false, 11),
+('Television', 'Television (CTV & OTT)', 'Television', 'fa-solid fa-tv', 'Linear Cable & Connected TV Pre-Roll Ads', false, 12),
+('Socialmedia', 'Social Media Marketing', 'Social Media', 'fa-solid fa-hashtag', 'Meta, Instagram, YouTube & Influencer ads', true, 13),
+('Development', 'Development & Ad Tech', 'Development', 'fa-solid fa-code', 'High-conversion web, landing pages & ad tech', true, 14),
+('Drone Marketing', 'Drone Marketing', 'Drone Marketing', 'fa-solid fa-helicopter', 'Sky light shows & aerial drone brand formations', true, 15)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, icon = EXCLUDED.icon;
 
 -- SEED: services
 INSERT INTO services (id, name, type, genre, sub_type, chain_or_brand, audience_metric, min_spend, price, rating, popularity, status, dims, durations, image, description) VALUES
