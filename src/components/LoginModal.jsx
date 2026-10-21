@@ -10,9 +10,9 @@ export default function LoginModal() {
 
   if (!loginModalOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const ok = login(email, password);
+    const ok = await login(email, password);
     if (ok) {
       navigate('/admin');
     }
@@ -48,11 +48,12 @@ export default function LoginModal() {
 
         <form onSubmit={handleSubmit} className="space-y-3 mt-5">
           <div>
-            <label className="lbl">Admin ID</label>
+            <label className="lbl">Admin Email or ID</label>
             <input
               type="text"
               value={email}
               onChange={e => setEmail(e.target.value)}
+              placeholder="admin@example.com"
               className="field"
               required
             />

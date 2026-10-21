@@ -13,6 +13,7 @@ import LoginModal from './components/LoginModal';
 import Home from './pages/Home';
 import Services from './pages/Services';
 import ServiceDetails from './pages/ServiceDetails';
+import CategoryListings from './pages/CategoryListings';
 import Portfolio from './pages/Portfolio';
 import Contact from './pages/Contact';
 import About from './pages/About';
@@ -24,6 +25,8 @@ import AdminLayout from './pages/admin/AdminLayout';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminServices from './pages/admin/AdminServices';
+import AdminUploadServices from './pages/admin/AdminUploadServices';
+import AdminListings from './pages/admin/AdminListings';
 import AdminLocations from './pages/admin/AdminLocations';
 import AdminCampaigns from './pages/admin/AdminCampaigns';
 import AdminInquiries from './pages/admin/AdminInquiries';
@@ -136,6 +139,11 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/services" element={<Services />} />
           <Route path="/services/:id" element={<ServiceDetails />} />
+          <Route path="/category/:category" element={<CategoryListings />} />
+          <Route path="/category" element={<CategoryListings />} />
+          <Route path="/listings/category/:category" element={<CategoryListings />} />
+          <Route path="/listings/:category" element={<CategoryListings />} />
+          <Route path="/listings" element={<CategoryListings />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
@@ -159,6 +167,8 @@ export default function App() {
         >
           <Route index element={<AdminDashboard />} />
           <Route path="services" element={<AdminServices />} />
+          <Route path="listings" element={<AdminListings />} />
+          <Route path="upload-services" element={<AdminUploadServices />} />
           <Route path="locations" element={<AdminLocations />} />
           <Route path="campaigns" element={<AdminCampaigns />} />
           <Route path="inquiries" element={<AdminInquiries />} />

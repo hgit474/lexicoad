@@ -37,9 +37,9 @@ export const createSupabaseInstance = (customUrl, customKey) => {
   try {
     return createClient(url, key, {
       auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-        detectSessionInUrl: false
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
       }
     });
   } catch (err) {

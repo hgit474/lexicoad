@@ -6,6 +6,7 @@ import {
   getCampaigns,
   getInquiries,
   getMedia,
+  getListings,
   getLocalDB,
   exportMySQLDump,
   exportDatabase
@@ -18,9 +19,10 @@ export default function AdminDatabase() {
   const { showToast } = useSite();
   const [activeTab, setActiveTab] = useState('mysql'); // 'mysql' | 'postgres'
   const [copied, setCopied] = useState(false);
-  const [selectedEntity, setSelectedEntity] = useState('Services');
+  const [selectedEntity, setSelectedEntity] = useState('Listings');
   const [counts, setCounts] = useState({
     services: 0,
+    listings: 0,
     locations: 0,
     service_locations: 0,
     campaigns: 0,
@@ -37,11 +39,13 @@ export default function AdminDatabase() {
       getServiceLocations(),
       getCampaigns(),
       getInquiries(),
-      getMedia()
-    ]).then(([s, l, sl, c, i, m]) => {
+      getMedia(),
+      getListings()
+    ]).then(([s, l, sl, c, i, m, list]) => {
       const db = getLocalDB();
       setCounts({
         services: s.length,
+        listings: list.length,
         locations: l.length,
         service_locations: sl.length,
         campaigns: c.length,
@@ -54,6 +58,30 @@ export default function AdminDatabase() {
   }, []);
 
   const erdEntities = {
+    Listings: {
+      name: 'Listings (Excel Managed)',
+      table: 'listings',
+      icon: 'fa-rectangle-list',
+      color: '#10b981',
+      count: counts.listings,
+      pk: 'id UUID / VARCHAR(36)',
+      fks: [],
+      relations: 'Stand-alone hierarchical inventory (Category → Subcategory)',
+      desc: 'Admin-managed advertising inventory uploaded via Excel (.xlsx) and synced to Supabase / PostgreSQL and MySQL.',
+      columns: [
+        { name: 'id', type: 'UUID / VARCHAR(36)', key: 'PK', desc: 'Unique listing identifier' },
+        { name: 'category', type: 'TEXT', key: '', desc: 'Top-level media category (e.g. Transit, Outdoor)' },
+        { name: 'subcategory', type: 'TEXT', key: '', desc: 'Grouped subcategory (e.g. Transport, Metro Networks)' },
+        { name: 'title', type: 'TEXT', key: '', desc: 'Listing media property title' },
+        { name: 'location', type: 'TEXT', key: '', desc: 'City, arterial route or metro station location' },
+        { name: 'price', type: 'NUMERIC', key: '', desc: 'Monthly advertising placement rate in INR' },
+        { name: 'media_type', type: 'TEXT', key: '', desc: 'Format type (Bus, Metro, Train, Billboard, etc.)' },
+        { name: 'reach', type: 'NUMERIC', key: '', desc: 'Audience impressions or weekly footfall count' },
+        { name: 'description', type: 'TEXT', key: '', desc: 'Specifications and inventory placement notes' },
+        { name: 'image_url', type: 'TEXT', key: '', desc: 'High-res showcase image URL or proof photo' },
+        { name: 'created_at', type: 'TIMESTAMPTZ', key: '', desc: 'Timestamp of upload or creation' }
+      ]
+    },
     Clients: {
       name: 'Clients',
       table: 'clients',

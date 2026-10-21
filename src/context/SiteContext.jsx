@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getSiteSettings, saveSiteSettings } from '../services/dataService';
 import { initialSettings } from '../lib/initialData';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 const SESSION_STORAGE_KEY = 'laxico_admin_session';
 const SESSION_DURATION_MS = 4 * 60 * 60 * 1000; // 4 hours
@@ -133,11 +134,90 @@ export const SiteProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, [adminSession]);
 
-  // Auth: Pure ENV-controlled Admin credentials (no hardcoded fallbacks)
-  const login = (identifier, password) => {
-    const cleanId = (identifier || '').trim().toLowerCase();
+  // Initial Supabase Session Sync
+  useEffect(() => {
+    if (isSupabaseConfigured() && supabase) {
+      supabase.auth.getSession().then(({ data }) => {
+        if (data?.session?.user?.email) {
+          const emailUser = data.session.user.email;
+          const session = {
+            user: emailUser,
+            token: data.session.access_token,
+            isSupabase: true,
+            loginTime: Date.now(),
+            expiresAt: Date.now() + SESSION_DURATION_MS
+          };
+          setAdminSession(session);
+          localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+          localStorage.setItem('laxico_admin_auth', 'true');
+          localStorage.setItem('laxico_admin_user', emailUser);
+        }
+      }).catch(err => console.warn('Supabase getSession error:', err));
+
+      const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' && session?.user?.email) {
+          const emailUser = session.user.email;
+          const newSession = {
+            user: emailUser,
+            token: session.access_token,
+            isSupabase: true,
+            loginTime: Date.now(),
+            expiresAt: Date.now() + SESSION_DURATION_MS
+          };
+          setAdminSession(newSession);
+          localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(newSession));
+          localStorage.setItem('laxico_admin_auth', 'true');
+          localStorage.setItem('laxico_admin_user', emailUser);
+        } else if (event === 'SIGNED_OUT') {
+          setAdminSession(null);
+          localStorage.removeItem(SESSION_STORAGE_KEY);
+          localStorage.removeItem('laxico_admin_auth');
+          localStorage.removeItem('laxico_admin_user');
+        }
+      });
+
+      return () => {
+        authListener?.subscription?.unsubscribe?.();
+      };
+    }
+  }, []);
+
+  // Auth: Supabase Auth Email/Password + ENV Fallback
+  const login = async (identifier, password) => {
+    const rawId = (identifier || '').trim();
+    const cleanId = rawId.toLowerCase();
     const cleanPass = (password || '').trim();
 
+    // 1. Try Supabase Auth email/password if Supabase is configured
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: rawId,
+          password: cleanPass
+        });
+        if (!error && data?.user) {
+          const userIdentifier = data.user.email || rawId;
+          const newSession = {
+            user: userIdentifier,
+            token: data.session?.access_token || `session_${Date.now()}`,
+            isSupabase: true,
+            loginTime: Date.now(),
+            expiresAt: Date.now() + SESSION_DURATION_MS
+          };
+          setAdminSession(newSession);
+          localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(newSession));
+          localStorage.setItem('laxico_admin_auth', 'true');
+          localStorage.setItem('laxico_admin_user', userIdentifier);
+          setLoginModalOpen(false);
+          showToast(`Welcome back, ${userIdentifier}!`, 'success');
+          return true;
+        }
+      } catch (err) {
+        console.warn('Supabase signInWithPassword attempt failed:', err);
+      }
+    }
+
+    // 2. Fallback to ENV-configured Admin credentials
     const adminPairs = [];
 
     // Format 1: VITE_ADMIN_CREDS="user1:pass1,user2:pass2,user3:pass3"
@@ -160,9 +240,9 @@ export const SiteProvider = ({ children }) => {
     const envUsers = envUsersStr.split(',').map(u => u.trim().toLowerCase()).filter(Boolean);
     const envPasses = envPassStr.split(',').map(p => p.trim()).filter(Boolean);
 
-    // If no credentials configured at all, alert user to configure .env
-    if (adminPairs.length === 0 && envUsers.length === 0) {
-      showToast('Admin credentials not configured. Please set VITE_ADMIN_USER and VITE_ADMIN_PASS in your .env file.', 'error');
+    // If no credentials configured at all, alert user
+    if (adminPairs.length === 0 && envUsers.length === 0 && !isSupabaseConfigured()) {
+      showToast('Admin credentials not configured. Please set VITE_ADMIN_USER and VITE_ADMIN_PASS in your .env file or configure Supabase.', 'error');
       return false;
     }
 
@@ -184,12 +264,19 @@ export const SiteProvider = ({ children }) => {
       showToast(`Welcome back, ${cleanId}!`, 'success');
       return true;
     } else {
-      showToast('Invalid Admin ID or Password', 'error');
+      showToast('Invalid Admin ID/Email or Password', 'error');
       return false;
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        await supabase.auth.signOut();
+      } catch (e) {
+        console.warn('Supabase signOut error:', e);
+      }
+    }
     setAdminSession(null);
     localStorage.removeItem(SESSION_STORAGE_KEY);
     localStorage.removeItem('laxico_admin_auth');

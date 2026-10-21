@@ -754,3 +754,137 @@ export const initialClients = [
   { id: 'cl4', name: 'HDFC Bank', contact: 'Kavya Nair', phone: '+91 98450 22334', email: 'kavya@hdfc.in' },
   { id: 'cl5', name: 'Coca-Cola', contact: 'Arjun Kapoor', phone: '+91 98100 99001', email: 'arjun@coke.in' }
 ];
+
+export const initialListings = [
+  {
+    id: 'b3c8f8b8-2e06-4e58-9a3b-287df53b1001',
+    category: 'Transit',
+    subcategory: 'Transport',
+    title: 'City Express Low-Floor AC Bus Branding',
+    location: 'Delhi NCR',
+    price: 45000,
+    media_type: 'Bus',
+    reach: 650000,
+    description: 'High-frequency city commuter bus fleet exterior wrapping covering prime arterial routes.',
+    image_url: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?q=80&w=800&auto=format&fit=crop',
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'b3c8f8b8-2e06-4e58-9a3b-287df53b1002',
+    category: 'Transit',
+    subcategory: 'Transport',
+    title: 'Delhi Metro Blue Line Full Train Wrap',
+    location: 'Delhi / NCR',
+    price: 185000,
+    media_type: 'Metro',
+    reach: 1200000,
+    description: 'Full exterior wrap across 6-coach train traversing Dwarka to Noida/Vaishali.',
+    image_url: 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?q=80&w=800&auto=format&fit=crop',
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'b3c8f8b8-2e06-4e58-9a3b-287df53b1003',
+    category: 'Transit',
+    subcategory: 'Transport',
+    title: 'Suburban Express Electric Train Panel',
+    location: 'Mumbai',
+    price: 95000,
+    media_type: 'Train',
+    reach: 900000,
+    description: 'Internal commuter panel advertising across western railway network.',
+    image_url: 'https://images.unsplash.com/photo-1565019011521-b0575cbb57c8?q=80&w=800&auto=format&fit=crop',
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'b3c8f8b8-2e06-4e58-9a3b-287df53b1004',
+    category: 'Transit',
+    subcategory: 'Transport',
+    title: 'Airport Feeder Bus Back-Panel Wrap',
+    location: 'Bengaluru',
+    price: 38000,
+    media_type: 'Bus',
+    reach: 420000,
+    description: 'High-visibility back-panel on Kempegowda International Airport Vayu Vajra volvo buses.',
+    image_url: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=800&auto=format&fit=crop',
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'b3c8f8b8-2e06-4e58-9a3b-287df53b1005',
+    category: 'Transit',
+    subcategory: 'Metro Networks',
+    title: 'Metro Station Platform Screen Doors (PSD)',
+    location: 'Bengaluru (Namma Metro)',
+    price: 75000,
+    media_type: 'Metro',
+    reach: 550000,
+    description: 'Illuminated platform screen door branding at high-traffic interchange stations.',
+    image_url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?q=80&w=800&auto=format&fit=crop',
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'b3c8f8b8-2e06-4e58-9a3b-287df53b1006',
+    category: 'Transit',
+    subcategory: 'Metro Networks',
+    title: 'Metro Pillar Wraps on MG Road',
+    location: 'Bengaluru',
+    price: 60000,
+    media_type: 'Metro',
+    reach: 800000,
+    description: 'Consecutive metro pillar vinyl wraps along prime commercial stretch.',
+    image_url: 'https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=800&auto=format&fit=crop',
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'b3c8f8b8-2e06-4e58-9a3b-287df53b1007',
+    category: 'Transit',
+    subcategory: 'Railway Terminals',
+    title: 'New Delhi Railway Concourse Mega Billboard',
+    location: 'New Delhi',
+    price: 140000,
+    media_type: 'Train',
+    reach: 1500000,
+    description: 'Massive illuminated display at platform entry concourse with 24/7 footfall.',
+    image_url: 'https://images.unsplash.com/photo-1565019011521-b0575cbb57c8?q=80&w=800&auto=format&fit=crop',
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'b3c8f8b8-2e06-4e58-9a3b-287df53b1008',
+    category: 'Outdoor',
+    subcategory: 'Billboards & Unipoles',
+    title: 'Cyber City Arterial Unipole (Backlit)',
+    location: 'Gurugram',
+    price: 125000,
+    media_type: 'Billboard',
+    reach: 980000,
+    description: 'Front-facing highway unipole catching top corporate commuters.',
+    image_url: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=800&auto=format&fit=crop',
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'b3c8f8b8-2e06-4e58-9a3b-287df53b1009',
+    category: 'Outdoor',
+    subcategory: 'Digital Hoardings',
+    title: 'Bandra Flyover Curved DOOH Screen',
+    location: 'Mumbai',
+    price: 210000,
+    media_type: 'Digital Screen',
+    reach: 1400000,
+    description: 'P6 LED high-definition screen at Western Express Highway intersection.',
+    image_url: 'https://images.unsplash.com/photo-1534430480872-3498386e7856?q=80&w=800&auto=format&fit=crop',
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'b3c8f8b8-2e06-4e58-9a3b-287df53b1010',
+    category: 'Airport',
+    subcategory: 'Terminal Displays',
+    title: 'T3 Departure Lounge Digital Totem',
+    location: 'Delhi Airport',
+    price: 275000,
+    media_type: 'Digital Totem',
+    reach: 850000,
+    description: 'Premium UHD digital totems targeting high-net-worth business travelers.',
+    image_url: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=800&auto=format&fit=crop',
+    created_at: new Date().toISOString()
+  }
+];
+

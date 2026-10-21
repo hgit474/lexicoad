@@ -15,6 +15,7 @@ This directory contains the production-ready PostgreSQL schema and seed dataset 
 7. `campaigns`: Active, scheduled, and completed placements with proof photo URLs and budgets.
 8. `inquiries`: Inbound lead generation pipeline with status stages and follow-up tracking.
 9. `media`: Creative assets, showcase photos, and campaign verification proofs.
+10. `listings`: Admin-managed Excel-imported service inventory grouped by category and subcategory.
 
 ## How to Import
 1. Open your Supabase dashboard at [supabase.com](https://supabase.com).

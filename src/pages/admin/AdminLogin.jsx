@@ -19,25 +19,28 @@ export default function AdminLogin() {
     }
   }, [isAdmin, navigate]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     if (!adminId.trim() || !password.trim()) {
-      setError('Please enter both Admin ID and Password');
+      setError('Please enter both Admin ID/Email and Password');
       return;
     }
 
     setLoading(true);
-    setTimeout(() => {
-      const success = login(adminId, password);
+    try {
+      const success = await login(adminId, password);
       setLoading(false);
       if (success) {
         navigate('/admin');
       } else {
-        setError('Invalid Admin ID or Password');
+        setError('Invalid Admin Email/ID or Password');
       }
-    }, 350);
+    } catch (err) {
+      setLoading(false);
+      setError(err?.message || 'Authentication failed');
+    }
   };
 
   return (
@@ -126,7 +129,7 @@ export default function AdminLogin() {
                     type="text"
                     value={adminId}
                     onChange={(e) => setAdminId(e.target.value)}
-                    placeholder="Enter Admin ID"
+                    placeholder="Enter Admin Email or ID"
                     autoFocus
                     required
                     className="w-full bg-[#040A29]/70 border border-white/15 focus:border-laxBlue-400 rounded-xl py-3 pl-10 pr-4 text-sm text-white placeholder-slate-500 outline-none transition focus:ring-2 focus:ring-laxBlue-500/30"

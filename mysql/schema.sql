@@ -585,4 +585,39 @@ INSERT INTO `services` (
 )
 ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `price` = VALUES(`price`);
 
+-- ------------------------------------------------------------------------------
+-- 10. Table: listings (Admin-Managed Service Listings with Excel Import)
+-- ------------------------------------------------------------------------------
+DROP TABLE IF EXISTS `listings`;
+CREATE TABLE `listings` (
+  `id` VARCHAR(36) NOT NULL,
+  `category` VARCHAR(100) NOT NULL,
+  `subcategory` VARCHAR(150) NOT NULL,
+  `title` VARCHAR(255) NOT NULL,
+  `location` VARCHAR(255) NOT NULL,
+  `price` DECIMAL(12, 2) NOT NULL,
+  `media_type` VARCHAR(100) NOT NULL,
+  `reach` DECIMAL(14, 2) DEFAULT NULL,
+  `description` TEXT DEFAULT NULL,
+  `image_url` TEXT DEFAULT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_listings_category` (`category`),
+  KEY `idx_listings_subcat` (`category`, `subcategory`),
+  KEY `idx_listings_price` (`price`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `listings` (`id`, `category`, `subcategory`, `title`, `location`, `price`, `media_type`, `reach`, `description`, `image_url`) VALUES
+('b3c8f8b8-2e06-4e58-9a3b-287df53b1001', 'Transit', 'Transport', 'City Express Low-Floor AC Bus Branding', 'Delhi NCR', 45000.00, 'Bus', 650000.00, 'High-frequency city commuter bus fleet exterior wrapping covering prime arterial routes.', 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?q=80&w=800&auto=format&fit=crop'),
+('b3c8f8b8-2e06-4e58-9a3b-287df53b1002', 'Transit', 'Transport', 'Delhi Metro Blue Line Full Train Wrap', 'Delhi / NCR', 185000.00, 'Metro', 1200000.00, 'Full exterior wrap across 6-coach train traversing Dwarka to Noida/Vaishali.', 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?q=80&w=800&auto=format&fit=crop'),
+('b3c8f8b8-2e06-4e58-9a3b-287df53b1003', 'Transit', 'Transport', 'Suburban Express Electric Train Panel', 'Mumbai', 95000.00, 'Train', 900000.00, 'Internal commuter panel advertising across western railway network.', 'https://images.unsplash.com/photo-1565019011521-b0575cbb57c8?q=80&w=800&auto=format&fit=crop'),
+('b3c8f8b8-2e06-4e58-9a3b-287df53b1004', 'Transit', 'Transport', 'Airport Feeder Bus Back-Panel Wrap', 'Bengaluru', 38000.00, 'Bus', 420000.00, 'High-visibility back-panel on Kempegowda International Airport Vayu Vajra volvo buses.', 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=800&auto=format&fit=crop'),
+('b3c8f8b8-2e06-4e58-9a3b-287df53b1005', 'Transit', 'Metro Networks', 'Metro Station Platform Screen Doors (PSD)', 'Bengaluru (Namma Metro)', 75000.00, 'Metro', 550000.00, 'Illuminated platform screen door branding at high-traffic interchange stations.', 'https://images.unsplash.com/photo-1514565131-fce0801e5785?q=80&w=800&auto=format&fit=crop'),
+('b3c8f8b8-2e06-4e58-9a3b-287df53b1006', 'Transit', 'Metro Networks', 'Metro Pillar Wraps on MG Road', 'Bengaluru', 60000.00, 'Metro', 800000.00, 'Consecutive metro pillar vinyl wraps along prime commercial stretch.', 'https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=800&auto=format&fit=crop'),
+('b3c8f8b8-2e06-4e58-9a3b-287df53b1007', 'Transit', 'Railway Terminals', 'New Delhi Railway Concourse Mega Billboard', 'New Delhi', 140000.00, 'Train', 1500000.00, 'Massive illuminated display at platform entry concourse with 24/7 footfall.', 'https://images.unsplash.com/photo-1565019011521-b0575cbb57c8?q=80&w=800&auto=format&fit=crop'),
+('b3c8f8b8-2e06-4e58-9a3b-287df53b1008', 'Outdoor', 'Billboards & Unipoles', 'Cyber City Arterial Unipole (Backlit)', 'Gurugram', 125000.00, 'Billboard', 980000.00, 'Front-facing highway unipole catching top corporate commuters.', 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=800&auto=format&fit=crop'),
+('b3c8f8b8-2e06-4e58-9a3b-287df53b1009', 'Outdoor', 'Digital Hoardings', 'Bandra Flyover Curved DOOH Screen', 'Mumbai', 210000.00, 'Digital Screen', 1400000.00, 'P6 LED high-definition screen at Western Express Highway intersection.', 'https://images.unsplash.com/photo-1534430480872-3498386e7856?q=80&w=800&auto=format&fit=crop'),
+('b3c8f8b8-2e06-4e58-9a3b-287df53b1010', 'Airport', 'Terminal Displays', 'T3 Departure Lounge Digital Totem', 'Delhi Airport', 275000.00, 'Digital Totem', 850000.00, 'Premium UHD digital totems targeting high-net-worth business travelers.', 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=800&auto=format&fit=crop')
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `price` = VALUES(`price`);
+
 SET FOREIGN_KEY_CHECKS = 1;

@@ -6,6 +6,7 @@ import {
   getLocations,
   getCampaigns,
   getInquiries,
+  getListings,
   exportDatabase,
   exportMySQLDump,
   resetDemoData
@@ -19,6 +20,7 @@ export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [counts, setCounts] = useState({
     services: 0,
+    listings: 0,
     locations: 0,
     liveCampaigns: 0,
     newInquiries: 0
@@ -26,14 +28,16 @@ export default function AdminLayout() {
 
   const loadCounts = async () => {
     try {
-      const [s, l, c, i] = await Promise.all([
+      const [s, l, c, i, list] = await Promise.all([
         getServices(),
         getLocations(),
         getCampaigns(),
-        getInquiries()
+        getInquiries(),
+        getListings()
       ]);
       setCounts({
         services: s.length,
+        listings: list.length,
         locations: l.length,
         liveCampaigns: c.filter(x => x.status === 'Live').length,
         newInquiries: i.filter(x => x.stage === 'New').length
@@ -71,19 +75,27 @@ export default function AdminLayout() {
 
   const getPageMeta = () => {
     const p = location.pathname;
+    if (p.includes('/admin/listings')) return { title: 'Manage Listings', sub: 'Category & subcategory inventory table • edit, delete & filter' };
+    if (p.includes('/admin/upload-services')) return { title: 'Upload Services (.xlsx)', sub: 'SheetJS Excel parsing & Supabase bulk insertion' };
     if (p.includes('/admin/services')) return { title: 'Services Management', sub: 'Add, edit, delete — with locations mapping' };
     if (p.includes('/admin/locations')) return { title: 'Locations Management', sub: 'Inventory, footfall & status' };
     if (p.includes('/admin/campaigns')) return { title: 'Campaigns / Placements', sub: 'Active client campaigns + artwork' };
     if (p.includes('/admin/inquiries')) return { title: 'Inquiry / Lead Management', sub: 'Pipeline, stages & follow-ups' };
     if (p.includes('/admin/media')) return { title: 'Media Library', sub: 'Showcase & campaign images' };
     if (p.includes('/admin/analytics')) return { title: 'Analytics', sub: 'Popularity, revenue & occupancy' };
-    if (p.includes('/admin/database')) return { title: 'Database Structure', sub: '7 tables • live row counts & schema' };
+    if (p.includes('/admin/database')) return { title: 'Database Structure', sub: '8 tables • live row counts & schema' };
     if (p.includes('/admin/settings')) return { title: 'CMS & Site Settings', sub: 'Update logo, favicon, site name, contact info & Supabase' };
     return { title: 'Dashboard', sub: 'Live overview of services, campaigns & revenue' };
   };
 
   const getContextButton = () => {
     const p = location.pathname;
+    if (p.includes('/admin/listings')) {
+      return { label: '+ Add Listing', action: 'listing', target: '/admin/listings' };
+    }
+    if (p.includes('/admin/upload-services')) {
+      return { label: 'Upload .xlsx', action: 'upload', target: '/admin/upload-services' };
+    }
     if (p.includes('/admin/services')) {
       return { label: '+ Services', action: 'services', target: '/admin/services' };
     }
@@ -173,6 +185,28 @@ export default function AdminLayout() {
             <i className="fa-solid fa-layer-group w-5"></i> Services
             <span className="ml-auto text-xs bg-white/10 px-2 py-0.5 rounded-full">
               {counts.services}
+            </span>
+          </NavLink>
+
+          <NavLink
+            to="/admin/listings"
+            onClick={() => setSidebarOpen(false)}
+            className={({ isActive }) => `admin-link ${isActive ? 'active' : ''}`}
+          >
+            <i className="fa-solid fa-list-check w-5 text-emerald-400"></i> Manage Listings
+            <span className="ml-auto text-xs bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full">
+              {counts.listings}
+            </span>
+          </NavLink>
+
+          <NavLink
+            to="/admin/upload-services"
+            onClick={() => setSidebarOpen(false)}
+            className={({ isActive }) => `admin-link ${isActive ? 'active' : ''}`}
+          >
+            <i className="fa-solid fa-file-excel w-5 text-emerald-400"></i> Upload Services
+            <span className="ml-auto text-[10px] bg-emerald-400/15 text-emerald-300 px-1.5 py-0.5 rounded font-bold">
+              .XLSX
             </span>
           </NavLink>
 

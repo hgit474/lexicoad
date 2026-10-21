@@ -446,3 +446,45 @@ INSERT INTO media (id, title, tag, service_id, url) VALUES
 ('m9', 'Times-Style LED Burst', 'Digital LED', 'svc_led', 'https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?q=80&w=800&auto=format&fit=crop')
 ON CONFLICT (id) DO NOTHING;
 
+-- ==============================================================================
+-- 10. LISTINGS TABLE (Admin-Managed Service Listings with Excel Import)
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS listings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    category TEXT NOT NULL,
+    subcategory TEXT NOT NULL,
+    title TEXT NOT NULL,
+    location TEXT NOT NULL,
+    price NUMERIC NOT NULL,
+    media_type TEXT NOT NULL,
+    reach NUMERIC,
+    description TEXT,
+    image_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_listings_category ON listings (category);
+CREATE INDEX IF NOT EXISTS idx_listings_subcategory ON listings (category, subcategory);
+CREATE INDEX IF NOT EXISTS idx_listings_price ON listings (price);
+
+ALTER TABLE listings ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public read listings" ON listings;
+DROP POLICY IF EXISTS "Public write listings" ON listings;
+CREATE POLICY "Public read listings" ON listings FOR SELECT USING (true);
+CREATE POLICY "Public write listings" ON listings FOR ALL USING (true) WITH CHECK (true);
+
+-- SEED: listings
+INSERT INTO listings (id, category, subcategory, title, location, price, media_type, reach, description, image_url) VALUES
+('b3c8f8b8-2e06-4e58-9a3b-287df53b1001', 'Transit', 'Transport', 'City Express Low-Floor AC Bus Branding', 'Delhi NCR', 45000, 'Bus', 650000, 'High-frequency city commuter bus fleet exterior wrapping covering prime arterial routes.', 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?q=80&w=800&auto=format&fit=crop'),
+('b3c8f8b8-2e06-4e58-9a3b-287df53b1002', 'Transit', 'Transport', 'Delhi Metro Blue Line Full Train Wrap', 'Delhi / NCR', 185000, 'Metro', 1200000, 'Full exterior wrap across 6-coach train traversing Dwarka to Noida/Vaishali.', 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?q=80&w=800&auto=format&fit=crop'),
+('b3c8f8b8-2e06-4e58-9a3b-287df53b1003', 'Transit', 'Transport', 'Suburban Express Electric Train Panel', 'Mumbai', 95000, 'Train', 900000, 'Internal commuter panel advertising across western railway network.', 'https://images.unsplash.com/photo-1565019011521-b0575cbb57c8?q=80&w=800&auto=format&fit=crop'),
+('b3c8f8b8-2e06-4e58-9a3b-287df53b1004', 'Transit', 'Transport', 'Airport Feeder Bus Back-Panel Wrap', 'Bengaluru', 38000, 'Bus', 420000, 'High-visibility back-panel on Kempegowda International Airport Vayu Vajra volvo buses.', 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=800&auto=format&fit=crop'),
+('b3c8f8b8-2e06-4e58-9a3b-287df53b1005', 'Transit', 'Metro Networks', 'Metro Station Platform Screen Doors (PSD)', 'Bengaluru (Namma Metro)', 75000, 'Metro', 550000, 'Illuminated platform screen door branding at high-traffic interchange stations.', 'https://images.unsplash.com/photo-1514565131-fce0801e5785?q=80&w=800&auto=format&fit=crop'),
+('b3c8f8b8-2e06-4e58-9a3b-287df53b1006', 'Transit', 'Metro Networks', 'Metro Pillar Wraps on MG Road', 'Bengaluru', 60000, 'Metro', 800000, 'Consecutive metro pillar vinyl wraps along prime commercial stretch.', 'https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=800&auto=format&fit=crop'),
+('b3c8f8b8-2e06-4e58-9a3b-287df53b1007', 'Transit', 'Railway Terminals', 'New Delhi Railway Concourse Mega Billboard', 'New Delhi', 140000, 'Train', 1500000, 'Massive illuminated display at platform entry concourse with 24/7 footfall.', 'https://images.unsplash.com/photo-1565019011521-b0575cbb57c8?q=80&w=800&auto=format&fit=crop'),
+('b3c8f8b8-2e06-4e58-9a3b-287df53b1008', 'Outdoor', 'Billboards & Unipoles', 'Cyber City Arterial Unipole (Backlit)', 'Gurugram', 125000, 'Billboard', 980000, 'Front-facing highway unipole catching top corporate commuters.', 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=800&auto=format&fit=crop'),
+('b3c8f8b8-2e06-4e58-9a3b-287df53b1009', 'Outdoor', 'Digital Hoardings', 'Bandra Flyover Curved DOOH Screen', 'Mumbai', 210000, 'Digital Screen', 1400000, 'P6 LED high-definition screen at Western Express Highway intersection.', 'https://images.unsplash.com/photo-1534430480872-3498386e7856?q=80&w=800&auto=format&fit=crop'),
+('b3c8f8b8-2e06-4e58-9a3b-287df53b1010', 'Airport', 'Terminal Displays', 'T3 Departure Lounge Digital Totem', 'Delhi Airport', 275000, 'Digital Totem', 850000, 'Premium UHD digital totems targeting high-net-worth business travelers.', 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=800&auto=format&fit=crop')
+ON CONFLICT (id) DO NOTHING;
+
+

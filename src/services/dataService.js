@@ -7,7 +7,8 @@ import {
   initialCampaigns,
   initialInquiries,
   initialMedia,
-  initialClients
+  initialClients,
+  initialListings
 } from '../lib/initialData';
 
 const STORAGE_KEY = 'laxico_db_v3';
@@ -87,6 +88,10 @@ export const getLocalDB = () => {
           }
         });
       }
+      if (!Array.isArray(parsed.listings) || parsed.listings.length === 0) {
+        parsed.listings = [...initialListings];
+        updated = true;
+      }
       if (updated) {
         saveLocalDB(parsed);
       }
@@ -103,7 +108,8 @@ export const getLocalDB = () => {
     campaigns: [...initialCampaigns],
     inquiries: [...initialInquiries],
     media: [...initialMedia],
-    clients: [...initialClients]
+    clients: [...initialClients],
+    listings: [...initialListings]
   };
   saveLocalDB(defaultDB);
   return defaultDB;
@@ -128,7 +134,8 @@ export const resetDemoData = async () => {
     campaigns: [...initialCampaigns],
     inquiries: [...initialInquiries],
     media: [...initialMedia],
-    clients: [...initialClients]
+    clients: [...initialClients],
+    listings: [...initialListings]
   };
   saveLocalDB(defaultDB);
   return defaultDB;
@@ -198,6 +205,15 @@ export const exportMySQLDump = async () => {
     sql += `\n`;
   }
 
+  // Listings (Admin Excel Managed)
+  if (db.listings && db.listings.length) {
+    sql += `-- Listings Table Data (Excel Imported)\n`;
+    db.listings.forEach(l => {
+      sql += `INSERT INTO \`listings\` (\`id\`, \`category\`, \`subcategory\`, \`title\`, \`location\`, \`price\`, \`media_type\`, \`reach\`, \`description\`, \`image_url\`) VALUES (${escapeVal(l.id)}, ${escapeVal(l.category)}, ${escapeVal(l.subcategory)}, ${escapeVal(l.title)}, ${escapeVal(l.location)}, ${escapeVal(l.price)}, ${escapeVal(l.media_type)}, ${escapeVal(l.reach)}, ${escapeVal(l.description)}, ${escapeVal(l.image_url)}) ON DUPLICATE KEY UPDATE \`title\`=VALUES(\`title\`), \`price\`=VALUES(\`price\`);\n`;
+    });
+    sql += `\n`;
+  }
+
   sql += `SET FOREIGN_KEY_CHECKS = 1;\n`;
 
   const blob = new Blob([sql], { type: 'application/sql' });
@@ -217,7 +233,8 @@ export const getAllData = async () => {
   const campaigns = await getCampaigns();
   const inquiries = await getInquiries();
   const media = await getMedia();
-  return { settings, services, locations, service_locations, campaigns, inquiries, media };
+  const listings = await getListings();
+  return { settings, services, locations, service_locations, campaigns, inquiries, media, listings };
 };
 
 // ==========================================
@@ -736,3 +753,149 @@ export const deleteMedia = async (id) => {
   }
   return true;
 };
+
+// ==========================================
+// 10. LISTINGS (Admin-Managed via Excel / CRUD)
+// ==========================================
+export const generateListingUUID = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
+export const getListings = async (filters = {}) => {
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      let query = supabase.from('listings').select('*').order('created_at', { ascending: false });
+      if (filters.category && filters.category !== 'All') {
+        query = query.ilike('category', filters.category);
+      }
+      if (filters.subcategory && filters.subcategory !== 'All') {
+        query = query.ilike('subcategory', filters.subcategory);
+      }
+      const { data, error } = await query;
+      if (!error && Array.isArray(data)) {
+        if (data.length > 0 && !filters.category && !filters.subcategory) {
+          const db = getLocalDB();
+          db.listings = data;
+          saveLocalDB(db);
+        }
+        return data;
+      }
+    } catch (err) {
+      console.warn('Supabase listings read failed, using local:', err);
+    }
+  }
+  const db = getLocalDB();
+  let list = db.listings || [];
+  if (filters.category && filters.category !== 'All') {
+    list = list.filter(l => (l.category || '').toLowerCase() === filters.category.toLowerCase());
+  }
+  if (filters.subcategory && filters.subcategory !== 'All') {
+    list = list.filter(l => (l.subcategory || '').toLowerCase() === filters.subcategory.toLowerCase());
+  }
+  return list;
+};
+
+export const getListingsByCategory = async (category) => {
+  return getListings({ category });
+};
+
+export const bulkInsertListings = async (newRows = []) => {
+  if (!Array.isArray(newRows) || newRows.length === 0) {
+    return { success: true, count: 0, data: [] };
+  }
+
+  const rowsWithMeta = newRows.map(row => ({
+    id: row.id || generateListingUUID(),
+    category: String(row.category || '').trim(),
+    subcategory: String(row.subcategory || '').trim(),
+    title: String(row.title || '').trim(),
+    location: String(row.location || 'Pan India').trim(),
+    price: Number(row.price) || 0,
+    media_type: String(row.media_type || row.subcategory || 'Standard').trim(),
+    reach: row.reach !== undefined && row.reach !== null && row.reach !== '' ? Number(row.reach) : null,
+    description: row.description ? String(row.description).trim() : null,
+    image_url: row.image_url ? String(row.image_url).trim() : null,
+    created_at: row.created_at || new Date().toISOString()
+  }));
+
+  // Update local DB cache
+  const db = getLocalDB();
+  const existingListings = db.listings || [];
+  db.listings = [...rowsWithMeta, ...existingListings];
+  saveLocalDB(db);
+
+  // If Supabase is configured, bulk insert
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      const { data, error } = await supabase.from('listings').insert(rowsWithMeta);
+      if (error) {
+        console.warn('Supabase bulkInsertListings error:', error);
+        return { success: false, error: error.message, count: rowsWithMeta.length, data: rowsWithMeta };
+      }
+    } catch (err) {
+      console.warn('Supabase bulkInsertListings exception:', err);
+      return { success: false, error: err.message, count: rowsWithMeta.length, data: rowsWithMeta };
+    }
+  }
+
+  return { success: true, count: rowsWithMeta.length, data: rowsWithMeta };
+};
+
+export const saveListing = async (listing) => {
+  const db = getLocalDB();
+  const itemToSave = {
+    ...listing,
+    id: listing.id || generateListingUUID(),
+    category: String(listing.category || '').trim(),
+    subcategory: String(listing.subcategory || '').trim(),
+    title: String(listing.title || '').trim(),
+    location: String(listing.location || 'Pan India').trim(),
+    price: Number(listing.price) || 0,
+    media_type: String(listing.media_type || 'Standard').trim(),
+    reach: listing.reach !== undefined && listing.reach !== null && listing.reach !== '' ? Number(listing.reach) : null,
+    description: listing.description || null,
+    image_url: listing.image_url || null,
+    created_at: listing.created_at || new Date().toISOString()
+  };
+
+  const existingIdx = (db.listings || []).findIndex(l => l.id === itemToSave.id);
+  if (existingIdx >= 0) {
+    db.listings[existingIdx] = itemToSave;
+  } else {
+    db.listings = [itemToSave, ...(db.listings || [])];
+  }
+  saveLocalDB(db);
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      await supabase.from('listings').upsert(itemToSave);
+    } catch (err) {
+      console.warn('Supabase saveListing failed:', err);
+    }
+  }
+
+  return itemToSave;
+};
+
+export const deleteListing = async (id) => {
+  const db = getLocalDB();
+  db.listings = (db.listings || []).filter(l => l.id !== id);
+  saveLocalDB(db);
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      await supabase.from('listings').delete().eq('id', id);
+    } catch (err) {
+      console.warn('Supabase deleteListing failed:', err);
+    }
+  }
+  return true;
+};
+
