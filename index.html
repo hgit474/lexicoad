@@ -11,6 +11,11 @@
     <meta name="author" content="Laxico Advertising" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <link rel="canonical" href="https://lexicoadvertising.com/" />
+    <link rel="alternate" hreflang="x-default" href="https://lexicoadvertising.com/" />
+    <link rel="alternate" hreflang="en-IN" href="https://lexicoadvertising.in/" />
+    <link rel="alternate" hreflang="en-US" href="https://lexicoadvertising.com/" />
+    <link rel="alternate" hreflang="en" href="https://lexicoadvertising.com/" />
+    <link rel="alternate" hreflang="en-GB" href="https://lexicoadvertising.org/" />
 
     <!-- Open Graph (Facebook / LinkedIn) -->
     <meta property="og:type" content="website" />
@@ -54,53 +59,71 @@
     <!-- Chart.js (Deferred execution to unblock LCP/FCP) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 
-    <!-- Structured Data (Schema.org JSON-LD for LocalBusiness / AdvertisingAgency) -->
+    <!-- Structured Data (Schema.org JSON-LD Graph) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "AdvertisingAgency",
-      "name": "Laxico Advertising",
-      "url": "https://lexicoadvertising.com/",
-      "logo": "https://lexicoadvertising.com/logo.png",
-      "image": "https://lexicoadvertising.com/logo.png",
-      "sameAs": [
-        "https://www.lexicoadvertising.com",
-        "https://lexicoadvertising.in",
-        "https://www.lexicoadvertising.in",
-        "https://lexicoadvertising.org",
-        "https://www.lexicoadvertising.org",
-        "https://lexicoad-two.vercel.app"
-      ],
-      "description": "Billboard & poster placements across metros, airports, highways, and malls in India.",
-      "telephone": "+91-9742313705",
-      "email": "lexicoadvertising@gmail.com",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "No 1 Nandini Complex, Chandra Layout",
-        "addressLocality": "Bangalore",
-        "postalCode": "560040",
-        "addressCountry": "IN"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": "12.9601",
-        "longitude": "77.5255"
-      },
-      "openingHoursSpecification": {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday"
-        ],
-        "opens": "10:00",
-        "closes": "19:00"
-      },
-      "priceRange": "₹₹",
-      "areaServed": ["Delhi NCR", "Mumbai", "Bengaluru", "Hyderabad", "Pune"]
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://lexicoadvertising.com/#website",
+          "url": "https://lexicoadvertising.com/",
+          "name": "Laxico Advertising",
+          "description": "Billboard, DOOH, metro, airport and transit advertising agency across India.",
+          "inLanguage": "en",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://lexicoadvertising.com/services?search={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "AdvertisingAgency",
+          "@id": "https://lexicoadvertising.com/#agency",
+          "name": "Laxico Advertising",
+          "url": "https://lexicoadvertising.com/",
+          "logo": "https://lexicoadvertising.com/logo.png",
+          "image": "https://lexicoadvertising.com/logo.png",
+          "sameAs": [
+            "https://www.lexicoadvertising.com",
+            "https://lexicoadvertising.in",
+            "https://www.lexicoadvertising.in",
+            "https://lexicoadvertising.org",
+            "https://www.lexicoadvertising.org",
+            "https://lexicoad-two.vercel.app"
+          ],
+          "description": "Billboard & poster placements across metros, airports, highways, and malls in India.",
+          "telephone": "+91-9742313705",
+          "email": "lexicoadvertising@gmail.com",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "No 1 Nandini Complex, Chandra Layout",
+            "addressLocality": "Bangalore",
+            "postalCode": "560040",
+            "addressCountry": "IN"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": "12.9601",
+            "longitude": "77.5255"
+          },
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "opens": "10:00",
+            "closes": "19:00"
+          },
+          "priceRange": "₹₹",
+          "areaServed": ["Delhi NCR", "Mumbai", "Bengaluru", "Hyderabad", "Pune"]
+        }
+      ]
     }
     </script>
   </head>
