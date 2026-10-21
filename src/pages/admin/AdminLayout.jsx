@@ -7,11 +7,12 @@ import {
   getCampaigns,
   getInquiries,
   exportDatabase,
+  exportMySQLDump,
   resetDemoData
 } from '../../services/dataService';
 
 export default function AdminLayout() {
-  const { isAdmin, logout, showToast, settings } = useSite();
+  const { isAdmin, logout, showToast, settings, adminUser } = useSite();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -55,6 +56,11 @@ export default function AdminLayout() {
     showToast('Database exported as JSON', 'success');
   };
 
+  const handleExportMySQL = async () => {
+    await exportMySQLDump();
+    showToast('MySQL 8.0 dump downloaded', 'success');
+  };
+
   const handleResetDemo = async () => {
     if (!window.confirm('Reset all data to demo defaults?')) return;
     await resetDemoData();
@@ -76,6 +82,36 @@ export default function AdminLayout() {
     return { title: 'Dashboard', sub: 'Live overview of services, campaigns & revenue' };
   };
 
+  const getContextButton = () => {
+    const p = location.pathname;
+    if (p.includes('/admin/services')) {
+      return { label: '+ Services', action: 'services', target: '/admin/services' };
+    }
+    if (p.includes('/admin/locations')) {
+      return { label: '+ Location', action: 'locations', target: '/admin/locations' };
+    }
+    if (p.includes('/admin/campaigns')) {
+      return { label: '+ Campaign', action: 'campaigns', target: '/admin/campaigns' };
+    }
+    if (p.includes('/admin/inquiries')) {
+      return { label: '+ Inquiry', action: 'inquiries', target: '/admin/inquiries' };
+    }
+    if (p.includes('/admin/media')) {
+      return { label: '+ Media', action: 'media', target: '/admin/media' };
+    }
+    return { label: '+ Services', action: 'services', target: '/admin/services' };
+  };
+
+  const contextButton = getContextButton();
+
+  const handleContextAction = () => {
+    if (location.pathname === contextButton.target) {
+      window.dispatchEvent(new CustomEvent('admin-open-modal', { detail: { action: contextButton.action } }));
+    } else {
+      navigate(contextButton.target, { state: { openAdd: true } });
+    }
+  };
+
   const pageMeta = getPageMeta();
 
   if (!isAdmin) return null;
@@ -90,22 +126,32 @@ export default function AdminLayout() {
             sidebarOpen ? 'translate-x-0' : '-translate-x-[110%] lg:translate-x-0'
           }`}
         >
-          <div className="flex items-center gap-3 px-1 mb-4">
-            <div className="w-11 h-11 rounded-xl grad-btn flex items-center justify-center text-white font-grotesk font-bold text-xl shadow-lg overflow-hidden">
-              {settings.logo_url ? (
-                <img src={settings.logo_url} alt={settings.site_name || 'Logo'} className="w-full h-full object-contain bg-white" />
-              ) : (
-                settings.logo_badge || 'L'
-              )}
-            </div>
-            <div>
-              <div className="text-white font-grotesk font-bold leading-none">
-                {settings.logo_text || 'LAXICO'} ADMIN
+          <div className="flex items-center justify-between px-1 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl grad-btn flex items-center justify-center text-white font-grotesk font-bold text-xl shadow-lg overflow-hidden shrink-0">
+                {settings.logo_url ? (
+                  <img src={settings.logo_url} alt={settings.site_name || 'Logo'} className="w-full h-full object-contain bg-white" />
+                ) : (
+                  settings.logo_badge || 'L'
+                )}
               </div>
-              <div className="text-[10px] tracking-[.25em] text-slate-400 font-bold mt-1">
-                CONTROL TOWER
+              <div>
+                <div className="text-white font-grotesk font-bold leading-none text-sm">
+                  {settings.logo_text || 'LAXICO'} ADMIN
+                </div>
+                <div className="text-[9px] tracking-[.25em] text-slate-400 font-bold mt-1">
+                  CONTROL TOWER
+                </div>
               </div>
             </div>
+
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 flex items-center justify-center text-sm"
+              title="Close Menu"
+            >
+              <i className="fa-solid fa-xmark"></i>
+            </button>
           </div>
 
           <NavLink
@@ -203,7 +249,7 @@ export default function AdminLayout() {
             </button>
 
             <div className="text-[11px] text-slate-500 font-semibold px-2">
-              Logged in as <span className="text-slate-300">lexicoadmin</span>
+              Logged in as <span className="text-slate-300 capitalize">{adminUser || 'Admin'}</span>
             </div>
           </div>
         </aside>
@@ -219,48 +265,55 @@ export default function AdminLayout() {
         {/* Main Content Area */}
         <div className="flex-1 min-w-0">
           {/* Topbar */}
-          <header className="sticky top-0 z-30 bg-[#040A29]/90 backdrop-blur border-b border-white/10 px-4 sm:px-8 py-4 flex items-center gap-3">
-            <button
-              className="lg:hidden w-10 h-10 rounded-xl bg-white/10 text-white flex items-center justify-center"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-            >
-              <i className="fa-solid fa-bars"></i>
-            </button>
+          <header className="sticky top-0 z-30 bg-[#040A29]/95 backdrop-blur border-b border-white/10 px-3.5 sm:px-8 py-3.5 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <button
+                className="lg:hidden w-10 h-10 rounded-xl bg-white/10 text-white flex items-center justify-center shrink-0"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                aria-label="Toggle navigation menu"
+              >
+                <i className="fa-solid fa-bars"></i>
+              </button>
 
-            <div>
-              <h1 className="text-white font-grotesk font-bold text-xl leading-none">
-                {pageMeta.title}
-              </h1>
-              <p className="text-slate-400 text-xs font-semibold mt-1">
-                {pageMeta.sub}
-              </p>
+              <div className="min-w-0">
+                <h1 className="text-white font-grotesk font-bold text-base sm:text-xl leading-tight truncate">
+                  {pageMeta.title}
+                </h1>
+                <p className="text-slate-400 text-[11px] sm:text-xs font-semibold mt-0.5 truncate hidden sm:block">
+                  {pageMeta.sub}
+                </p>
+              </div>
             </div>
 
-            <div className="ml-auto flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <button
-                onClick={handleExportDB}
-                className="hidden sm:inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition"
+                onClick={handleExportMySQL}
+                className="inline-flex items-center gap-1.5 bg-laxBlue-600/30 hover:bg-laxBlue-600/50 text-blue-200 border border-blue-500/30 text-xs font-bold px-3 py-2 rounded-xl transition"
+                title="Download MySQL Dump"
               >
-                <i className="fa-solid fa-download"></i> Export DB
+                <i className="fa-solid fa-database text-[11px]"></i>
+                <span className="hidden sm:inline">Export DB</span>
               </button>
 
               <button
                 onClick={handleResetDemo}
-                className="hidden sm:inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition"
+                className="inline-flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-bold px-3 py-2 rounded-xl transition"
+                title="Restore default demo data"
               >
-                <i className="fa-solid fa-rotate"></i> Reset Demo
+                <i className="fa-solid fa-rotate-left text-[11px]"></i>
+                <span className="hidden sm:inline">Reset Demo</span>
               </button>
 
-              <Link
-                to="/admin/services"
-                className="grad-btn text-white text-xs font-extrabold px-4 py-2.5 rounded-xl flex items-center gap-1.5 shadow"
+              <button
+                onClick={handleContextAction}
+                className="grad-btn text-white text-xs font-extrabold px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl flex items-center gap-1.5 shadow"
               >
-                <i className="fa-solid fa-plus"></i> Services
-              </Link>
+                <span>{contextButton.label}</span>
+              </button>
             </div>
           </header>
 
-          <main className="p-4 sm:p-8">
+          <main className="p-3.5 sm:p-6 lg:p-8">
             <Outlet context={{ refreshCounts: loadCounts }} />
           </main>
         </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getServices, getLocations, getServiceLocations, getMedia } from '../services/dataService';
 import CostCalculator from '../components/CostCalculator';
+import BrowseByGenre from '../components/BrowseByGenre';
 import { useSite } from '../context/SiteContext';
 
 const heroAds = [
@@ -304,8 +305,13 @@ export default function Home() {
         </div>
       </div>
 
+      {/* ================= BROWSE MEDIA BY GENRE (THE MEDIA ANT STYLE) ================= */}
+      <div className="max-w-7xl mx-auto px-4 pt-10 sm:pt-14">
+        <BrowseByGenre services={services} />
+      </div>
+
       {/* ================= FEATURED SERVICES ================= */}
-      <div className="max-w-7xl mx-auto px-4 py-16">
+      <div className="max-w-7xl mx-auto px-4 py-12 sm:py-16">
         <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
           <div>
             <span className="section-label text-laxRed-600">What we do</span>
@@ -422,52 +428,58 @@ export default function Home() {
       {/* ================= HOW IT WORKS + CALCULATOR ================= */}
       <div className="bg-laxBlue-950 relative overflow-hidden">
         <div className="absolute inset-0 hero-grid opacity-60"></div>
-        <div className="relative max-w-7xl mx-auto px-4 py-16 grid lg:grid-cols-2 gap-10">
-          <div>
-            <span className="section-label text-red-400">Simple process</span>
-            <h2 className="font-grotesk font-bold text-white text-3xl sm:text-4xl mt-2">
-              Launch in 4 steps.<br />Live in 48 hours.
-            </h2>
+        <div className="relative max-w-7xl mx-auto px-4 py-16 grid lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
+          <div className="flex flex-col justify-between h-full space-y-6">
+            <div>
+              <span className="section-label text-red-400">Simple process</span>
+              <h2 className="font-grotesk font-bold text-white text-3xl sm:text-4xl mt-2">
+                Launch in 4 steps.<br />Live in 48 hours.
+              </h2>
+            </div>
 
-            <div className="mt-8 space-y-4">
+            <div className="grid gap-3.5 flex-1">
               {[
-                { n: '1', t: 'Pick a service', d: 'Browse 8 service types with live pricing & durations.', icon: 'fa-layer-group' },
+                { n: '1', t: 'Pick a service', d: 'Browse 12 media channels with live pricing & durations.', icon: 'fa-layer-group' },
                 { n: '2', t: 'Choose locations', d: 'Compare footfall, photos & availability per site.', icon: 'fa-location-dot' },
                 { n: '3', t: 'Approve artwork', d: 'Upload creative — we print, mount & light it.', icon: 'fa-pen-nib' },
                 { n: '4', t: 'Track live proof', d: 'Get geo-tagged photos + performance report.', icon: 'fa-satellite-dish' }
               ].map(step => (
                 <div
                   key={step.n}
-                  className="flex gap-4 rounded-2xl p-4 border border-white/12"
+                  className="flex items-center gap-4 rounded-2xl p-4 border border-white/12 transition hover:border-white/25"
                   style={{ background: 'rgba(255,255,255,.06)' }}
                 >
-                  <div className="w-12 h-12 rounded-2xl grad-btn flex items-center justify-center text-white font-grotesk font-bold text-lg shrink-0">
+                  <div className="w-11 h-11 rounded-2xl grad-btn flex items-center justify-center text-white font-grotesk font-bold text-base shrink-0 shadow">
                     {step.n}
                   </div>
-                  <div>
-                    <div className="text-white font-bold flex items-center gap-2">
-                      {step.t} <i className={`fa-solid ${step.icon} text-red-400 text-sm`}></i>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-white font-bold text-sm sm:text-base flex items-center gap-2">
+                      <span>{step.t}</span>
+                      <i className={`fa-solid ${step.icon} text-red-400 text-xs sm:text-sm`}></i>
                     </div>
-                    <div className="text-blue-200 text-sm font-medium">{step.d}</div>
+                    <div className="text-blue-200 text-xs sm:text-sm font-medium mt-0.5">{step.d}</div>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <div className="flex items-center gap-2 text-blue-200 text-sm font-bold">
-                <i className="fa-solid fa-circle-check text-green-400"></i> MCD / DMRC / AAI Approved Sites
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 grid sm:grid-cols-3 gap-3 text-xs sm:text-[13px] font-bold text-blue-100">
+              <div className="flex items-center gap-2">
+                <i className="fa-solid fa-circle-check text-emerald-400 shrink-0"></i>
+                <span>Govt. Approved Sites</span>
               </div>
-              <div className="flex items-center gap-2 text-blue-200 text-sm font-bold">
-                <i className="fa-solid fa-circle-check text-green-400"></i> Geo-tagged Proof of Display
+              <div className="flex items-center gap-2">
+                <i className="fa-solid fa-circle-check text-emerald-400 shrink-0"></i>
+                <span>Geo-tagged Proof</span>
               </div>
-              <div className="flex items-center gap-2 text-blue-200 text-sm font-bold">
-                <i className="fa-solid fa-circle-check text-green-400"></i> Dedicated Campaign Manager
+              <div className="flex items-center gap-2">
+                <i className="fa-solid fa-circle-check text-emerald-400 shrink-0"></i>
+                <span>Dedicated Manager</span>
               </div>
             </div>
           </div>
 
-          <div>
+          <div className="h-full">
             <CostCalculator />
           </div>
         </div>
@@ -533,16 +545,18 @@ export default function Home() {
 
       {/* ================= WHY LAXICO ================= */}
       <div className="max-w-7xl mx-auto px-4 pb-16">
-        <div className="rounded-[28px] overflow-hidden grid lg:grid-cols-2 grad-bg-2 relative">
+        <div className="rounded-[28px] overflow-hidden grid lg:grid-cols-2 items-stretch grad-bg-2 relative">
           <div className="absolute inset-0 hero-grid"></div>
 
-          <div className="relative p-8 sm:p-12">
-            <span className="section-label text-red-300">Why Laxico</span>
-            <h2 className="font-grotesk font-bold text-white text-3xl sm:text-4xl mt-2">
-              The agency brands call when outdoor must perform.
-            </h2>
+          <div className="relative p-6 sm:p-10 lg:p-12 flex flex-col justify-between h-full">
+            <div>
+              <span className="section-label text-red-300">Why Laxico</span>
+              <h2 className="font-grotesk font-bold text-white text-3xl sm:text-4xl mt-2">
+                The agency brands call when outdoor must perform.
+              </h2>
+            </div>
 
-            <div className="grid sm:grid-cols-2 gap-4 mt-8">
+            <div className="grid sm:grid-cols-2 gap-4 mt-8 flex-1">
               {[
                 { icon: 'fa-certificate', title: 'Govt.-Approved Sites', desc: 'MCD, DMRC, AAI & railway approvals on every hoarding. Zero takedown risk.' },
                 { icon: 'fa-camera', title: 'Photo Proof of Display', desc: 'Geo-tagged day & night photos for every site, every cycle.' },
@@ -551,58 +565,62 @@ export default function Home() {
               ].map((item, idx) => (
                 <div
                   key={idx}
-                  className="rounded-2xl p-5 border border-white/15"
+                  className="rounded-2xl p-5 border border-white/15 h-full flex flex-col justify-between transition hover:border-white/30"
                   style={{ background: 'rgba(255,255,255,.07)' }}
                 >
                   <div className="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center text-white text-lg">
                     <i className={`fa-solid ${item.icon}`}></i>
                   </div>
-                  <div className="text-white font-bold mt-3">{item.title}</div>
-                  <div className="text-blue-200 text-[13px] font-medium mt-1">{item.desc}</div>
+                  <div className="mt-3">
+                    <div className="text-white font-bold text-sm sm:text-base">{item.title}</div>
+                    <div className="text-blue-200 text-xs sm:text-[13px] font-medium mt-1 leading-relaxed">{item.desc}</div>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
           <div
-            className="relative p-8 sm:p-12 flex flex-col justify-center"
+            className="relative p-6 sm:p-10 lg:p-12 flex flex-col justify-between h-full border-t lg:border-t-0 lg:border-l border-white/10"
             style={{ background: 'rgba(255,255,255,.06)' }}
           >
-            <div className="glass rounded-3xl p-6 shadow-xl">
-              <div className="flex items-center gap-1 text-amber-400 text-sm">
-                <i className="fa-solid fa-star"></i>
-                <i className="fa-solid fa-star"></i>
-                <i className="fa-solid fa-star"></i>
-                <i className="fa-solid fa-star"></i>
-                <i className="fa-solid fa-star"></i>
-                <span className="text-slate-600 font-bold ml-2">4.9 / 5 • 320 reviews</span>
-              </div>
+            <div className="glass rounded-3xl p-6 sm:p-7 shadow-xl flex-1 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-1 text-amber-400 text-sm">
+                  <i className="fa-solid fa-star"></i>
+                  <i className="fa-solid fa-star"></i>
+                  <i className="fa-solid fa-star"></i>
+                  <i className="fa-solid fa-star"></i>
+                  <i className="fa-solid fa-star"></i>
+                  <span className="text-slate-600 font-bold ml-2">4.9 / 5 • 320 reviews</span>
+                </div>
 
-              <div className="overflow-hidden mt-4 rounded-2xl relative min-h-[140px]">
-                <div
-                  className="flex transition-transform duration-500 ease-out"
-                  style={{ transform: `translateX(-${testiIdx * 100}%)` }}
-                >
-                  {testimonials.map((t, idx) => (
-                    <div key={idx} className="min-w-full pr-1">
-                      <p className="text-slate-600 font-medium text-[15px] leading-relaxed">
-                        “{t.quote}”
-                      </p>
-                      <div className="flex items-center gap-3 mt-4">
-                        <div className="w-11 h-11 rounded-full grad-bg flex items-center justify-center text-white font-extrabold text-sm shadow">
-                          {t.initials}
-                        </div>
-                        <div>
-                          <div className="font-extrabold text-sm text-laxBlue-950">{t.name}</div>
-                          <div className="text-xs text-slate-500 font-semibold">{t.role}</div>
+                <div className="overflow-hidden mt-4 rounded-2xl relative min-h-[140px]">
+                  <div
+                    className="flex transition-transform duration-500 ease-out"
+                    style={{ transform: `translateX(-${testiIdx * 100}%)` }}
+                  >
+                    {testimonials.map((t, idx) => (
+                      <div key={idx} className="min-w-full pr-1">
+                        <p className="text-slate-600 font-medium text-[15px] leading-relaxed">
+                          “{t.quote}”
+                        </p>
+                        <div className="flex items-center gap-3 mt-4">
+                          <div className="w-11 h-11 rounded-full grad-bg flex items-center justify-center text-white font-extrabold text-sm shadow">
+                            {t.initials}
+                          </div>
+                          <div>
+                            <div className="font-extrabold text-sm text-laxBlue-950">{t.name}</div>
+                            <div className="text-xs text-slate-500 font-semibold">{t.role}</div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between mt-4">
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
                 <div className="flex gap-2">
                   {testimonials.map((_, i) => (
                     <span
@@ -622,6 +640,7 @@ export default function Home() {
                     type="button"
                     onClick={() => nextTestimonial(-1)}
                     className="w-10 h-10 rounded-xl bg-laxBlue-900 text-white hover:bg-laxRed-600 transition flex items-center justify-center shadow"
+                    aria-label="Previous testimonial"
                   >
                     <i className="fa-solid fa-arrow-left"></i>
                   </button>
@@ -629,6 +648,7 @@ export default function Home() {
                     type="button"
                     onClick={() => nextTestimonial(1)}
                     className="w-10 h-10 rounded-xl bg-laxBlue-900 text-white hover:bg-laxRed-600 transition flex items-center justify-center shadow"
+                    aria-label="Next testimonial"
                   >
                     <i className="fa-solid fa-arrow-right"></i>
                   </button>
@@ -638,7 +658,7 @@ export default function Home() {
 
             <Link
               to="/contact"
-              className="mt-5 grad-btn shine text-white font-extrabold py-4 rounded-2xl text-[15px] text-center shadow-lg block"
+              className="mt-5 grad-btn shine text-white font-extrabold py-4 rounded-2xl text-[15px] text-center shadow-lg block transition hover:scale-[1.01]"
             >
               Get My Free Media Plan <i className="fa-solid fa-paper-plane ml-2"></i>
             </Link>

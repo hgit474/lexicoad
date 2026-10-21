@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   getInquiries,
   getServices,
   getLocations,
+  saveInquiry,
   updateInquiryStage,
   updateInquiryFollowup,
   deleteInquiry,
@@ -12,6 +13,7 @@ import {
 import { useSite } from '../../context/SiteContext';
 
 export default function AdminInquiries() {
+  const location = useLocation();
   const [inquiries, setInquiries] = useState([]);
   const [services, setServices] = useState([]);
   const [locations, setLocations] = useState([]);
@@ -19,6 +21,18 @@ export default function AdminInquiries() {
   const [stageFilter, setStageFilter] = useState('All');
   const [selectedLead, setSelectedLead] = useState(null);
   const [leadModalOpen, setLeadModalOpen] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [addForm, setAddForm] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    company: '',
+    service_id: '',
+    location_id: '',
+    budget: '₹50,000 - ₹1,00,000',
+    duration: '1 Month',
+    message: ''
+  });
 
   const { showToast } = useSite();
   const navigate = useNavigate();
@@ -47,6 +61,67 @@ export default function AdminInquiries() {
   useEffect(() => {
     loadData();
   }, []);
+
+  const openAddModal = () => {
+    setAddForm({
+      name: '',
+      phone: '',
+      email: '',
+      company: '',
+      service_id: services[0]?.id || '',
+      location_id: locations[0]?.id || '',
+      budget: '₹50,000 - ₹1,00,000',
+      duration: '1 Month',
+      message: ''
+    });
+    setAddModalOpen(true);
+  };
+
+  useEffect(() => {
+    const handleOpen = (e) => {
+      if (!e.detail || e.detail.action === 'inquiries') {
+        openAddModal();
+      }
+    };
+    window.addEventListener('admin-open-modal', handleOpen);
+    if (location.state?.openAdd) {
+      openAddModal();
+    }
+    return () => window.removeEventListener('admin-open-modal', handleOpen);
+  }, [location.state, services, locations]);
+
+  const handleCreateInquiry = async (e) => {
+    e.preventDefault();
+    if (!addForm.name.trim() || !addForm.phone.trim()) {
+      showToast('Name and phone are required', 'error');
+      return;
+    }
+
+    const newLead = {
+      id: `inq_${Math.random().toString(36).slice(2, 9)}`,
+      name: addForm.name.trim(),
+      phone: addForm.phone.trim(),
+      email: addForm.email.trim() || 'contact@client.com',
+      company: addForm.company.trim() || 'Direct Client',
+      service_id: addForm.service_id || (services[0] ? services[0].id : null),
+      location_id: addForm.location_id || (locations[0] ? locations[0].id : null),
+      budget: addForm.budget || '₹50,000 - ₹1,00,000',
+      duration: addForm.duration || '1 Month',
+      stage: 'New',
+      followup: '—',
+      message: addForm.message.trim() || 'Manual lead entry via admin panel.',
+      date: new Date().toISOString().split('T')[0]
+    };
+
+    try {
+      await saveInquiry(newLead);
+      showToast('New lead created successfully', 'success');
+      setAddModalOpen(false);
+      await loadData();
+    } catch {
+      showToast('Error saving lead', 'error');
+    }
+  };
 
   const filtered = inquiries.filter(i => {
     if (stageFilter !== 'All' && i.stage !== stageFilter) return false;
@@ -360,6 +435,160 @@ export default function AdminInquiries() {
                 Convert to Campaign →
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add New Inquiry / Lead Modal */}
+      {addModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-6 sm:p-7 max-w-lg w-full text-slate-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setAddModalOpen(false)}
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold"
+            >
+              ✕
+            </button>
+
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-xl grad-btn flex items-center justify-center text-white text-lg">
+                <i className="fa-solid fa-inbox"></i>
+              </div>
+              <div>
+                <h3 className="font-grotesk font-bold text-xl text-laxBlue-950">Add New Lead</h3>
+                <p className="text-xs text-slate-500 font-semibold">Enter customer or inquiry details</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleCreateInquiry} className="space-y-3.5 text-xs font-bold">
+              <div>
+                <label className="lbl block mb-1">Contact Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Vikram Verma"
+                  value={addForm.name}
+                  onChange={e => setAddForm(prev => ({ ...prev, name: e.target.value }))}
+                  className="field w-full"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="lbl block mb-1">Phone *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="+91 98765 43210"
+                    value={addForm.phone}
+                    onChange={e => setAddForm(prev => ({ ...prev, phone: e.target.value }))}
+                    className="field w-full"
+                  />
+                </div>
+                <div>
+                  <label className="lbl block mb-1">Email</label>
+                  <input
+                    type="email"
+                    placeholder="client@brand.com"
+                    value={addForm.email}
+                    onChange={e => setAddForm(prev => ({ ...prev, email: e.target.value }))}
+                    className="field w-full"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="lbl block mb-1">Company / Brand</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Tata Motors / Zomato"
+                  value={addForm.company}
+                  onChange={e => setAddForm(prev => ({ ...prev, company: e.target.value }))}
+                  className="field w-full"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="lbl block mb-1">Service</label>
+                  <select
+                    value={addForm.service_id}
+                    onChange={e => setAddForm(prev => ({ ...prev, service_id: e.target.value }))}
+                    className="field w-full"
+                  >
+                    {services.map(s => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="lbl block mb-1">Target Location</label>
+                  <select
+                    value={addForm.location_id}
+                    onChange={e => setAddForm(prev => ({ ...prev, location_id: e.target.value }))}
+                    className="field w-full"
+                  >
+                    {locations.map(l => (
+                      <option key={l.id} value={l.id}>
+                        {l.name} ({l.city})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="lbl block mb-1">Budget Range</label>
+                  <input
+                    type="text"
+                    placeholder="₹50K - ₹2L"
+                    value={addForm.budget}
+                    onChange={e => setAddForm(prev => ({ ...prev, budget: e.target.value }))}
+                    className="field w-full"
+                  />
+                </div>
+                <div>
+                  <label className="lbl block mb-1">Duration</label>
+                  <input
+                    type="text"
+                    placeholder="1 Month"
+                    value={addForm.duration}
+                    onChange={e => setAddForm(prev => ({ ...prev, duration: e.target.value }))}
+                    className="field w-full"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="lbl block mb-1">Notes / Message</label>
+                <textarea
+                  rows="2"
+                  placeholder="Client requirements, specific unipolar hoardings requested..."
+                  value={addForm.message}
+                  onChange={e => setAddForm(prev => ({ ...prev, message: e.target.value }))}
+                  className="field w-full"
+                ></textarea>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setAddModalOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 grad-btn text-white py-2.5 rounded-xl font-extrabold shadow"
+                >
+                  Save Lead
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { getMedia, getServices, saveMedia, deleteMedia, uploadImage } from '../../services/dataService';
 import { useSite } from '../../context/SiteContext';
 
 export default function AdminMedia() {
+  const location = useLocation();
+  const formRef = useRef(null);
   const [mediaList, setMediaList] = useState([]);
   const [file, setFile] = useState(null);
   const [imageUrl, setImageUrl] = useState('');
@@ -22,6 +25,19 @@ export default function AdminMedia() {
   useEffect(() => {
     loadMedia();
   }, []);
+
+  useEffect(() => {
+    const handleOpen = (e) => {
+      if (!e.detail || e.detail.action === 'media') {
+        formRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }
+    };
+    window.addEventListener('admin-open-modal', handleOpen);
+    if (location.state?.openAdd) {
+      formRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+    return () => window.removeEventListener('admin-open-modal', handleOpen);
+  }, [location.state]);
 
   const handleAddMedia = async (e) => {
     e.preventDefault();
@@ -82,6 +98,7 @@ export default function AdminMedia() {
     <div className="bg-[#0c1747] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-xl">
       {/* Upload Zone */}
       <form
+        ref={formRef}
         onSubmit={handleAddMedia}
         className="rounded-2xl border-2 border-dashed border-white/15 p-6 grid md:grid-cols-4 gap-3 items-end bg-white/[.03]"
       >

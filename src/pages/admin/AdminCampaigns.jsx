@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   getCampaigns,
   getServices,
@@ -11,6 +12,7 @@ import {
 import { useSite } from '../../context/SiteContext';
 
 export default function AdminCampaigns() {
+  const location = useLocation();
   const [campaigns, setCampaigns] = useState([]);
   const [services, setServices] = useState([]);
   const [locations, setLocations] = useState([]);
@@ -50,6 +52,19 @@ export default function AdminCampaigns() {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    const handleOpen = (e) => {
+      if (!e.detail || e.detail.action === 'campaigns') {
+        openAddModal();
+      }
+    };
+    window.addEventListener('admin-open-modal', handleOpen);
+    if (location.state?.openAdd) {
+      openAddModal();
+    }
+    return () => window.removeEventListener('admin-open-modal', handleOpen);
+  }, [location.state]);
 
   const filtered = campaigns.filter(c => {
     if (statusFilter !== 'All' && c.status !== statusFilter) return false;

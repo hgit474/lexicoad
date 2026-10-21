@@ -47,7 +47,7 @@ export default function CostCalculator() {
   };
 
   return (
-    <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-blue-100">
+    <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-blue-100 h-full flex flex-col justify-between">
       <div className="flex items-center justify-between">
         <h3 className="font-grotesk font-bold text-xl text-laxBlue-950">Instant Cost Estimator</h3>
         <span className="badge bg-laxRed-50 text-laxRed-600 border border-red-100">

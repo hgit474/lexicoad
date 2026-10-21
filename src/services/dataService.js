@@ -131,6 +131,69 @@ export const exportDatabase = async () => {
   return true;
 };
 
+// Export database as MySQL .sql dump
+export const exportMySQLDump = async () => {
+  const db = await getAllData();
+  const escapeVal = (val) => {
+    if (val === null || val === undefined) return 'NULL';
+    if (typeof val === 'number') return val;
+    if (typeof val === 'boolean') return val ? 1 : 0;
+    if (typeof val === 'object') return `'${JSON.stringify(val).replace(/'/g, "''")}'`;
+    return `'${String(val).replace(/'/g, "''").replace(/\n/g, '\\n')}'`;
+  };
+
+  let sql = `-- ==============================================================================\n`;
+  sql += `-- Laxico Advertising MySQL 8.0 Dump\n`;
+  sql += `-- Generated at: ${new Date().toISOString()}\n`;
+  sql += `-- ==============================================================================\n\n`;
+  sql += `SET NAMES utf8mb4;\nSET FOREIGN_KEY_CHECKS = 0;\n\n`;
+
+  // Services
+  if (db.services && db.services.length) {
+    sql += `-- Services Table Data\n`;
+    db.services.forEach(s => {
+      sql += `INSERT INTO \`services\` (\`id\`, \`name\`, \`type\`, \`genre\`, \`sub_type\`, \`chain_or_brand\`, \`audience_metric\`, \`min_spend\`, \`price\`, \`rating\`, \`popularity\`, \`status\`, \`dims\`, \`durations\`, \`cities\`, \`image\`, \`description\`) VALUES (${escapeVal(s.id)}, ${escapeVal(s.name)}, ${escapeVal(s.type)}, ${escapeVal(s.genre || s.type)}, ${escapeVal(s.sub_type || '')}, ${escapeVal(s.chain_or_brand || '')}, ${escapeVal(s.audience_metric || '')}, ${escapeVal(s.min_spend || s.price)}, ${escapeVal(s.price)}, ${escapeVal(s.rating)}, ${escapeVal(s.popularity)}, ${escapeVal(s.status)}, ${escapeVal(s.dims)}, ${escapeVal(s.durations)}, ${escapeVal(s.cities)}, ${escapeVal(s.image)}, ${escapeVal(s.description)}) ON DUPLICATE KEY UPDATE \`name\`=VALUES(\`name\`);\n`;
+    });
+    sql += `\n`;
+  }
+
+  // Locations
+  if (db.locations && db.locations.length) {
+    sql += `-- Locations Table Data\n`;
+    db.locations.forEach(l => {
+      sql += `INSERT INTO \`locations\` (\`id\`, \`name\`, \`city\`, \`zone\`, \`footfall\`, \`status\`, \`price_mult\`, \`lat\`, \`lng\`, \`address\`) VALUES (${escapeVal(l.id)}, ${escapeVal(l.name)}, ${escapeVal(l.city)}, ${escapeVal(l.zone)}, ${escapeVal(l.footfall)}, ${escapeVal(l.status)}, ${escapeVal(l.price_mult || 1)}, ${escapeVal(l.lat)}, ${escapeVal(l.lng)}, ${escapeVal(l.address)}) ON DUPLICATE KEY UPDATE \`name\`=VALUES(\`name\`);\n`;
+    });
+    sql += `\n`;
+  }
+
+  // Service Locations Pivot
+  if (db.service_locations && db.service_locations.length) {
+    sql += `-- Service Locations Mapping\n`;
+    db.service_locations.forEach(sl => {
+      sql += `INSERT IGNORE INTO \`service_locations\` (\`id\`, \`service_id\`, \`location_id\`) VALUES (${escapeVal(sl.id)}, ${escapeVal(sl.service_id)}, ${escapeVal(sl.location_id)});\n`;
+    });
+    sql += `\n`;
+  }
+
+  // Inquiries
+  if (db.inquiries && db.inquiries.length) {
+    sql += `-- Inquiries Table Data\n`;
+    db.inquiries.forEach(i => {
+      sql += `INSERT INTO \`inquiries\` (\`id\`, \`name\`, \`phone\`, \`email\`, \`company\`, \`service_id\`, \`location_id\`, \`duration\`, \`budget\`, \`has_artwork\`, \`message\`, \`stage\`) VALUES (${escapeVal(i.id)}, ${escapeVal(i.name)}, ${escapeVal(i.phone)}, ${escapeVal(i.email)}, ${escapeVal(i.company)}, ${escapeVal(i.service_id)}, ${escapeVal(i.location_id)}, ${escapeVal(i.duration)}, ${escapeVal(i.budget)}, ${escapeVal(i.has_artwork)}, ${escapeVal(i.message)}, ${escapeVal(i.stage || 'New')});\n`;
+    });
+    sql += `\n`;
+  }
+
+  sql += `SET FOREIGN_KEY_CHECKS = 1;\n`;
+
+  const blob = new Blob([sql], { type: 'application/sql' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'lexicoad_mysql_dump.sql';
+  a.click();
+  return true;
+};
+
 // Get all data
 export const getAllData = async () => {
   const settings = await getSiteSettings();

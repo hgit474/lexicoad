@@ -92,6 +92,8 @@ export const SiteProvider = ({ children }) => {
     setLightbox(prev => ({ ...prev, isOpen: false }));
   };
 
+  const [adminUser, setAdminUser] = useState(() => localStorage.getItem('laxico_admin_user') || '');
+
   // Auth: Pure ENV-controlled Admin credentials (no hardcoded fallbacks)
   const login = (identifier, password) => {
     const cleanId = (identifier || '').trim().toLowerCase();
@@ -112,21 +114,29 @@ export const SiteProvider = ({ children }) => {
       });
     }
 
-    // Format 2: VITE_ADMIN_USERS="user1,user2" & VITE_ADMIN_PASSWORDS="pass1,pass2"
+    // Format 2: VITE_ADMIN_USERS="user1,user2" & VITE_ADMIN_PASSWORDS="pass1,pass2" or VITE_ADMIN_USER & VITE_ADMIN_PASS
     const envUsersStr = import.meta.env.VITE_ADMIN_USERS || import.meta.env.VITE_ADMIN_USER || '';
     const envPassStr = import.meta.env.VITE_ADMIN_PASSWORDS || import.meta.env.VITE_ADMIN_PASS || '';
 
     const envUsers = envUsersStr.split(',').map(u => u.trim().toLowerCase()).filter(Boolean);
     const envPasses = envPassStr.split(',').map(p => p.trim()).filter(Boolean);
 
+    // If no credentials configured at all, alert user to configure .env
+    if (adminPairs.length === 0 && envUsers.length === 0) {
+      showToast('Admin credentials not configured. Please set VITE_ADMIN_USER and VITE_ADMIN_PASS in your .env file.', 'error');
+      return false;
+    }
+
     const isDirectMatch = adminPairs.some(a => a.user === cleanId && a.pass === cleanPass);
     const isListMatch = envUsers.length > 0 && envPasses.length > 0 && envUsers.includes(cleanId) && envPasses.includes(cleanPass);
 
     if (isDirectMatch || isListMatch) {
       setIsAdmin(true);
+      setAdminUser(cleanId);
       localStorage.setItem('laxico_admin_auth', 'true');
+      localStorage.setItem('laxico_admin_user', cleanId);
       setLoginModalOpen(false);
-      showToast('Welcome back, Admin!', 'success');
+      showToast(`Welcome back, ${cleanId}!`, 'success');
       return true;
     } else {
       showToast('Invalid Admin ID or Password', 'error');
@@ -136,7 +146,9 @@ export const SiteProvider = ({ children }) => {
 
   const logout = () => {
     setIsAdmin(false);
+    setAdminUser('');
     localStorage.removeItem('laxico_admin_auth');
+    localStorage.removeItem('laxico_admin_user');
     showToast('Logged out securely', 'info');
   };
 
@@ -154,6 +166,7 @@ export const SiteProvider = ({ children }) => {
         openLightbox,
         closeLightbox,
         isAdmin,
+        adminUser,
         login,
         logout,
         loginModalOpen,
