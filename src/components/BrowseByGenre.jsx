@@ -226,7 +226,7 @@ export default function BrowseByGenre({ activeGenre = 'All', onSelectGenre, serv
               </div>
 
               <div className={`text-[10px] font-semibold mt-1 line-clamp-1 transition ${
-                isActive ? 'text-blue-200' : 'text-slate-400'
+                isActive ? 'text-blue-200' : 'text-slate-600'
               }`}>
                 {count !== null && count > 0 ? `${count} Media Sites` : genre.shortName}
               </div>

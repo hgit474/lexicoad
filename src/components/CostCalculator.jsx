@@ -60,8 +60,10 @@ export default function CostCalculator() {
 
       <div className="grid sm:grid-cols-2 gap-4 mt-5">
         <div>
-          <label className="lbl">Service</label>
+          <label htmlFor="calc-service-select" className="lbl">Service</label>
           <select
+            id="calc-service-select"
+            aria-label="Select outdoor advertising service"
             value={selectedServiceId}
             onChange={e => setSelectedServiceId(e.target.value)}
             className="field"
@@ -75,8 +77,10 @@ export default function CostCalculator() {
         </div>
 
         <div>
-          <label className="lbl">Duration</label>
+          <label htmlFor="calc-duration-select" className="lbl">Duration</label>
           <select
+            id="calc-duration-select"
+            aria-label="Select campaign duration"
             value={duration}
             onChange={e => setDuration(e.target.value)}
             className="field"
@@ -91,8 +95,10 @@ export default function CostCalculator() {
         </div>
 
         <div>
-          <label className="lbl">No. of locations</label>
+          <label htmlFor="calc-qty-input" className="lbl">No. of locations</label>
           <input
+            id="calc-qty-input"
+            aria-label="Number of advertising locations"
             type="number"
             min="1"
             max="50"
@@ -103,8 +109,10 @@ export default function CostCalculator() {
         </div>
 
         <div>
-          <label className="lbl">Need printing?</label>
+          <label htmlFor="calc-print-select" className="lbl">Need printing?</label>
           <select
+            id="calc-print-select"
+            aria-label="Select printing and mounting option"
             value={printCost}
             onChange={e => setPrintCost(parseInt(e.target.value) || 0)}
             className="field"

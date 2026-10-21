@@ -239,6 +239,8 @@ export default function Home() {
                 <img
                   src={heroSlides[heroIdx % heroSlides.length].img}
                   alt={heroSlides[heroIdx % heroSlides.length].brand}
+                  width="600"
+                  height="400"
                   className={`w-full h-full object-cover transition-opacity duration-500 ${
                     heroFade ? 'opacity-100' : 'opacity-0'
                   }`}
@@ -266,9 +268,12 @@ export default function Home() {
                   </div>
                   <div className="flex gap-1.5 mt-3">
                     {heroSlides.map((_, i) => (
-                      <span
+                      <button
                         key={i}
-                        className="h-1.5 rounded-full transition-all duration-300"
+                        type="button"
+                        aria-label={`Show slide ${i + 1}`}
+                        onClick={() => setHeroIdx(i)}
+                        className="h-1.5 rounded-full transition-all duration-300 border-0 p-0 cursor-pointer"
                         style={{
                           width: i === heroIdx ? 28 : 10,
                           background: i === heroIdx ? '#FF2E4D' : 'rgba(255,255,255,.4)'
@@ -406,12 +411,12 @@ export default function Home() {
 
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
                     <div>
-                      <div className="text-[11px] font-extrabold tracking-widest text-slate-400 uppercase">
+                      <div className="text-[11px] font-extrabold tracking-widest text-slate-500 uppercase">
                         STARTS AT
                       </div>
                       <div className="font-grotesk font-bold text-xl text-laxBlue-950">
                         ₹{Number(s.price).toLocaleString('en-IN')}
-                        <span className="text-xs text-slate-400 font-bold">/mo</span>
+                        <span className="text-xs text-slate-500 font-bold">/mo</span>
                       </div>
                     </div>
 
@@ -538,7 +543,7 @@ export default function Home() {
                     ></span>
                     {l.status}
                   </span>
-                  <span className="text-xs font-bold text-slate-400">{l.city}</span>
+                  <span className="text-xs font-bold text-slate-600">{l.city}</span>
                 </div>
                 <div className="font-grotesk font-bold mt-2 text-laxBlue-950">{l.name}</div>
                 <div className="text-xs font-bold text-slate-500 mt-1">
@@ -631,13 +636,15 @@ export default function Home() {
               <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
                 <div className="flex gap-2">
                   {testimonials.map((_, i) => (
-                    <span
+                    <button
                       key={i}
+                      type="button"
+                      aria-label={`View testimonial slide ${i + 1}`}
                       onClick={() => setTestiIdx(i)}
-                      className="h-2 rounded-full transition-all cursor-pointer"
+                      className="h-2 rounded-full transition-all cursor-pointer border-0 p-0"
                       style={{
                         width: i === testiIdx ? 26 : 8,
-                        background: i === testiIdx ? '#E11D2E' : '#c9d4ff'
+                        background: i === testiIdx ? '#E11D2E' : '#94a3b8'
                       }}
                     />
                   ))}
@@ -703,13 +710,21 @@ export default function Home() {
           <div className="relative grid grid-cols-2 gap-3">
             <img
               src="https://images.unsplash.com/photo-1514565131-fce0801e5785?q=80&w=600&auto=format&fit=crop"
+              width="300"
+              height="160"
+              loading="lazy"
+              decoding="async"
               className="rounded-2xl h-40 object-cover w-full shadow"
-              alt="Night billboard"
+              alt="Night billboard showcase in metro city"
             />
             <img
               src="https://images.unsplash.com/photo-1474487548417-781cb71495f3?q=80&w=600&auto=format&fit=crop"
+              width="300"
+              height="160"
+              loading="lazy"
+              decoding="async"
               className="rounded-2xl h-40 object-cover w-full mt-6 shadow"
-              alt="Metro train"
+              alt="Metro train advertisement wrap placement"
             />
           </div>
         </div>

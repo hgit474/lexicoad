@@ -104,10 +104,10 @@ export default function Footer() {
 
           {/* Services Col */}
           <div>
-            <h4 className="font-grotesk font-bold text-sm tracking-widest text-slate-300 uppercase">
+            <h3 className="font-grotesk font-bold text-sm tracking-widest text-slate-200 uppercase">
               SERVICES
-            </h4>
-            <ul className="mt-4 space-y-2.5 text-sm font-semibold text-slate-400">
+            </h3>
+            <ul className="mt-4 space-y-2.5 text-sm font-semibold text-slate-300">
               {services.map(s => (
                 <li key={s.id}>
                   <Link to={`/services/${s.id}`} className="hover:text-white transition">
@@ -120,10 +120,10 @@ export default function Footer() {
 
           {/* Company Col */}
           <div>
-            <h4 className="font-grotesk font-bold text-sm tracking-widest text-slate-300 uppercase">
+            <h3 className="font-grotesk font-bold text-sm tracking-widest text-slate-200 uppercase">
               COMPANY
-            </h4>
-            <ul className="mt-4 space-y-2.5 text-sm font-semibold text-slate-400">
+            </h3>
+            <ul className="mt-4 space-y-2.5 text-sm font-semibold text-slate-300">
               <li>
                 <Link to="/" className="hover:text-white transition">
                   Home
@@ -149,36 +149,41 @@ export default function Footer() {
 
           {/* Stay Updated Col */}
           <div>
-            <h4 className="font-grotesk font-bold text-sm tracking-widest text-slate-300 uppercase">
+            <h3 className="font-grotesk font-bold text-sm tracking-widest text-slate-200 uppercase">
               STAY UPDATED
-            </h4>
-            <p className="text-sm text-slate-400 font-medium mt-4">
+            </h3>
+            <p className="text-sm text-slate-300 font-medium mt-4">
               New site launches & rate cards, monthly.
             </p>
             <form onSubmit={handleSubscribe} className="flex gap-2 mt-3">
               <input
                 type="email"
+                aria-label="Work email address for monthly rate card"
                 value={nlEmail}
                 onChange={e => setNlEmail(e.target.value)}
                 placeholder="Work email"
-                className="flex-1 bg-white/10 border border-white/10 rounded-xl px-4 py-3 text-sm placeholder:text-slate-500 text-white outline-none focus:border-laxBlue-600"
+                className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm placeholder:text-slate-400 text-white outline-none focus:border-laxBlue-600"
               />
-              <button type="submit" className="grad-btn px-4 rounded-xl text-white">
+              <button
+                type="submit"
+                aria-label="Subscribe to newsletter"
+                className="grad-btn px-4 rounded-xl text-white"
+              >
                 <i className="fa-solid fa-paper-plane"></i>
               </button>
             </form>
-            <div className="mt-4 text-sm font-bold text-slate-300 flex items-center">
+            <div className="mt-4 text-sm font-bold text-slate-200 flex items-center">
               <i className="fa-solid fa-phone text-laxRed-500 mr-2"></i>
               {settings.phone || '9742313705'}
             </div>
-            <div className="text-sm font-semibold text-slate-400 flex items-center mt-1">
+            <div className="text-sm font-semibold text-slate-300 flex items-center mt-1">
               <i className="fa-solid fa-envelope text-laxRed-500 mr-2"></i>
               {settings.email || 'lexicoadvertising@gmail.com'}
             </div>
-            <a href={settings.map_link || '#'} target="_blank" rel="noreferrer" className="text-xs font-semibold text-slate-500 mt-3 block hover:text-white">
+            <a href={settings.map_link || '#'} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-slate-400 mt-3 block hover:text-white">
               <i className="fa-solid fa-location-dot mr-1"></i>{settings.head_office || 'Head Office Location'}
             </a>
-            <div className="text-xs font-semibold text-slate-500 mt-3 space-y-1">
+            <div className="text-xs font-semibold text-slate-400 mt-3 space-y-1">
               <div>UDYAM: {settings.udyam_number || 'UDYAM-KR-03-0664055'}</div>
               <div>GST: {settings.gst_number || '29CTIPS2521P1ZZ'}</div>
             </div>
