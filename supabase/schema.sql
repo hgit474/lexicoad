@@ -224,42 +224,42 @@ ALTER TABLE media ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public read site_settings" ON site_settings;
 DROP POLICY IF EXISTS "Public write site_settings" ON site_settings;
 CREATE POLICY "Public read site_settings" ON site_settings FOR SELECT USING (true);
-CREATE POLICY "Public write site_settings" ON site_settings FOR ALL USING (true);
+CREATE POLICY "Public write site_settings" ON site_settings FOR ALL USING (true) WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Public read services" ON services;
 DROP POLICY IF EXISTS "Public write services" ON services;
 CREATE POLICY "Public read services" ON services FOR SELECT USING (true);
-CREATE POLICY "Public write services" ON services FOR ALL USING (true);
+CREATE POLICY "Public write services" ON services FOR ALL USING (true) WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Public read locations" ON locations;
 DROP POLICY IF EXISTS "Public write locations" ON locations;
 CREATE POLICY "Public read locations" ON locations FOR SELECT USING (true);
-CREATE POLICY "Public write locations" ON locations FOR ALL USING (true);
+CREATE POLICY "Public write locations" ON locations FOR ALL USING (true) WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Public read service_locations" ON service_locations;
 DROP POLICY IF EXISTS "Public write service_locations" ON service_locations;
 CREATE POLICY "Public read service_locations" ON service_locations FOR SELECT USING (true);
-CREATE POLICY "Public write service_locations" ON service_locations FOR ALL USING (true);
+CREATE POLICY "Public write service_locations" ON service_locations FOR ALL USING (true) WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Public read clients" ON clients;
 DROP POLICY IF EXISTS "Public write clients" ON clients;
 CREATE POLICY "Public read clients" ON clients FOR SELECT USING (true);
-CREATE POLICY "Public write clients" ON clients FOR ALL USING (true);
+CREATE POLICY "Public write clients" ON clients FOR ALL USING (true) WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Public read campaigns" ON campaigns;
 DROP POLICY IF EXISTS "Public write campaigns" ON campaigns;
 CREATE POLICY "Public read campaigns" ON campaigns FOR SELECT USING (true);
-CREATE POLICY "Public write campaigns" ON campaigns FOR ALL USING (true);
+CREATE POLICY "Public write campaigns" ON campaigns FOR ALL USING (true) WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Public read inquiries" ON inquiries;
 DROP POLICY IF EXISTS "Public write inquiries" ON inquiries;
 CREATE POLICY "Public read inquiries" ON inquiries FOR SELECT USING (true);
-CREATE POLICY "Public write inquiries" ON inquiries FOR ALL USING (true);
+CREATE POLICY "Public write inquiries" ON inquiries FOR ALL USING (true) WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Public read media" ON media;
 DROP POLICY IF EXISTS "Public write media" ON media;
 CREATE POLICY "Public read media" ON media FOR SELECT USING (true);
-CREATE POLICY "Public write media" ON media FOR ALL USING (true);
+CREATE POLICY "Public write media" ON media FOR ALL USING (true) WITH CHECK (true);
 
 
 INSERT INTO site_settings (id, site_name, tagline, brand_subtitle, logo_text, logo_badge, logo_url, favicon_url, phone, phone_alt, whatsapp, email, email_sales, udyam_number, gst_number, about_label, head_office, office_mumbai, office_bengaluru, map_link, cities, active_sites_count, campaigns_count, locations_count, retention_rate)

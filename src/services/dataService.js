@@ -201,7 +201,14 @@ export const getServices = async () => {
         .from('services')
         .select('*')
         .order('popularity', { ascending: false });
-      if (!error && data && data.length > 0) return data;
+      if (!error && Array.isArray(data)) {
+        if (data.length > 0) {
+          const db = getLocalDB();
+          db.services = data;
+          saveLocalDB(db);
+        }
+        return data;
+      }
     } catch (err) {
       console.warn('Supabase services read failed, using local:', err);
     }
@@ -234,7 +241,8 @@ export const saveService = async (service, mappedLocationIds = null) => {
 
   if (isSupabaseConfigured() && supabase) {
     try {
-      await supabase.from('services').upsert(service);
+      const { error } = await supabase.from('services').upsert(service);
+      if (error) console.error('Supabase saveService error:', error);
       if (Array.isArray(mappedLocationIds)) {
         await supabase.from('service_locations').delete().eq('service_id', service.id);
         if (mappedLocationIds.length > 0) {
@@ -277,7 +285,14 @@ export const getLocations = async () => {
   if (isSupabaseConfigured() && supabase) {
     try {
       const { data, error } = await supabase.from('locations').select('*');
-      if (!error && data && data.length > 0) return data;
+      if (!error && Array.isArray(data)) {
+        if (data.length > 0) {
+          const db = getLocalDB();
+          db.locations = data;
+          saveLocalDB(db);
+        }
+        return data;
+      }
     } catch (err) {
       console.warn('Supabase locations read failed, using local:', err);
     }
@@ -298,7 +313,8 @@ export const saveLocation = async (location) => {
 
   if (isSupabaseConfigured() && supabase) {
     try {
-      await supabase.from('locations').upsert(location);
+      const { error } = await supabase.from('locations').upsert(location);
+      if (error) console.error('Supabase saveLocation error:', error);
     } catch (err) {
       console.warn('Supabase saveLocation failed:', err);
     }
@@ -330,7 +346,14 @@ export const getServiceLocations = async () => {
   if (isSupabaseConfigured() && supabase) {
     try {
       const { data, error } = await supabase.from('service_locations').select('*');
-      if (!error && data && data.length > 0) return data;
+      if (!error && Array.isArray(data)) {
+        if (data.length > 0) {
+          const db = getLocalDB();
+          db.service_locations = data;
+          saveLocalDB(db);
+        }
+        return data;
+      }
     } catch (err) {
       console.warn('Supabase service_locations read failed, using local:', err);
     }
@@ -349,7 +372,14 @@ export const getCampaigns = async () => {
         .from('campaigns')
         .select('*')
         .order('start_date', { ascending: false });
-      if (!error && data && data.length > 0) return data;
+      if (!error && Array.isArray(data)) {
+        if (data.length > 0) {
+          const db = getLocalDB();
+          db.campaigns = data;
+          saveLocalDB(db);
+        }
+        return data;
+      }
     } catch (err) {
       console.warn('Supabase campaigns read failed, using local:', err);
     }
@@ -376,7 +406,8 @@ export const saveCampaign = async (campaign) => {
 
   if (isSupabaseConfigured() && supabase) {
     try {
-      await supabase.from('campaigns').upsert(campaign);
+      const { error } = await supabase.from('campaigns').upsert(campaign);
+      if (error) console.error('Supabase saveCampaign error:', error);
     } catch (err) {
       console.warn('Supabase saveCampaign failed:', err);
     }
@@ -428,7 +459,14 @@ export const getInquiries = async () => {
         .from('inquiries')
         .select('*')
         .order('created_at', { ascending: false });
-      if (!error && data && data.length > 0) return data;
+      if (!error && Array.isArray(data)) {
+        if (data.length > 0) {
+          const db = getLocalDB();
+          db.inquiries = data;
+          saveLocalDB(db);
+        }
+        return data;
+      }
     } catch (err) {
       console.warn('Supabase inquiries read failed, using local:', err);
     }
@@ -570,7 +608,14 @@ export const getMedia = async () => {
   if (isSupabaseConfigured() && supabase) {
     try {
       const { data, error } = await supabase.from('media').select('*');
-      if (!error && data && data.length > 0) return data;
+      if (!error && Array.isArray(data)) {
+        if (data.length > 0) {
+          const db = getLocalDB();
+          db.media = data;
+          saveLocalDB(db);
+        }
+        return data;
+      }
     } catch (err) {
       console.warn('Supabase media read failed, using local:', err);
     }
