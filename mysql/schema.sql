@@ -1202,11 +1202,14 @@ CREATE TABLE `listings` (
   `reach` DECIMAL(14, 2) DEFAULT NULL,
   `description` TEXT DEFAULT NULL,
   `image_url` TEXT DEFAULT NULL,
+  `upsert_key` VARCHAR(255) DEFAULT NULL,
+  `metadata` JSON DEFAULT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_listings_category` (`category`),
   KEY `idx_listings_subcat` (`category`, `subcategory`),
-  KEY `idx_listings_price` (`price`)
+  KEY `idx_listings_price` (`price`),
+  KEY `idx_listings_upsert_key` (`upsert_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `listings` (`id`, `category`, `subcategory`, `title`, `location`, `price`, `media_type`, `reach`, `description`, `image_url`) VALUES
@@ -1231,4 +1234,27 @@ ON DUPLICATE KEY UPDATE
   `description` = VALUES(`description`),
   `image_url` = VALUES(`image_url`);
 
+-- ------------------------------------------------------------------------------
+-- 11. Table: upload_logs (Admin Inventory Excel/CSV Bulk Import Audit Logs)
+-- ------------------------------------------------------------------------------
+DROP TABLE IF EXISTS `upload_logs`;
+CREATE TABLE `upload_logs` (
+  `id` VARCHAR(36) NOT NULL,
+  `admin_user` VARCHAR(120) NOT NULL,
+  `category` VARCHAR(60) NOT NULL,
+  `filename` VARCHAR(255) NOT NULL,
+  `total_rows` INT NOT NULL DEFAULT 0,
+  `added_count` INT NOT NULL DEFAULT 0,
+  `updated_count` INT NOT NULL DEFAULT 0,
+  `skipped_count` INT NOT NULL DEFAULT 0,
+  `failed_count` INT NOT NULL DEFAULT 0,
+  `status` VARCHAR(40) NOT NULL DEFAULT 'Success',
+  `error_summary` TEXT DEFAULT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_upload_logs_category` (`category`),
+  KEY `idx_upload_logs_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;
+

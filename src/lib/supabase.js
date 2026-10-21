@@ -3,18 +3,39 @@ import { createClient } from '@supabase/supabase-js';
 // Keys configured via .env take priority over old browser localStorage cache
 export const getStoredCredentials = () => {
   try {
-    const envUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim();
-    const envKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
+    const metaEnv = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env : {};
+    const envUrl = (
+      metaEnv.VITE_SUPABASE_URL ||
+      metaEnv.NEXT_PUBLIC_SUPABASE_URL ||
+      metaEnv.SUPABASE_URL ||
+      ''
+    ).trim();
+    const envKey = (
+      metaEnv.VITE_SUPABASE_ANON_KEY ||
+      metaEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      metaEnv.SUPABASE_ANON_KEY ||
+      metaEnv.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      metaEnv.SUPABASE_PUBLISHABLE_KEY ||
+      ''
+    ).trim();
     if (envUrl && envKey) {
       return { url: envUrl, key: envKey };
     }
-    const localUrl = (localStorage.getItem('laxico_supabase_url') || '').trim();
-    const localKey = (localStorage.getItem('laxico_supabase_key') || '').trim();
+    const localUrl = (typeof localStorage !== 'undefined' ? localStorage.getItem('laxico_supabase_url') || '' : '').trim();
+    const localKey = (typeof localStorage !== 'undefined' ? localStorage.getItem('laxico_supabase_key') || '' : '').trim();
     return { url: localUrl || envUrl, key: localKey || envKey };
   } catch {
+    const metaEnv = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env : {};
     return {
-      url: (import.meta.env.VITE_SUPABASE_URL || '').trim(),
-      key: (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim()
+      url: (metaEnv.VITE_SUPABASE_URL || metaEnv.NEXT_PUBLIC_SUPABASE_URL || metaEnv.SUPABASE_URL || '').trim(),
+      key: (
+        metaEnv.VITE_SUPABASE_ANON_KEY ||
+        metaEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+        metaEnv.SUPABASE_ANON_KEY ||
+        metaEnv.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+        metaEnv.SUPABASE_PUBLISHABLE_KEY ||
+        ''
+      ).trim()
     };
   }
 };

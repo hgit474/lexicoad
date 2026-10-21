@@ -1348,3 +1348,20 @@ export const initialListings = [
   }
 ];
 
+export const initialUploadLogs = [
+  {
+    id: 'log_seed_001',
+    admin_user: 'admin',
+    category: 'Transit',
+    filename: 'transit_metro_inventory_seed.xlsx',
+    total_rows: 15,
+    added_count: 15,
+    updated_count: 0,
+    skipped_count: 0,
+    failed_count: 0,
+    status: 'Success',
+    error_summary: null,
+    created_at: new Date(Date.now() - 86400000 * 2).toISOString()
+  }
+];
+

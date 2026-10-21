@@ -8,6 +8,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    envPrefix: ['VITE_', 'NEXT_PUBLIC_', 'SUPABASE_'],
     server: {
       port,
       host: env.VITE_HOST ? (env.VITE_HOST === 'true' ? true : env.VITE_HOST) : false,

@@ -564,12 +564,15 @@ CREATE TABLE IF NOT EXISTS listings (
     reach NUMERIC,
     description TEXT,
     image_url TEXT,
+    upsert_key TEXT,
+    metadata JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_listings_category ON listings (category);
 CREATE INDEX IF NOT EXISTS idx_listings_subcategory ON listings (category, subcategory);
 CREATE INDEX IF NOT EXISTS idx_listings_price ON listings (price);
+CREATE INDEX IF NOT EXISTS idx_listings_upsert_key ON listings (upsert_key);
 
 ALTER TABLE listings ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public read listings" ON listings;
@@ -599,5 +602,33 @@ ON CONFLICT (id) DO UPDATE SET
   reach = EXCLUDED.reach,
   description = EXCLUDED.description,
   image_url = EXCLUDED.image_url;
+
+-- ==============================================================================
+-- 11. UPLOAD LOGS TABLE (Admin Inventory Excel/CSV Bulk Import Audit Logs)
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS upload_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    admin_user TEXT NOT NULL,
+    category TEXT NOT NULL,
+    filename TEXT NOT NULL,
+    total_rows INT NOT NULL DEFAULT 0,
+    added_count INT NOT NULL DEFAULT 0,
+    updated_count INT NOT NULL DEFAULT 0,
+    skipped_count INT NOT NULL DEFAULT 0,
+    failed_count INT NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'Success',
+    error_summary TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_upload_logs_category ON upload_logs (category);
+CREATE INDEX IF NOT EXISTS idx_upload_logs_created ON upload_logs (created_at DESC);
+
+ALTER TABLE upload_logs ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public read upload_logs" ON upload_logs;
+DROP POLICY IF EXISTS "Public write upload_logs" ON upload_logs;
+CREATE POLICY "Public read upload_logs" ON upload_logs FOR SELECT USING (true);
+CREATE POLICY "Public write upload_logs" ON upload_logs FOR ALL USING (true) WITH CHECK (true);
+
 
 

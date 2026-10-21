@@ -15,7 +15,8 @@ This directory contains the production-ready relational database schema and seed
 7. `campaigns`: Active, scheduled, and completed placements with proof photo URLs and budgets.
 8. `inquiries`: Inbound lead generation pipeline with status stages and follow-up tracking.
 9. `media`: Creative assets, showcase photos, and campaign verification proofs.
-10. `listings`: Admin-managed Excel-imported service inventory grouped by category and subcategory.
+10. `listings`: Admin-managed Excel/CSV inventory with category-specific metadata and upsert keys.
+11. `upload_logs`: Persistent audit history of all bulk inventory imports with success/failure counts.
 
 ## How to Import
 Run in terminal or import via MySQL Workbench / phpMyAdmin:
@@ -23,3 +24,4 @@ Run in terminal or import via MySQL Workbench / phpMyAdmin:
 ```bash
 mysql -u <username> -p <database_name> < mysql/schema.sql
 ```
+

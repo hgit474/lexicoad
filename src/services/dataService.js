@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase.js';
 import {
   initialSettings,
   initialServices,
@@ -8,8 +8,9 @@ import {
   initialInquiries,
   initialMedia,
   initialClients,
-  initialListings
-} from '../lib/initialData';
+  initialListings,
+  initialUploadLogs
+} from '../lib/initialData.js';
 
 const STORAGE_KEY = 'laxico_db_v4';
 
@@ -68,7 +69,8 @@ export const getLocalDB = () => {
         ['inquiries', initialInquiries],
         ['media', initialMedia],
         ['clients', initialClients],
-        ['listings', initialListings]
+        ['listings', initialListings],
+        ['upload_logs', initialUploadLogs]
       ];
 
       collections.forEach(([key, defaults]) => {
@@ -100,7 +102,8 @@ export const getLocalDB = () => {
     inquiries: [...initialInquiries],
     media: [...initialMedia],
     clients: [...initialClients],
-    listings: [...initialListings]
+    listings: [...initialListings],
+    upload_logs: [...initialUploadLogs]
   };
   saveLocalDB(defaultDB);
   return defaultDB;
@@ -207,7 +210,16 @@ export const exportMySQLDump = async () => {
   if (db.listings && db.listings.length) {
     sql += `-- Listings Table Data (Excel Imported)\n`;
     db.listings.forEach(l => {
-      sql += `INSERT INTO \`listings\` (\`id\`, \`category\`, \`subcategory\`, \`title\`, \`location\`, \`price\`, \`media_type\`, \`reach\`, \`description\`, \`image_url\`) VALUES (${escapeVal(l.id)}, ${escapeVal(l.category)}, ${escapeVal(l.subcategory)}, ${escapeVal(l.title)}, ${escapeVal(l.location)}, ${escapeVal(l.price)}, ${escapeVal(l.media_type)}, ${escapeVal(l.reach)}, ${escapeVal(l.description)}, ${escapeVal(l.image_url)}) ON DUPLICATE KEY UPDATE \`title\`=VALUES(\`title\`), \`price\`=VALUES(\`price\`);\n`;
+      sql += `INSERT INTO \`listings\` (\`id\`, \`category\`, \`subcategory\`, \`title\`, \`location\`, \`price\`, \`media_type\`, \`reach\`, \`description\`, \`image_url\`, \`upsert_key\`, \`metadata\`) VALUES (${escapeVal(l.id)}, ${escapeVal(l.category)}, ${escapeVal(l.subcategory)}, ${escapeVal(l.title)}, ${escapeVal(l.location)}, ${escapeVal(l.price)}, ${escapeVal(l.media_type)}, ${escapeVal(l.reach)}, ${escapeVal(l.description)}, ${escapeVal(l.image_url)}, ${escapeVal(l.upsert_key || null)}, ${escapeVal(l.metadata ? JSON.stringify(l.metadata) : null)}) ON DUPLICATE KEY UPDATE \`title\`=VALUES(\`title\`), \`price\`=VALUES(\`price\`), \`metadata\`=VALUES(\`metadata\`);\n`;
+    });
+    sql += `\n`;
+  }
+
+  // Upload Logs Table Data
+  if (db.upload_logs && db.upload_logs.length) {
+    sql += `-- Upload Logs Table Data\n`;
+    db.upload_logs.forEach(u => {
+      sql += `INSERT INTO \`upload_logs\` (\`id\`, \`admin_user\`, \`category\`, \`filename\`, \`total_rows\`, \`added_count\`, \`updated_count\`, \`skipped_count\`, \`failed_count\`, \`status\`, \`error_summary\`, \`created_at\`) VALUES (${escapeVal(u.id)}, ${escapeVal(u.admin_user)}, ${escapeVal(u.category)}, ${escapeVal(u.filename)}, ${escapeVal(u.total_rows)}, ${escapeVal(u.added_count)}, ${escapeVal(u.updated_count)}, ${escapeVal(u.skipped_count)}, ${escapeVal(u.failed_count)}, ${escapeVal(u.status)}, ${escapeVal(u.error_summary)}, ${escapeVal(u.created_at)});\n`;
     });
     sql += `\n`;
   }
@@ -286,7 +298,16 @@ export const exportPostgresDump = async () => {
   if (db.listings && db.listings.length) {
     sql += `-- 5. Listings Table Data (Excel Managed Inventory)\n`;
     db.listings.forEach(l => {
-      sql += `INSERT INTO listings (id, category, subcategory, title, location, price, media_type, reach, description, image_url) VALUES (${escapeVal(l.id)}, ${escapeVal(l.category)}, ${escapeVal(l.subcategory)}, ${escapeVal(l.title)}, ${escapeVal(l.location)}, ${escapeVal(l.price)}, ${escapeVal(l.media_type)}, ${escapeVal(l.reach)}, ${escapeVal(l.description)}, ${escapeVal(l.image_url)}) ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, price = EXCLUDED.price;\n`;
+      sql += `INSERT INTO listings (id, category, subcategory, title, location, price, media_type, reach, description, image_url, upsert_key, metadata) VALUES (${escapeVal(l.id)}, ${escapeVal(l.category)}, ${escapeVal(l.subcategory)}, ${escapeVal(l.title)}, ${escapeVal(l.location)}, ${escapeVal(l.price)}, ${escapeVal(l.media_type)}, ${escapeVal(l.reach)}, ${escapeVal(l.description)}, ${escapeVal(l.image_url)}, ${escapeVal(l.upsert_key || null)}, ${escapeVal(l.metadata || {})}) ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, price = EXCLUDED.price, metadata = EXCLUDED.metadata;\n`;
+    });
+    sql += `\n`;
+  }
+
+  // Upload Logs
+  if (db.upload_logs && db.upload_logs.length) {
+    sql += `-- 6. Upload Logs Table Data\n`;
+    db.upload_logs.forEach(u => {
+      sql += `INSERT INTO upload_logs (id, admin_user, category, filename, total_rows, added_count, updated_count, skipped_count, failed_count, status, error_summary, created_at) VALUES (${escapeVal(u.id)}, ${escapeVal(u.admin_user)}, ${escapeVal(u.category)}, ${escapeVal(u.filename)}, ${escapeVal(u.total_rows)}, ${escapeVal(u.added_count)}, ${escapeVal(u.updated_count)}, ${escapeVal(u.skipped_count)}, ${escapeVal(u.failed_count)}, ${escapeVal(u.status)}, ${escapeVal(u.error_summary)}, ${escapeVal(u.created_at)}) ON CONFLICT (id) DO NOTHING;\n`;
     });
     sql += `\n`;
   }
@@ -309,7 +330,8 @@ export const getAllData = async () => {
   const inquiries = await getInquiries();
   const media = await getMedia();
   const listings = await getListings();
-  return { settings, services, locations, service_locations, campaigns, inquiries, media, listings };
+  const upload_logs = await getUploadLogs();
+  return { settings, services, locations, service_locations, campaigns, inquiries, media, listings, upload_logs };
 };
 
 // ==========================================
@@ -1138,5 +1160,274 @@ export const rollbackToExampleListings = async () => {
     }
   }
   return demoListings;
+};
+
+// =========================================================================
+// UPLOAD LOGS & PER-CATEGORY BULK INVENTORY IMPORT
+// =========================================================================
+
+/**
+ * Retrieve upload logs ordered by newest first
+ */
+export const getUploadLogs = async () => {
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('upload_logs')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (!error && Array.isArray(data)) {
+        const db = getLocalDB();
+        db.upload_logs = data;
+        saveLocalDB(db);
+        return data;
+      }
+    } catch (err) {
+      console.warn('Supabase upload_logs read failed, using local storage:', err);
+    }
+  }
+  const db = getLocalDB();
+  return (db.upload_logs || []).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+};
+
+/**
+ * Persists an upload audit log entry across Supabase & LocalStorage
+ */
+export const saveUploadLog = async (logItem) => {
+  const db = getLocalDB();
+  const entry = {
+    ...logItem,
+    id: logItem.id || generateListingUUID(),
+    admin_user: String(logItem.admin_user || 'admin'),
+    category: String(logItem.category || 'Transit'),
+    filename: String(logItem.filename || 'upload.xlsx'),
+    total_rows: Number(logItem.total_rows) || 0,
+    added_count: Number(logItem.added_count) || 0,
+    updated_count: Number(logItem.updated_count) || 0,
+    skipped_count: Number(logItem.skipped_count) || 0,
+    failed_count: Number(logItem.failed_count) || 0,
+    status: logItem.status || (logItem.failed_count > 0 ? (logItem.added_count > 0 || logItem.updated_count > 0 ? 'Partial' : 'Failed') : 'Success'),
+    error_summary: logItem.error_summary || null,
+    created_at: logItem.created_at || new Date().toISOString()
+  };
+
+  db.upload_logs = [entry, ...(db.upload_logs || [])];
+  saveLocalDB(db);
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      await supabase.from('upload_logs').insert([entry]);
+    } catch (err) {
+      console.warn('Supabase saveUploadLog failed:', err);
+    }
+  }
+
+  return entry;
+};
+
+/**
+ * Clear all upload audit logs
+ */
+export const clearUploadLogs = async () => {
+  const db = getLocalDB();
+  db.upload_logs = [];
+  saveLocalDB(db);
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      await supabase.from('upload_logs').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    } catch (err) {
+      console.warn('Supabase clearUploadLogs failed:', err);
+    }
+  }
+  return true;
+};
+
+/**
+ * Bulk Upserts Listings by Category in responsive 500-row chunks.
+ * Performs upsert matching against existing records, keeps UI responsive,
+ * and records an upload audit log.
+ */
+export const bulkUpsertListingsByCategory = async (
+  category,
+  rows = [],
+  options = {},
+  onProgress = () => {}
+) => {
+  const {
+    adminUser = 'admin',
+    filename = 'upload.xlsx',
+    abortOnError = false,
+    errorCount = 0,
+    batchSize = 500
+  } = options;
+
+  if (abortOnError && errorCount > 0) {
+    const errorMsg = `Import aborted: ${errorCount} invalid rows detected and abort-on-error toggle is active.`;
+    const logEntry = await saveUploadLog({
+      admin_user: adminUser,
+      category,
+      filename,
+      total_rows: rows.length + errorCount,
+      added_count: 0,
+      updated_count: 0,
+      skipped_count: rows.length,
+      failed_count: errorCount,
+      status: 'Aborted',
+      error_summary: errorMsg
+    });
+    return {
+      success: false,
+      aborted: true,
+      error: errorMsg,
+      added: 0,
+      updated: 0,
+      skipped: rows.length,
+      failed: errorCount,
+      log: logEntry
+    };
+  }
+
+  const db = getLocalDB();
+  const existingListings = [...(db.listings || [])];
+
+  // Quick lookup map for existing listings by upsert_key or composite signature
+  const existingMap = new Map();
+  existingListings.forEach((item, idx) => {
+    if (item.upsert_key) {
+      existingMap.set(String(item.upsert_key).toLowerCase(), idx);
+    }
+    const compKey = `${item.category || ''}:${item.title || ''}:${item.location || ''}`
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '');
+    if (compKey) {
+      existingMap.set(compKey, idx);
+    }
+  });
+
+  const total = rows.length;
+  let added = 0;
+  let updated = 0;
+  let skipped = 0;
+  const totalBatches = Math.ceil(total / batchSize) || 1;
+
+  for (let b = 0; b < totalBatches; b++) {
+    const startIdx = b * batchSize;
+    const endIdx = Math.min(startIdx + batchSize, total);
+    const chunk = rows.slice(startIdx, endIdx);
+
+    const batchToUpsertSupabase = [];
+
+    chunk.forEach(row => {
+      const uKey = String(row.upsert_key || '').toLowerCase();
+      const compKey = `${row.category || ''}:${row.title || ''}:${row.location || ''}`
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+
+      const matchIdx = (uKey && existingMap.has(uKey))
+        ? existingMap.get(uKey)
+        : (compKey && existingMap.has(compKey) ? existingMap.get(compKey) : -1);
+
+      if (matchIdx >= 0 && existingListings[matchIdx]) {
+        // Update existing record with refreshed pricing, reach, specs
+        const existing = existingListings[matchIdx];
+        const updatedItem = {
+          ...existing,
+          price: row.price,
+          reach: row.reach !== null && row.reach !== undefined ? row.reach : existing.reach,
+          description: row.description || existing.description,
+          image_url: row.image_url || existing.image_url,
+          media_type: row.media_type || existing.media_type,
+          location: row.location || existing.location,
+          upsert_key: row.upsert_key || existing.upsert_key,
+          metadata: { ...(existing.metadata || {}), ...(row.metadata || {}) }
+        };
+        existingListings[matchIdx] = updatedItem;
+        batchToUpsertSupabase.push(updatedItem);
+        updated++;
+      } else {
+        // Insert brand new listing
+        const newItem = {
+          id: row.id || generateListingUUID(),
+          category: String(row.category || category).trim(),
+          subcategory: String(row.subcategory || 'General').trim(),
+          title: String(row.title || 'Untitled').trim(),
+          location: String(row.location || 'Pan India').trim(),
+          price: Number(row.price) || 0,
+          media_type: String(row.media_type || 'Standard').trim(),
+          reach: row.reach !== undefined && row.reach !== null ? Number(row.reach) : null,
+          description: row.description || null,
+          image_url: row.image_url || null,
+          upsert_key: row.upsert_key || null,
+          metadata: row.metadata || {},
+          created_at: new Date().toISOString()
+        };
+        existingListings.unshift(newItem);
+        if (uKey) existingMap.set(uKey, 0);
+        if (compKey) existingMap.set(compKey, 0);
+        batchToUpsertSupabase.push(newItem);
+        added++;
+      }
+    });
+
+    // Save batch to LocalStorage
+    db.listings = existingListings;
+    saveLocalDB(db);
+
+    // Save batch to Supabase if configured
+    if (isSupabaseConfigured() && supabase && batchToUpsertSupabase.length > 0) {
+      try {
+        const { error } = await supabase.from('listings').upsert(batchToUpsertSupabase);
+        if (error) {
+          console.warn(`Supabase upsert batch ${b + 1} error:`, error);
+        }
+      } catch (err) {
+        console.warn(`Supabase upsert batch ${b + 1} exception:`, err);
+      }
+    }
+
+    const processed = endIdx;
+    const percent = Math.round((processed / total) * 100);
+    onProgress({
+      processed,
+      total,
+      added,
+      updated,
+      skipped,
+      failed: errorCount,
+      percent,
+      currentBatch: b + 1,
+      totalBatches
+    });
+
+    // Yield control to UI thread for seamless frame renders
+    if (totalBatches > 1) {
+      await new Promise(r => setTimeout(r, 20));
+    }
+  }
+
+  // Create audit log entry
+  const logEntry = await saveUploadLog({
+    admin_user: adminUser,
+    category,
+    filename,
+    total_rows: total + errorCount,
+    added_count: added,
+    updated_count: updated,
+    skipped_count: skipped,
+    failed_count: errorCount,
+    status: errorCount > 0 ? (added > 0 || updated > 0 ? 'Partial' : 'Failed') : 'Success',
+    error_summary: errorCount > 0 ? `${errorCount} invalid rows skipped or rejected during validation` : null
+  });
+
+  return {
+    success: true,
+    added,
+    updated,
+    skipped,
+    failed: errorCount,
+    total: total + errorCount,
+    log: logEntry
+  };
 };
 

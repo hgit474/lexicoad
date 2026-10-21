@@ -15,10 +15,12 @@ This directory contains the production-ready PostgreSQL 14+ schema and seed data
 7. `campaigns`: Active, scheduled, and completed placements with proof photo URLs and budgets.
 8. `inquiries`: Inbound lead generation pipeline with status stages and follow-up tracking.
 9. `media`: Creative assets, showcase photos, and campaign verification proofs.
-10. `listings`: Admin-managed Excel-imported service inventory grouped by category and subcategory.
+10. `listings`: Admin-managed Excel/CSV inventory with category-specific metadata and upsert keys.
+11. `upload_logs`: Persistent audit history of all bulk inventory imports with success/failure counts.
 
 ## How to Import
 1. Open your Supabase dashboard at [supabase.com](https://supabase.com).
 2. Go to the **SQL Editor**.
 3. Paste the contents of `supabase/schema.sql` and click **Run**.
 4. Copy your Project URL and anon public key into `.env` or configure them dynamically in **Admin Control Tower → CMS & Settings**.
+

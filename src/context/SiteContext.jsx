@@ -217,10 +217,10 @@ export const SiteProvider = ({ children }) => {
       }
     }
 
-    // 2. Fallback to ENV-configured Admin credentials
+    // 2. ENV-configured Admin credentials (VITE_ADMIN_CREDS)
     const adminPairs = [];
 
-    // Format 1: VITE_ADMIN_CREDS="user1:pass1,user2:pass2,user3:pass3"
+    // Format: VITE_ADMIN_CREDS="user1:pass1,user2:pass2,user3:pass3"
     const envCredsStr = import.meta.env.VITE_ADMIN_CREDS || '';
     if (envCredsStr) {
       envCredsStr.split(',').forEach(pair => {
@@ -240,16 +240,22 @@ export const SiteProvider = ({ children }) => {
     const envUsers = envUsersStr.split(',').map(u => u.trim().toLowerCase()).filter(Boolean);
     const envPasses = envPassStr.split(',').map(p => p.trim()).filter(Boolean);
 
+    // If paired list provided
+    if (envUsers.length > 0 && envPasses.length > 0 && envUsers.length === envPasses.length) {
+      envUsers.forEach((u, i) => {
+        adminPairs.push({ user: u, pass: envPasses[i] });
+      });
+    }
+
     // If no credentials configured at all, alert user
-    if (adminPairs.length === 0 && envUsers.length === 0 && !isSupabaseConfigured()) {
-      showToast('Admin credentials not configured. Please set VITE_ADMIN_USER and VITE_ADMIN_PASS in your .env file or configure Supabase.', 'error');
+    if (adminPairs.length === 0 && !isSupabaseConfigured()) {
+      showToast('Admin credentials not configured. Please set VITE_ADMIN_USER and VITE_ADMIN_PASS or configure Supabase.', 'error');
       return false;
     }
 
     const isDirectMatch = adminPairs.some(a => a.user === cleanId && a.pass === cleanPass);
-    const isListMatch = envUsers.length > 0 && envPasses.length > 0 && envUsers.includes(cleanId) && envPasses.includes(cleanPass);
 
-    if (isDirectMatch || isListMatch) {
+    if (isDirectMatch) {
       const newSession = {
         user: cleanId,
         token: `session_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
