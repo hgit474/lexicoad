@@ -1,15 +1,20 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Keys can be configured in Admin UI (stored in localStorage) or via .env
+// Keys configured via .env take priority over old browser localStorage cache
 export const getStoredCredentials = () => {
   try {
-    const url = localStorage.getItem('laxico_supabase_url') || import.meta.env.VITE_SUPABASE_URL || '';
-    const key = localStorage.getItem('laxico_supabase_key') || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-    return { url: url.trim(), key: key.trim() };
+    const envUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim();
+    const envKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
+    if (envUrl && envKey) {
+      return { url: envUrl, key: envKey };
+    }
+    const localUrl = (localStorage.getItem('laxico_supabase_url') || '').trim();
+    const localKey = (localStorage.getItem('laxico_supabase_key') || '').trim();
+    return { url: localUrl || envUrl, key: localKey || envKey };
   } catch {
     return {
-      url: import.meta.env.VITE_SUPABASE_URL || '',
-      key: import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+      url: (import.meta.env.VITE_SUPABASE_URL || '').trim(),
+      key: (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim()
     };
   }
 };
