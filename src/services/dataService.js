@@ -45,18 +45,22 @@ export const uploadImage = async (file, folder = 'general') => {
   }
 
   if (isSupabaseConfigured() && supabase) {
-    const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-    const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${extension}`;
-    const { error } = await supabase.storage.from('site-media').upload(path, file, {
-      cacheControl: '3600',
-      upsert: false,
-      contentType: file.type
-    });
-    if (error) {
-      throw new Error(`Storage upload failed: ${error.message}`);
+    try {
+      const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${extension}`;
+      const { error } = await supabase.storage.from('site-media').upload(path, file, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: file.type
+      });
+      if (!error) {
+        const { data } = supabase.storage.from('site-media').getPublicUrl(path);
+        if (data?.publicUrl) return data.publicUrl;
+      }
+      console.warn('Supabase storage upload failed, falling back to local encoding:', error);
+    } catch (err) {
+      console.warn('Supabase storage exception, falling back to local encoding:', err);
     }
-    const { data } = supabase.storage.from('site-media').getPublicUrl(path);
-    return data.publicUrl;
   }
 
   return new Promise((resolve, reject) => {
