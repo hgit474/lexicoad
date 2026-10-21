@@ -222,41 +222,41 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full max-w-full overflow-hidden">
       {/* KPI Cards */}
-      <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 w-full">
         {kpis.map((kpi, idx) => (
-          <div key={idx} className="kpi-card" style={{ background: kpi.bg }}>
+          <div key={idx} className="kpi-card p-4 sm:p-5 overflow-hidden" style={{ background: kpi.bg }}>
             <div className="absolute -right-6 -bottom-6 text-[90px] opacity-15 pointer-events-none">
               <i className={`fa-solid ${kpi.icon}`}></i>
             </div>
             <div className="text-xs font-extrabold tracking-widest opacity-80 uppercase">
               {kpi.title}
             </div>
-            <div className="font-grotesk font-bold text-4xl mt-1">{kpi.value}</div>
+            <div className="font-grotesk font-bold text-3xl sm:text-4xl mt-1">{kpi.value}</div>
             <div className="text-xs font-bold opacity-80 mt-1">{kpi.sub}</div>
           </div>
         ))}
       </div>
 
       {/* Row 1 Charts: Revenue & Occupancy */}
-      <div className="grid lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 bg-[#0c1747] border border-white/10 rounded-3xl p-6 shadow-xl">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full">
+        <div className="lg:col-span-2 bg-[#0c1747] border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl w-full min-w-0 overflow-hidden">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-white font-grotesk font-bold text-lg">
+            <h3 className="text-white font-grotesk font-bold text-base sm:text-lg">
               Revenue Trend (last 8 months)
             </h3>
-            <span className="badge bg-green-500/15 text-green-300 border border-green-500/30">
+            <span className="badge bg-green-500/15 text-green-300 border border-green-500/30 text-[11px] sm:text-xs">
               ▲ +24.6%
             </span>
           </div>
-          <div className="h-[260px] relative">
+          <div className="h-[220px] sm:h-[260px] relative w-full">
             <canvas ref={revCanvasRef}></canvas>
           </div>
         </div>
 
-        <div className="bg-[#0c1747] border border-white/10 rounded-3xl p-6 shadow-xl flex flex-col justify-between">
-          <h3 className="text-white font-grotesk font-bold text-lg mb-2">
+        <div className="bg-[#0c1747] border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl flex flex-col justify-between w-full min-w-0 overflow-hidden">
+          <h3 className="text-white font-grotesk font-bold text-base sm:text-lg mb-2">
             Location Occupancy
           </h3>
           <div className="h-[200px] flex items-center justify-center relative">
@@ -286,19 +286,19 @@ export default function AdminDashboard() {
       </div>
 
       {/* Row 2: Service Performance & Latest Inquiries */}
-      <div className="grid lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 bg-[#0c1747] border border-white/10 rounded-3xl p-6 shadow-xl">
-          <h3 className="text-white font-grotesk font-bold text-lg mb-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full">
+        <div className="lg:col-span-2 bg-[#0c1747] border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl w-full min-w-0 overflow-hidden">
+          <h3 className="text-white font-grotesk font-bold text-base sm:text-lg mb-4">
             Service-wise Performance (active campaigns)
           </h3>
-          <div className="h-[260px] relative">
+          <div className="h-[220px] sm:h-[260px] relative w-full">
             <canvas ref={perfCanvasRef}></canvas>
           </div>
         </div>
 
-        <div className="bg-[#0c1747] border border-white/10 rounded-3xl p-6 shadow-xl flex flex-col">
+        <div className="bg-[#0c1747] border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl flex flex-col w-full min-w-0 overflow-hidden">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-white font-grotesk font-bold text-lg">Latest Inquiries</h3>
+            <h3 className="text-white font-grotesk font-bold text-base sm:text-lg">Latest Inquiries</h3>
             <Link to="/admin/inquiries" className="text-xs font-bold text-blue-300 hover:text-white transition">
               View all →
             </Link>

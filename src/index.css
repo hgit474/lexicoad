@@ -3,14 +3,21 @@
 @tailwind utilities;
 
 @layer base {
+  html, body, #root {
+    max-width: 100vw;
+    overflow-x: clip;
+  }
   * {
     font-family: 'Plus Jakarta Sans', sans-serif;
     scroll-behavior: smooth;
+    box-sizing: border-box;
   }
   body {
     background-color: #f5f8f8;
     color: #052f42;
     overflow-x: hidden;
+    width: 100%;
+    position: relative;
   }
 }
 
@@ -123,6 +130,11 @@
 
 .hero-phone {
   transform: perspective(1200px) rotateY(-10deg) rotateX(6deg);
+}
+@media (max-width: 768px) {
+  .hero-phone {
+    transform: none !important;
+  }
 }
 
 .nav-link {

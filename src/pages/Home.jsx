@@ -155,14 +155,14 @@ export default function Home() {
   return (
     <div>
       {/* ================= HERO ================= */}
-      <div className="relative grad-bg overflow-hidden">
+      <div className="relative grad-bg overflow-hidden w-full max-w-full">
         <div className="absolute inset-0 hero-grid"></div>
         <div className="absolute -top-24 -left-24 w-[420px] h-[420px] bg-laxRed-500/30 blur-[110px] rounded-full"></div>
         <div className="absolute top-20 right-0 w-[520px] h-[520px] bg-blue-400/30 blur-[120px] rounded-full"></div>
 
-        <div className="relative max-w-7xl mx-auto px-4 pt-6 pb-8 lg:pt-10 lg:pb-12 grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          <div>
-            <h1 className="font-grotesk font-bold text-white leading-[1.02] text-[2.6rem] sm:text-6xl">
+        <div className="relative max-w-7xl mx-auto px-4 pt-6 pb-8 lg:pt-10 lg:pb-12 grid lg:grid-cols-2 gap-8 lg:gap-12 items-center w-full">
+          <div className="min-w-0">
+            <h1 className="font-grotesk font-bold text-white leading-[1.05] text-[2.2rem] sm:text-6xl break-words">
               Your Brand.<br />
               Every <span className="relative inline-block">
                 <span className="absolute left-0 -bottom-1 w-full h-3 bg-laxRed-500/80 -z-0 rounded"></span>
@@ -193,49 +193,49 @@ export default function Home() {
             </div>
 
             {/* Live Counters */}
-            <div className="grid grid-cols-3 gap-3 mt-10 max-w-lg">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-8 sm:mt-10 max-w-lg w-full">
               <div
-                className="rounded-2xl p-4 border border-white/15"
+                className="rounded-2xl p-2.5 sm:p-4 border border-white/15 min-w-0 text-center sm:text-left"
                 style={{ background: 'rgba(255,255,255,.08)' }}
               >
-                <div className="text-white font-grotesk font-bold text-2xl">
+                <div className="text-white font-grotesk font-bold text-lg sm:text-2xl truncate">
                   {counts.campaigns.toLocaleString('en-IN')}+
                 </div>
-                <div className="text-blue-200 text-xs font-bold tracking-wide">
-                  CAMPAIGNS LIVE
+                <div className="text-blue-200 text-[9px] sm:text-xs font-bold tracking-tight sm:tracking-wide">
+                  CAMPAIGNS
                 </div>
               </div>
 
               <div
-                className="rounded-2xl p-4 border border-white/15"
+                className="rounded-2xl p-2.5 sm:p-4 border border-white/15 min-w-0 text-center sm:text-left"
                 style={{ background: 'rgba(255,255,255,.08)' }}
               >
-                <div className="text-white font-grotesk font-bold text-2xl">
+                <div className="text-white font-grotesk font-bold text-lg sm:text-2xl truncate">
                   {counts.locations.toLocaleString('en-IN')}
                 </div>
-                <div className="text-blue-200 text-xs font-bold tracking-wide">
-                  PRIME LOCATIONS
+                <div className="text-blue-200 text-[9px] sm:text-xs font-bold tracking-tight sm:tracking-wide">
+                  LOCATIONS
                 </div>
               </div>
 
               <div
-                className="rounded-2xl p-4 border border-white/15"
+                className="rounded-2xl p-2.5 sm:p-4 border border-white/15 min-w-0 text-center sm:text-left"
                 style={{ background: 'rgba(255,255,255,.08)' }}
               >
-                <div className="text-white font-grotesk font-bold text-2xl">
+                <div className="text-white font-grotesk font-bold text-lg sm:text-2xl truncate">
                   {counts.retention}%
                 </div>
-                <div className="text-blue-200 text-xs font-bold tracking-wide">
-                  CLIENT RETENTION
+                <div className="text-blue-200 text-[9px] sm:text-xs font-bold tracking-tight sm:tracking-wide">
+                  RETENTION
                 </div>
               </div>
             </div>
           </div>
 
           {/* Billboard Frame Visual */}
-          <div className="relative hero-phone">
-            <div className="billboard-frame led-dot p-2 relative">
-              <div className="rounded-xl overflow-hidden relative h-[340px] sm:h-[400px]">
+          <div className="relative hero-phone w-full max-w-full overflow-hidden sm:overflow-visible">
+            <div className="billboard-frame led-dot p-2 relative w-full">
+              <div className="rounded-xl overflow-hidden relative h-[280px] sm:h-[400px]">
                 <img
                   src={heroSlides[heroIdx % heroSlides.length].img}
                   alt={heroSlides[heroIdx % heroSlides.length].brand}
@@ -294,8 +294,8 @@ export default function Home() {
         </div>
 
         {/* Marquee Track */}
-        <div className="relative border-t border-white/10" style={{ background: 'rgba(0,0,0,.22)' }}>
-          <div className="max-w-7xl mx-auto px-4 py-2.5 overflow-hidden">
+        <div className="relative border-t border-white/10 w-full max-w-full overflow-hidden" style={{ background: 'rgba(0,0,0,.22)' }}>
+          <div className="max-w-7xl mx-auto px-4 py-2.5 overflow-hidden w-full">
             <div className="marquee-track text-white/80 text-sm font-extrabold tracking-[.22em]">
               {[...Array(2)].flatMap((_, rep) =>
                 featuredBrands.map((brand, bIdx) => (
@@ -557,19 +557,19 @@ export default function Home() {
       </div>
 
       {/* ================= WHY LAXICO ================= */}
-      <div className="max-w-7xl mx-auto px-4 pb-8 sm:pb-10">
-        <div className="rounded-[28px] overflow-hidden grid lg:grid-cols-2 items-stretch grad-bg-2 relative">
+      <div className="max-w-7xl mx-auto px-4 pb-8 sm:pb-10 w-full max-w-full overflow-hidden">
+        <div className="rounded-[28px] overflow-hidden grid grid-cols-1 lg:grid-cols-2 items-stretch grad-bg-2 relative w-full">
           <div className="absolute inset-0 hero-grid"></div>
 
-          <div className="relative p-6 sm:p-10 lg:p-12 flex flex-col justify-between h-full">
+          <div className="relative p-5 sm:p-10 lg:p-12 flex flex-col justify-between h-full min-w-0 w-full">
             <div>
               <span className="section-label text-red-300">Why Laxico</span>
-              <h2 className="font-grotesk font-bold text-white text-3xl sm:text-4xl mt-2">
+              <h2 className="font-grotesk font-bold text-white text-2xl sm:text-4xl mt-2 leading-tight">
                 The agency brands call when outdoor must perform.
               </h2>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4 mt-8 flex-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-6 sm:mt-8 flex-1 min-w-0 w-full">
               {[
                 { icon: 'fa-certificate', title: 'Govt.-Approved Sites', desc: 'MCD, DMRC, AAI & railway approvals on every hoarding. Zero takedown risk.' },
                 { icon: 'fa-camera', title: 'Photo Proof of Display', desc: 'Geo-tagged day & night photos for every site, every cycle.' },
@@ -578,10 +578,10 @@ export default function Home() {
               ].map((item, idx) => (
                 <div
                   key={idx}
-                  className="rounded-2xl p-5 border border-white/15 h-full flex flex-col justify-between transition hover:border-white/30"
+                  className="rounded-2xl p-4 sm:p-5 border border-white/15 h-full flex flex-col justify-between transition hover:border-white/30 min-w-0"
                   style={{ background: 'rgba(255,255,255,.07)' }}
                 >
-                  <div className="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center text-white text-lg">
+                  <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white/15 flex items-center justify-center text-white text-base sm:text-lg">
                     <i className={`fa-solid ${item.icon}`}></i>
                   </div>
                   <div className="mt-3">
@@ -594,11 +594,11 @@ export default function Home() {
           </div>
 
           <div
-            className="relative p-6 sm:p-10 lg:p-12 flex flex-col justify-between h-full border-t lg:border-t-0 lg:border-l border-white/10"
+            className="relative p-5 sm:p-10 lg:p-12 flex flex-col justify-between h-full border-t lg:border-t-0 lg:border-l border-white/10 min-w-0 w-full overflow-hidden"
             style={{ background: 'rgba(255,255,255,.06)' }}
           >
-            <div className="glass rounded-3xl p-6 sm:p-7 shadow-xl flex-1 flex flex-col justify-between">
-              <div>
+            <div className="glass rounded-3xl p-5 sm:p-7 shadow-xl flex-1 flex flex-col justify-between min-w-0 w-full overflow-hidden">
+              <div className="w-full min-w-0">
                 <div className="flex items-center gap-1 text-amber-400 text-sm">
                   <i className="fa-solid fa-star"></i>
                   <i className="fa-solid fa-star"></i>
@@ -608,23 +608,23 @@ export default function Home() {
                   <span className="text-slate-600 font-bold ml-2">4.9 / 5 • 320 reviews</span>
                 </div>
 
-                <div className="overflow-hidden mt-4 rounded-2xl relative min-h-[140px]">
+                <div className="overflow-hidden mt-4 rounded-2xl relative min-h-[140px] w-full max-w-full">
                   <div
-                    className="flex transition-transform duration-500 ease-out"
+                    className="flex transition-transform duration-500 ease-out w-full"
                     style={{ transform: `translateX(-${testiIdx * 100}%)` }}
                   >
                     {testimonials.map((t, idx) => (
-                      <div key={idx} className="min-w-full pr-1">
-                        <p className="text-slate-600 font-medium text-[15px] leading-relaxed">
+                      <div key={idx} className="w-full shrink-0 flex-shrink-0 min-w-full pr-1">
+                        <p className="text-slate-600 font-medium text-sm sm:text-[15px] leading-relaxed break-words">
                           “{t.quote}”
                         </p>
                         <div className="flex items-center gap-3 mt-4">
-                          <div className="w-11 h-11 rounded-full grad-bg flex items-center justify-center text-white font-extrabold text-sm shadow">
+                          <div className="w-11 h-11 rounded-full grad-bg flex items-center justify-center text-white font-extrabold text-sm shadow shrink-0">
                             {t.initials}
                           </div>
-                          <div>
-                            <div className="font-extrabold text-sm text-laxBlue-950">{t.name}</div>
-                            <div className="text-xs text-slate-500 font-semibold">{t.role}</div>
+                          <div className="min-w-0">
+                            <div className="font-extrabold text-sm text-laxBlue-950 truncate">{t.name}</div>
+                            <div className="text-xs text-slate-500 font-semibold truncate">{t.role}</div>
                           </div>
                         </div>
                       </div>
@@ -633,7 +633,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100 w-full">
                 <div className="flex gap-2">
                   {testimonials.map((_, i) => (
                     <button
@@ -673,7 +673,7 @@ export default function Home() {
 
             <Link
               to="/contact"
-              className="mt-5 grad-btn shine text-white font-extrabold py-4 rounded-2xl text-[15px] text-center shadow-lg block transition hover:scale-[1.01]"
+              className="mt-5 grad-btn shine text-white font-extrabold py-4 rounded-2xl text-[15px] text-center shadow-lg block transition hover:scale-[1.01] w-full"
             >
               Get My Free Media Plan <i className="fa-solid fa-paper-plane ml-2"></i>
             </Link>

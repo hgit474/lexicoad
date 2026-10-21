@@ -131,8 +131,8 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-[#040A29] text-white flex flex-col font-jakarta">
-      <div className="flex flex-1">
+    <div className="min-h-screen bg-[#040A29] text-white flex flex-col font-jakarta w-full max-w-full overflow-x-hidden">
+      <div className="flex flex-1 w-full max-w-full min-w-0">
         {/* Sidebar */}
         <aside
           id="adminSidebar"
@@ -299,12 +299,12 @@ export default function AdminLayout() {
         )}
 
         {/* Main Content Area */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 w-full max-w-full overflow-x-hidden">
           {/* Topbar */}
-          <header className="sticky top-0 z-30 bg-[#040A29]/95 backdrop-blur border-b border-white/10 px-3.5 sm:px-8 py-3.5 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
+          <header className="sticky top-0 z-30 bg-[#040A29]/95 backdrop-blur border-b border-white/10 px-3 sm:px-6 py-3 flex items-center justify-between gap-2 sm:gap-3 w-full max-w-full">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <button
-                className="lg:hidden w-10 h-10 rounded-xl bg-white/10 text-white flex items-center justify-center shrink-0"
+                className="lg:hidden w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center shrink-0 transition"
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 aria-label="Toggle navigation menu"
               >
@@ -312,44 +312,44 @@ export default function AdminLayout() {
               </button>
 
               <div className="min-w-0">
-                <h1 className="text-white font-grotesk font-bold text-base sm:text-xl leading-tight truncate">
+                <h1 className="text-white font-grotesk font-bold text-sm sm:text-xl leading-tight truncate">
                   {pageMeta.title}
                 </h1>
-                <p className="text-slate-400 text-[11px] sm:text-xs font-semibold mt-0.5 truncate hidden sm:block">
+                <p className="text-slate-400 text-[11px] sm:text-xs font-semibold mt-0.5 truncate hidden md:block">
                   {pageMeta.sub}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               <button
                 onClick={handleExportMySQL}
-                className="inline-flex items-center gap-1.5 bg-laxBlue-600/30 hover:bg-laxBlue-600/50 text-blue-200 border border-blue-500/30 text-xs font-bold px-3 py-2 rounded-xl transition"
+                className="hidden sm:inline-flex items-center gap-1.5 bg-laxBlue-600/30 hover:bg-laxBlue-600/50 text-blue-200 border border-blue-500/30 text-xs font-bold px-3 py-2 rounded-xl transition"
                 title="Download MySQL Dump"
               >
                 <i className="fa-solid fa-database text-[11px]"></i>
-                <span className="hidden sm:inline">Export DB</span>
+                <span>Export DB</span>
               </button>
 
               <button
                 onClick={handleResetDemo}
-                className="inline-flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-bold px-3 py-2 rounded-xl transition"
+                className="hidden sm:inline-flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-bold px-3 py-2 rounded-xl transition"
                 title="Restore default demo data"
               >
                 <i className="fa-solid fa-rotate-left text-[11px]"></i>
-                <span className="hidden sm:inline">Reset Demo</span>
+                <span>Reset Demo</span>
               </button>
 
               <button
                 onClick={handleContextAction}
-                className="grad-btn text-white text-xs font-extrabold px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl flex items-center gap-1.5 shadow"
+                className="grad-btn text-white text-xs font-extrabold px-3 py-2 sm:px-4 sm:py-2 rounded-xl flex items-center gap-1.5 shadow"
               >
                 <span>{contextButton.label}</span>
               </button>
             </div>
           </header>
 
-          <main className="p-3.5 sm:p-6 lg:p-8">
+          <main className="p-3 sm:p-6 lg:p-8 w-full max-w-full min-w-0 overflow-x-hidden">
             <Outlet context={{ refreshCounts: loadCounts }} />
           </main>
         </div>

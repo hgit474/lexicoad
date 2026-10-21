@@ -203,9 +203,9 @@ export default function AdminSettings() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6 max-w-5xl w-full max-w-full overflow-hidden">
       {/* 1. BRAND & IDENTITY CMS */}
-      <div className="bg-[#0c1747] border border-white/10 rounded-3xl p-6 sm:p-8 shadow-xl">
+      <div className="bg-[#0c1747] border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-xl w-full max-w-full overflow-hidden">
         <div className="flex items-center gap-3 mb-6 pb-4 border-b border-white/10">
           <div className="w-10 h-10 rounded-xl grad-btn flex items-center justify-center text-white text-lg shadow">
             <i className="fa-solid fa-paintbrush"></i>
@@ -752,10 +752,10 @@ export default function AdminSettings() {
       </div>
 
       {/* 2. SUPABASE BACKEND CLOUD CONNECTION */}
-      <div className="bg-[#0c1747] border border-white/10 rounded-3xl p-6 sm:p-8 shadow-xl">
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+      <div className="bg-[#0c1747] border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-xl w-full max-w-full overflow-hidden">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-600/30 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-lg shadow">
+            <div className="w-10 h-10 rounded-xl bg-emerald-600/30 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-lg shadow shrink-0">
               <i className="fa-solid fa-cloud"></i>
             </div>
             <div>
@@ -773,7 +773,7 @@ export default function AdminSettings() {
               sbConfig.isConfigured
                 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                 : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-            }`}
+            } shrink-0`}
           >
             <span
               className="w-2 h-2 rounded-full mr-1"

@@ -7,10 +7,10 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-[100] glass border-b border-blue-100/70">
-      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-[100] glass border-b border-blue-100/70 w-full max-w-full">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3 sm:gap-4 w-full">
         {/* Brand Logo */}
-        <Link to="/" className="flex items-center gap-3 cursor-pointer group">
+        <Link to="/" className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group min-w-0">
           {settings.logo_url ? (
             <img
               src={settings.logo_url}

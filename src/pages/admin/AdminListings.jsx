@@ -11,6 +11,7 @@ import {
   uploadImage
 } from '../../services/dataService';
 import { downloadListingsTemplate } from '../../lib/excelTemplate';
+import AdminPagination from '../../components/admin/AdminPagination';
 
 export default function AdminListings() {
   const { showToast } = useSite();
@@ -24,6 +25,10 @@ export default function AdminListings() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedSubcategory, setSelectedSubcategory] = useState('All');
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
@@ -111,6 +116,19 @@ export default function AdminListings() {
       return true;
     });
   }, [listings, selectedCategory, selectedSubcategory, searchQuery]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, selectedSubcategory, searchQuery, itemsPerPage]);
+
+  // Paginated Listings Slice
+  const paginatedListings = useMemo(() => {
+    if (itemsPerPage === 'all') return filteredListings;
+    const size = Number(itemsPerPage);
+    const start = (currentPage - 1) * size;
+    return filteredListings.slice(start, start + size);
+  }, [filteredListings, currentPage, itemsPerPage]);
 
   const openAddModal = () => {
     setEditingItem(null);
@@ -284,9 +302,9 @@ export default function AdminListings() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 w-full max-w-full overflow-hidden">
       {/* Header Bar */}
-      <div className="bg-[#071343]/80 backdrop-blur border border-white/10 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-[#071343]/80 backdrop-blur border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4 w-full max-w-full overflow-hidden">
         <div>
           <div className="inline-flex items-center gap-2 bg-laxBlue-500/15 border border-laxBlue-400/30 text-laxBlue-300 text-xs font-bold px-3 py-1 rounded-full mb-2">
             <i className="fa-solid fa-layer-group"></i> SUPABASE / POSTGRES TABLE `listings`
@@ -299,7 +317,7 @@ export default function AdminListings() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           {/* Delete Selected Button */}
           {selectedIds.size > 0 && (
             <button
@@ -363,7 +381,7 @@ export default function AdminListings() {
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="bg-[#071343]/60 border border-white/10 rounded-2xl p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+      <div className="bg-[#071343]/60 border border-white/10 rounded-2xl p-3 sm:p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between w-full max-w-full overflow-hidden">
         <div className="relative flex-1">
           <i className="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
           <input
@@ -375,9 +393,9 @@ export default function AdminListings() {
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full md:w-auto">
           {/* Category Dropdown */}
-          <div className="flex items-center gap-1.5 bg-[#040A29]/70 border border-white/10 px-3 py-1.5 rounded-xl text-xs">
+          <div className="flex items-center gap-1.5 bg-[#040A29]/70 border border-white/10 px-3 py-2 rounded-xl text-xs flex-1 sm:flex-initial justify-between">
             <span className="text-slate-400 font-bold">Category:</span>
             <select
               value={selectedCategory}
@@ -393,7 +411,7 @@ export default function AdminListings() {
           </div>
 
           {/* Subcategory Dropdown */}
-          <div className="flex items-center gap-1.5 bg-[#040A29]/70 border border-white/10 px-3 py-1.5 rounded-xl text-xs">
+          <div className="flex items-center gap-1.5 bg-[#040A29]/70 border border-white/10 px-3 py-2 rounded-xl text-xs flex-1 sm:flex-initial justify-between">
             <span className="text-slate-400 font-bold">Subcategory:</span>
             <select
               value={selectedSubcategory}
@@ -439,8 +457,8 @@ export default function AdminListings() {
       </div>
 
       {/* Listings Table */}
-      <div className="overflow-x-auto rounded-3xl border border-white/10 bg-[#071343]/60 shadow-xl">
-        <table className="w-full text-left border-collapse text-xs">
+      <div className="overflow-x-auto rounded-2xl sm:rounded-3xl border border-white/10 bg-[#071343]/60 shadow-xl w-full max-w-full">
+        <table className="w-full min-w-[850px] text-left border-collapse text-xs">
           <thead>
             <tr className="border-b border-white/10 text-slate-400 font-bold bg-[#040A29]/80 uppercase tracking-wider text-[11px]">
               <th className="py-3.5 px-3 w-10 text-center">
@@ -488,7 +506,7 @@ export default function AdminListings() {
                 </td>
               </tr>
             ) : (
-              filteredListings.map(item => (
+              paginatedListings.map(item => (
                 <tr
                   key={item.id}
                   className={`hover:bg-white/[0.03] transition ${
@@ -617,6 +635,17 @@ export default function AdminListings() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination & Next Page Controls */}
+      <AdminPagination
+        totalItems={filteredListings.length}
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
+        onItemsPerPageChange={setItemsPerPage}
+        itemLabel="listings"
+        perPageOptions={[5, 10, 20, 50, 'all']}
+      />
 
       {/* Add / Edit Listing Modal */}
       {modalOpen && (

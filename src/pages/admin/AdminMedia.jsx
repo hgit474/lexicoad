@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { getMedia, getServices, saveMedia, deleteMedia, uploadImage } from '../../services/dataService';
 import { useSite } from '../../context/SiteContext';
+import AdminPagination from '../../components/admin/AdminPagination';
 
 export default function AdminMedia() {
   const location = useLocation();
@@ -13,6 +14,10 @@ export default function AdminMedia() {
   const [tag, setTag] = useState('Showcase');
   const [services, setServices] = useState([]);
   const [serviceId, setServiceId] = useState('');
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(8);
 
   const { showToast, openLightbox } = useSite();
 
@@ -95,12 +100,12 @@ export default function AdminMedia() {
   };
 
   return (
-    <div className="bg-[#0c1747] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-xl">
+    <div className="bg-[#0c1747] border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl w-full max-w-full overflow-hidden">
       {/* Upload Zone */}
       <form
         ref={formRef}
         onSubmit={handleAddMedia}
-        className="rounded-2xl border-2 border-dashed border-white/15 p-6 grid md:grid-cols-4 gap-3 items-end bg-white/[.03]"
+        className="rounded-2xl border-2 border-dashed border-white/15 p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 items-end bg-white/[.03] w-full max-w-full"
       >
         <div>
           <label className="lbl !text-slate-400">Upload image file</label>
@@ -108,7 +113,7 @@ export default function AdminMedia() {
             type="file"
             accept="image/*"
             onChange={e => setFile(e.target.files[0])}
-            className="text-xs text-slate-300 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20"
+            className="text-xs text-slate-300 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 w-full"
           />
         </div>
 
@@ -157,14 +162,17 @@ export default function AdminMedia() {
             type="submit"
             className="grad-btn w-full text-white text-sm font-extrabold px-5 py-3 rounded-xl shadow flex items-center justify-center gap-1.5"
           >
-            <i className="fa-solid fa-cloud-arrow-up"></i> Upload to Library
+            <i className="fa-solid fa-cloud-arrow-up"></i> Upload
           </button>
         </div>
       </form>
 
       {/* Media Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-        {mediaList.map(m => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mt-6 w-full max-w-full">
+        {(itemsPerPage === 'all'
+          ? mediaList
+          : mediaList.slice((currentPage - 1) * Number(itemsPerPage), (currentPage - 1) * Number(itemsPerPage) + Number(itemsPerPage))
+        ).map(m => (
           <div
             key={m.id}
             className="rounded-2xl overflow-hidden bg-white/5 border border-white/10 group relative flex flex-col justify-between"
@@ -191,7 +199,7 @@ export default function AdminMedia() {
             <button
               type="button"
               onClick={() => handleDelete(m.id)}
-              className="absolute top-2 right-2 w-8 h-8 rounded-lg bg-black/60 text-white opacity-0 group-hover:opacity-100 transition hover:bg-red-600 flex items-center justify-center shadow"
+              className="absolute top-2 right-2 w-8 h-8 rounded-lg bg-black/70 text-white sm:opacity-0 sm:group-hover:opacity-100 transition hover:bg-red-600 flex items-center justify-center shadow"
               title="Delete Media"
             >
               <i className="fa-solid fa-trash text-xs"></i>
@@ -200,11 +208,22 @@ export default function AdminMedia() {
         ))}
 
         {mediaList.length === 0 && (
-          <div className="col-span-4 text-center py-12 text-slate-400 font-bold">
+          <div className="col-span-full text-center py-12 text-slate-400 font-bold">
             Library is empty. Upload your first artwork above.
           </div>
         )}
       </div>
+
+      {/* Pagination & Next Page Controls */}
+      <AdminPagination
+        totalItems={mediaList.length}
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
+        onItemsPerPageChange={setItemsPerPage}
+        itemLabel="media artworks"
+        perPageOptions={[4, 8, 12, 24, 'all']}
+      />
     </div>
   );
 }

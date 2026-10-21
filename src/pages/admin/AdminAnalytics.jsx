@@ -160,42 +160,42 @@ export default function AdminAnalytics() {
   const topLocations = [...locations].sort((a, b) => b.footfall - a.footfall).slice(0, 5);
 
   return (
-    <div className="grid lg:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full max-w-full overflow-hidden">
       {/* 1. Service Popularity */}
-      <div className="bg-[#0c1747] border border-white/10 rounded-3xl p-6 shadow-xl">
+      <div className="bg-[#0c1747] border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl w-full max-w-full overflow-hidden">
         <h3 className="text-white font-grotesk font-bold text-lg mb-1">Service Popularity</h3>
         <p className="text-xs text-slate-400 font-semibold mb-4">
           Inquiries + campaigns per service
         </p>
-        <div className="h-[280px] relative">
+        <div className="h-[280px] relative w-full">
           <canvas ref={popRef}></canvas>
         </div>
       </div>
 
       {/* 2. Revenue by Service */}
-      <div className="bg-[#0c1747] border border-white/10 rounded-3xl p-6 shadow-xl">
+      <div className="bg-[#0c1747] border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl w-full max-w-full overflow-hidden">
         <h3 className="text-white font-grotesk font-bold text-lg mb-1">Revenue by Service</h3>
         <p className="text-xs text-slate-400 font-semibold mb-4">
           Booked campaign value (₹ Lakh)
         </p>
-        <div className="h-[280px] relative">
+        <div className="h-[280px] relative w-full">
           <canvas ref={revSvcRef}></canvas>
         </div>
       </div>
 
       {/* 3. Location Occupancy Rate */}
-      <div className="bg-[#0c1747] border border-white/10 rounded-3xl p-6 shadow-xl">
+      <div className="bg-[#0c1747] border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl w-full max-w-full overflow-hidden">
         <h3 className="text-white font-grotesk font-bold text-lg mb-1">Location Occupancy Rate</h3>
         <p className="text-xs text-slate-400 font-semibold mb-4">
           % of days booked (last 90 days)
         </p>
-        <div className="h-[280px] relative">
+        <div className="h-[280px] relative w-full">
           <canvas ref={locOccRef}></canvas>
         </div>
       </div>
 
       {/* 4. Top Performing Locations */}
-      <div className="bg-[#0c1747] border border-white/10 rounded-3xl p-6 shadow-xl flex flex-col justify-between">
+      <div className="bg-[#0c1747] border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl flex flex-col justify-between w-full max-w-full overflow-hidden">
         <div>
           <h3 className="text-white font-grotesk font-bold text-lg mb-4">
             Top Performing Locations
@@ -205,11 +205,11 @@ export default function AdminAnalytics() {
               const pct = Math.min(100, Math.round(l.footfall / 4100));
               return (
                 <div key={l.id}>
-                  <div className="flex justify-between text-xs font-bold">
-                    <span className="text-white">
+                  <div className="flex justify-between items-center text-xs font-bold gap-2">
+                    <span className="text-white truncate min-w-0 flex-1">
                       #{i + 1} {l.name}
                     </span>
-                    <span className="text-slate-400">
+                    <span className="text-slate-400 shrink-0 text-right">
                       {Number(l.footfall).toLocaleString('en-IN')} / day
                     </span>
                   </div>

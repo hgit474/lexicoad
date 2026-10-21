@@ -289,7 +289,7 @@ export default function CategoryListings() {
                 <section
                   key={subcategoryName}
                   id={`subcat-${subcategoryName.replace(/\s+/g, '-').toLowerCase()}`}
-                  className="bg-white rounded-3xl border border-blue-100/80 p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow"
+                  className="bg-white rounded-2xl sm:rounded-3xl border border-blue-100/80 p-4 sm:p-8 shadow-sm hover:shadow-md transition-shadow"
                 >
                   {/* Visually Distinct Subcategory Header Section */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-6 mb-6 border-b border-slate-100">

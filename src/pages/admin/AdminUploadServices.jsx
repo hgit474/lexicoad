@@ -218,9 +218,9 @@ export default function AdminUploadServices() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 w-full max-w-full overflow-hidden">
       {/* Top Action Header Card */}
-      <div className="bg-[#071343]/80 backdrop-blur border border-white/10 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-[#071343]/80 backdrop-blur border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4 w-full max-w-full overflow-hidden">
         <div>
           <div className="inline-flex items-center gap-2 bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full mb-2">
             <i className="fa-solid fa-file-excel"></i> BULK LISTINGS IMPORTER
@@ -234,7 +234,7 @@ export default function AdminUploadServices() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           {/* Rollback to Example Listings */}
           <button
             onClick={handleRollback}

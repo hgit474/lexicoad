@@ -11,6 +11,7 @@ import {
 import { useSite } from '../../context/SiteContext';
 import { MEDIA_GENRES } from '../../components/BrowseByGenre';
 import GenreBadgesModal from '../../components/admin/GenreBadgesModal';
+import AdminPagination from '../../components/admin/AdminPagination';
 
 export default function AdminServices() {
   const location = useLocation();
@@ -20,6 +21,10 @@ export default function AdminServices() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('All');
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(8);
 
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
@@ -93,6 +98,17 @@ export default function AdminServices() {
     }
     return true;
   });
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [typeFilter, searchQuery, itemsPerPage]);
+
+  // Paginated Services Slice
+  const paginatedServices = filtered.slice(
+    itemsPerPage === 'all' ? 0 : (currentPage - 1) * Number(itemsPerPage),
+    itemsPerPage === 'all' ? filtered.length : (currentPage - 1) * Number(itemsPerPage) + Number(itemsPerPage)
+  );
 
   const openAddModal = () => {
     setEditingId(null);
@@ -245,25 +261,25 @@ export default function AdminServices() {
   };
 
   return (
-    <div className="bg-[#0c1747] border border-white/10 rounded-3xl p-4 sm:p-6 shadow-xl">
+    <div className="bg-[#0c1747] border border-white/10 rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-xl w-full max-w-full overflow-hidden">
       {/* Top Filter Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between mb-6 w-full">
         <div className="relative flex-1">
-          <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+          <i className="fa-solid fa-magnifying-glass absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs sm:text-sm"></i>
           <input
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search media by name, chain, or genre..."
-            className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none focus:border-laxBlue-500"
+            className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 sm:pl-11 pr-3 sm:pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white placeholder:text-slate-500 outline-none focus:border-laxBlue-500"
           />
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <select
             value={typeFilter}
             onChange={e => setTypeFilter(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs sm:text-sm text-white font-bold outline-none cursor-pointer"
+            className="bg-white/5 border border-white/10 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-bold outline-none cursor-pointer flex-1 sm:flex-initial"
           >
             <option value="All">All Media Genres</option>
             {MEDIA_GENRES.map(g => (
@@ -275,7 +291,7 @@ export default function AdminServices() {
 
           <button
             onClick={() => setBadgeModalOpen(true)}
-            className="bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs sm:text-sm font-extrabold px-3.5 py-3 rounded-xl flex items-center gap-2 shadow shrink-0 transition"
+            className="bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs sm:text-sm font-extrabold px-3 sm:px-3.5 py-2.5 sm:py-3 rounded-xl flex items-center gap-1.5 sm:gap-2 shadow shrink-0 transition"
             title="Manage HOT, TRENDING, and POPULAR tags for media genres"
           >
             <i className="fa-solid fa-tags text-laxRed-400"></i>
@@ -285,7 +301,7 @@ export default function AdminServices() {
 
           <button
             onClick={openAddModal}
-            className="grad-btn text-white text-xs sm:text-sm font-extrabold px-4 py-3 rounded-xl flex items-center gap-2 shadow shrink-0"
+            className="grad-btn text-white text-xs sm:text-sm font-extrabold px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl flex items-center gap-1.5 sm:gap-2 shadow shrink-0"
           >
             <i className="fa-solid fa-plus"></i>
             <span>Add Media</span>
@@ -307,7 +323,7 @@ export default function AdminServices() {
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5 font-medium">
-            {filtered.map(service => {
+            {paginatedServices.map(service => {
               const minSpend = service.min_spend || Math.round(service.price * 0.35);
               const locCount = getMappedCount(service.id);
 
@@ -410,7 +426,7 @@ export default function AdminServices() {
 
       {/* Mobile Card View (Visible only on mobile screens) */}
       <div className="md:hidden space-y-3">
-        {filtered.map(service => {
+        {paginatedServices.map(service => {
           const minSpend = service.min_spend || Math.round(service.price * 0.35);
 
           return (
@@ -486,6 +502,17 @@ export default function AdminServices() {
           );
         })}
       </div>
+
+      {/* Pagination & Next Page Controls */}
+      <AdminPagination
+        totalItems={filtered.length}
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
+        onItemsPerPageChange={setItemsPerPage}
+        itemLabel="media properties"
+        perPageOptions={[4, 8, 12, 24, 'all']}
+      />
 
       {/* Add / Edit Service Modal */}
       {modalOpen && (

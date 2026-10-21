@@ -83,9 +83,9 @@ export default function AdminLogin() {
       </header>
 
       {/* Main Login Card */}
-      <main className="relative z-10 flex-1 flex items-center justify-center p-4">
+      <main className="relative z-10 flex-1 flex items-center justify-center p-4 w-full max-w-full">
         <div className="w-full max-w-md">
-          <div className="bg-[#071343]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 sm:p-10 shadow-2xl shadow-black/60 relative overflow-hidden">
+          <div className="bg-[#071343]/80 backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-10 shadow-2xl shadow-black/60 relative overflow-hidden">
             {/* Top Accent Line */}
             <div className="absolute top-0 left-0 right-0 h-1.5 grad-bg"></div>
 

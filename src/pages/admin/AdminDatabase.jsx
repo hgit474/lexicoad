@@ -419,9 +419,9 @@ CREATE TABLE IF NOT EXISTS locations (
   const erdNodes = ['Clients', 'Placements', 'Services', 'Service_Locations', 'Locations', 'Inquiries', 'Media'];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full max-w-full overflow-hidden">
       {/* Header & Quick Action Buttons */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/5 border border-white/10 rounded-2xl p-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5 w-full max-w-full overflow-hidden">
         <div>
           <h2 className="text-white font-grotesk font-bold text-xl">Database Architecture & Schema</h2>
           <p className="text-slate-400 text-xs font-semibold mt-0.5">
@@ -449,7 +449,7 @@ CREATE TABLE IF NOT EXISTS locations (
       </div>
 
       {/* Entity-Relationship Diagram (ERD) */}
-      <div className="bg-[#0c1747] border border-white/10 rounded-3xl p-6 shadow-xl">
+      <div className="bg-[#0c1747] border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl w-full max-w-full overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
           <div>
             <h3 className="text-white font-grotesk font-bold text-lg flex items-center gap-2">

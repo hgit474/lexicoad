@@ -11,6 +11,7 @@ import {
   convertInquiryToCampaign
 } from '../../services/dataService';
 import { useSite } from '../../context/SiteContext';
+import AdminPagination from '../../components/admin/AdminPagination';
 
 export default function AdminInquiries() {
   const location = useLocation();
@@ -19,6 +20,8 @@ export default function AdminInquiries() {
   const [locations, setLocations] = useState([]);
 
   const [stageFilter, setStageFilter] = useState('All');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [selectedLead, setSelectedLead] = useState(null);
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -128,6 +131,17 @@ export default function AdminInquiries() {
     return true;
   });
 
+  // Reset page when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [stageFilter, itemsPerPage]);
+
+  // Paginated Inquiries Slice
+  const paginatedInquiries = filtered.slice(
+    itemsPerPage === 'all' ? 0 : (currentPage - 1) * Number(itemsPerPage),
+    itemsPerPage === 'all' ? filtered.length : (currentPage - 1) * Number(itemsPerPage) + Number(itemsPerPage)
+  );
+
   const handleStageChange = async (id, newStage) => {
     await updateInquiryStage(id, newStage);
     showToast(`Lead stage → ${newStage}`, 'info');
@@ -166,7 +180,7 @@ export default function AdminInquiries() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full max-w-full overflow-hidden">
       {/* Stage Filter Pills */}
       <div className="flex flex-wrap gap-2">
         {['All', ...stages].map(s => {
@@ -194,8 +208,8 @@ export default function AdminInquiries() {
       </div>
 
       {/* Inquiries Table */}
-      <div className="bg-[#0c1747] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-xl">
-        <div className="overflow-x-auto rounded-2xl overflow-hidden">
+      <div className="bg-[#0c1747] border border-white/10 rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-xl w-full max-w-full overflow-hidden">
+        <div className="overflow-x-auto rounded-xl sm:rounded-2xl w-full max-w-full">
           <table className="lax min-w-[900px]">
             <thead>
               <tr>
@@ -208,7 +222,7 @@ export default function AdminInquiries() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map(q => {
+              {paginatedInquiries.map(q => {
                 const s = services.find(x => x.id === q.service_id);
                 const l = locations.find(x => x.id === q.location_id);
                 return (
@@ -299,6 +313,17 @@ export default function AdminInquiries() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination & Next Page Controls */}
+        <AdminPagination
+          totalItems={filtered.length}
+          currentPage={currentPage}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+          onItemsPerPageChange={setItemsPerPage}
+          itemLabel="leads"
+          perPageOptions={[5, 10, 20, 'all']}
+        />
       </div>
 
       {/* Kanban Pipeline Board */}

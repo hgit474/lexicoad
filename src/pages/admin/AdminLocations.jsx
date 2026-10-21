@@ -12,6 +12,7 @@ import {
   uploadImage
 } from '../../services/dataService';
 import { useSite } from '../../context/SiteContext';
+import AdminPagination from '../../components/admin/AdminPagination';
 
 export default function AdminLocations() {
   const location = useLocation();
@@ -20,6 +21,10 @@ export default function AdminLocations() {
   const [serviceLocations, setServiceLocations] = useState([]);
 
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(6);
 
   // Bulk Selection State
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -94,6 +99,17 @@ export default function AdminLocations() {
     }
     return true;
   });
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, itemsPerPage]);
+
+  // Paginated Locations Slice
+  const paginatedLocations = filtered.slice(
+    itemsPerPage === 'all' ? 0 : (currentPage - 1) * Number(itemsPerPage),
+    itemsPerPage === 'all' ? filtered.length : (currentPage - 1) * Number(itemsPerPage) + Number(itemsPerPage)
+  );
 
   const getMappedServices = (locId) => {
     const svcIds = serviceLocations.filter(m => m.location_id === locId).map(m => m.service_id);
@@ -257,17 +273,17 @@ export default function AdminLocations() {
   };
 
   return (
-    <div className="bg-[#0c1747] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-xl">
+    <div className="bg-[#0c1747] border border-white/10 rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-xl w-full max-w-full overflow-hidden">
       {/* Search and Action */}
-      <div className="flex flex-wrap gap-3 items-center mb-5">
-        <div className="relative flex-1 min-w-[200px]">
-          <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+      <div className="flex flex-wrap gap-2 sm:gap-3 items-center mb-5 w-full">
+        <div className="relative flex-1 min-w-[140px] sm:min-w-[200px]">
+          <i className="fa-solid fa-magnifying-glass absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs sm:text-sm"></i>
           <input
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search locations, cities..."
-            className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none focus:border-laxBlue-600"
+            className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 sm:pl-11 pr-3 sm:pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white placeholder:text-slate-500 outline-none focus:border-laxBlue-600"
           />
         </div>
 
@@ -275,7 +291,7 @@ export default function AdminLocations() {
         {filtered.length > 0 && (
           <button
             onClick={handleToggleSelectAll}
-            className="inline-flex items-center gap-1.5 bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 text-xs sm:text-sm font-bold px-3.5 py-3 rounded-xl transition"
+            className="inline-flex items-center gap-1.5 bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 text-xs sm:text-sm font-bold px-3 sm:px-3.5 py-2.5 sm:py-3 rounded-xl transition"
             title="Select or deselect all visible locations"
           >
             <input
@@ -293,7 +309,7 @@ export default function AdminLocations() {
           <button
             onClick={handleDeleteSelected}
             disabled={deletingBulk}
-            className="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-500 text-white text-xs sm:text-sm font-extrabold px-4 py-3 rounded-xl transition shadow-lg animate-pulse"
+            className="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-500 text-white text-xs sm:text-sm font-extrabold px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl transition shadow-lg animate-pulse"
             title="Delete selected locations"
           >
             <i className={`fa-solid ${deletingBulk ? 'fa-circle-notch fa-spin' : 'fa-trash'}`}></i>
@@ -305,7 +321,7 @@ export default function AdminLocations() {
         <button
           onClick={handleRollback}
           disabled={rollingBack}
-          className="inline-flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs sm:text-sm font-bold px-4 py-3 rounded-xl transition shadow"
+          className="inline-flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs sm:text-sm font-bold px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl transition shadow"
           title="Restore default example locations"
         >
           <i className={`fa-solid ${rollingBack ? 'fa-circle-notch fa-spin' : 'fa-rotate-left'}`}></i>
@@ -319,7 +335,7 @@ export default function AdminLocations() {
             setWipeConfirmText('');
             setWipeModalOpen(true);
           }}
-          className="inline-flex items-center gap-1.5 bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 text-xs sm:text-sm font-bold px-4 py-3 rounded-xl transition shadow"
+          className="inline-flex items-center gap-1.5 bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 text-xs sm:text-sm font-bold px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl transition shadow"
           title="Wipe all locations with double confirmation warning"
         >
           <i className="fa-solid fa-trash-can"></i>
@@ -328,15 +344,15 @@ export default function AdminLocations() {
 
         <button
           onClick={openAddModal}
-          className="grad-btn text-white text-sm font-extrabold px-5 py-3 rounded-xl flex items-center gap-1.5 shadow"
+          className="grad-btn text-white text-xs sm:text-sm font-extrabold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl flex items-center gap-1.5 shadow"
         >
           <i className="fa-solid fa-plus"></i> Add Location
         </button>
       </div>
 
       {/* Grid */}
-      <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
-        {filtered.map(l => {
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 w-full">
+        {paginatedLocations.map(l => {
           const mappedSvcs = getMappedServices(l.id);
           return (
             <div
@@ -461,6 +477,17 @@ export default function AdminLocations() {
           </div>
         )}
       </div>
+
+      {/* Pagination & Next Page Controls */}
+      <AdminPagination
+        totalItems={filtered.length}
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
+        onItemsPerPageChange={setItemsPerPage}
+        itemLabel="locations"
+        perPageOptions={[3, 6, 9, 18, 'all']}
+      />
 
       {/* Add / Edit Location Modal */}
       {modalOpen && (

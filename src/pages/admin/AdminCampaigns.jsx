@@ -13,6 +13,7 @@ import {
   uploadImage
 } from '../../services/dataService';
 import { useSite } from '../../context/SiteContext';
+import AdminPagination from '../../components/admin/AdminPagination';
 
 export default function AdminCampaigns() {
   const location = useLocation();
@@ -22,6 +23,10 @@ export default function AdminCampaigns() {
 
   const [statusFilter, setStatusFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
 
   // Bulk Selection State
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -90,6 +95,17 @@ export default function AdminCampaigns() {
     }
     return true;
   });
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, searchQuery, itemsPerPage]);
+
+  // Paginated Campaigns Slice
+  const paginatedCampaigns = filtered.slice(
+    itemsPerPage === 'all' ? 0 : (currentPage - 1) * Number(itemsPerPage),
+    itemsPerPage === 'all' ? filtered.length : (currentPage - 1) * Number(itemsPerPage) + Number(itemsPerPage)
+  );
 
   const fmtK = (n) => {
     n = Number(n || 0);
@@ -283,13 +299,13 @@ export default function AdminCampaigns() {
   };
 
   return (
-    <div className="bg-[#0c1747] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-xl">
+    <div className="bg-[#0c1747] border border-white/10 rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-xl w-full max-w-full overflow-hidden">
       {/* Controls Bar */}
-      <div className="flex flex-wrap gap-3 items-center mb-5">
+      <div className="flex flex-wrap gap-2 sm:gap-3 items-center mb-5 w-full">
         <select
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
-          className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white font-bold outline-none cursor-pointer"
+          className="bg-white/5 border border-white/10 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-bold outline-none cursor-pointer flex-1 sm:flex-initial"
         >
           <option value="All">All statuses</option>
           <option>Live</option>
@@ -298,14 +314,14 @@ export default function AdminCampaigns() {
           <option>Completed</option>
         </select>
 
-        <div className="relative flex-1 min-w-[200px]">
-          <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+        <div className="relative flex-1 min-w-[140px] sm:min-w-[200px]">
+          <i className="fa-solid fa-magnifying-glass absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs sm:text-sm"></i>
           <input
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search brand, client..."
-            className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none focus:border-laxBlue-600"
+            className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 sm:pl-11 pr-3 sm:pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white placeholder:text-slate-500 outline-none focus:border-laxBlue-600"
           />
         </div>
 
@@ -314,7 +330,7 @@ export default function AdminCampaigns() {
           <button
             onClick={handleDeleteSelected}
             disabled={deletingBulk}
-            className="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-500 text-white text-xs sm:text-sm font-extrabold px-4 py-3 rounded-xl transition shadow-lg animate-pulse"
+            className="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-500 text-white text-xs sm:text-sm font-extrabold px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl transition shadow-lg animate-pulse"
             title="Delete selected campaigns"
           >
             <i className={`fa-solid ${deletingBulk ? 'fa-circle-notch fa-spin' : 'fa-trash'}`}></i>
@@ -326,7 +342,7 @@ export default function AdminCampaigns() {
         <button
           onClick={handleRollback}
           disabled={rollingBack}
-          className="inline-flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs sm:text-sm font-bold px-4 py-3 rounded-xl transition shadow"
+          className="inline-flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs sm:text-sm font-bold px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl transition shadow"
           title="Restore default example campaigns"
         >
           <i className={`fa-solid ${rollingBack ? 'fa-circle-notch fa-spin' : 'fa-rotate-left'}`}></i>
@@ -340,7 +356,7 @@ export default function AdminCampaigns() {
             setWipeConfirmText('');
             setWipeModalOpen(true);
           }}
-          className="inline-flex items-center gap-1.5 bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 text-xs sm:text-sm font-bold px-4 py-3 rounded-xl transition shadow"
+          className="inline-flex items-center gap-1.5 bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 text-xs sm:text-sm font-bold px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl transition shadow"
           title="Wipe all campaigns with double confirmation warning"
         >
           <i className="fa-solid fa-trash-can"></i>
@@ -349,14 +365,14 @@ export default function AdminCampaigns() {
 
         <button
           onClick={openAddModal}
-          className="grad-btn text-white text-sm font-extrabold px-5 py-3 rounded-xl flex items-center gap-1.5 shadow"
+          className="grad-btn text-white text-xs sm:text-sm font-extrabold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl flex items-center gap-1.5 shadow"
         >
           <i className="fa-solid fa-plus"></i> New Campaign
         </button>
       </div>
 
       {/* Campaigns Table */}
-      <div className="overflow-x-auto rounded-2xl overflow-hidden">
+      <div className="overflow-x-auto rounded-2xl overflow-hidden w-full max-w-full">
         <table className="lax min-w-[980px]">
           <thead>
             <tr>
@@ -379,7 +395,7 @@ export default function AdminCampaigns() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map(c => {
+            {paginatedCampaigns.map(c => {
               const s = services.find(x => x.id === c.service_id);
               const l = locations.find(x => x.id === c.location_id);
               return (
@@ -494,6 +510,17 @@ export default function AdminCampaigns() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination & Next Page Controls */}
+      <AdminPagination
+        totalItems={filtered.length}
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
+        onItemsPerPageChange={setItemsPerPage}
+        itemLabel="campaigns"
+        perPageOptions={[3, 5, 10, 20, 'all']}
+      />
 
       {/* Add / Edit Campaign Modal */}
       {modalOpen && (

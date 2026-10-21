@@ -97,7 +97,7 @@ function RouteMetadataUpdater() {
 // Public Layout Wrapper
 function PublicLayout() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#F6F8FF] text-[#071343] font-jakarta">
+    <div className="min-h-screen flex flex-col bg-[#F6F8FF] text-[#071343] font-jakarta w-full max-w-full overflow-x-hidden">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:bg-laxRed-600 focus:text-white focus:px-4 focus:py-2.5 focus:rounded-xl focus:shadow-2xl focus:font-extrabold focus:outline-none"
@@ -105,7 +105,7 @@ function PublicLayout() {
         Skip to main content
       </a>
       <Navbar />
-      <main id="main-content" role="main" tabIndex="-1" className="flex-1 focus:outline-none">
+      <main id="main-content" role="main" tabIndex="-1" className="flex-1 focus:outline-none w-full max-w-full overflow-x-hidden">
         <Outlet />
       </main>
       <Footer />
