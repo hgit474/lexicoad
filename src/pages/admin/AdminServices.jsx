@@ -456,12 +456,12 @@ export default function AdminServices() {
                   }}
                 />
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="chip bg-blue-500/20 text-blue-300 text-[10px] font-bold">
+                  <div className="flex flex-col items-start gap-1 min-w-0">
+                    <span className="chip bg-blue-500/20 text-blue-300 text-[10px] font-bold truncate max-w-full">
                       {service.genre || service.type}
                     </span>
                     {service.chain_or_brand && (
-                      <span className="chip bg-white/10 text-white text-[10px]">
+                      <span className="chip bg-white/10 text-white text-[10px] truncate max-w-full">
                         {service.chain_or_brand}
                       </span>
                     )}

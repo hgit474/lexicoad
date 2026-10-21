@@ -373,13 +373,21 @@ export default function Home() {
                         e.target.src = `https://picsum.photos/seed/${s.id}/600/380`;
                       }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-laxBlue-950/70 via-transparent to-transparent"></div>
-                    <span className="chip absolute top-3 left-3 bg-white/95 text-laxBlue-800 shadow">
-                      {s.type}
-                    </span>
-                    <span className="chip absolute top-3 right-3 bg-laxRed-600 text-white">
-                      ★ {s.rating}
-                    </span>
+                    <div className="absolute top-3 inset-x-3 flex items-start justify-between gap-2 pointer-events-none z-10">
+                      <div className="flex flex-col items-start gap-1.5 min-w-0 max-w-[calc(100%-60px)] pointer-events-auto">
+                        <span className="chip bg-white/95 text-laxBlue-800 font-bold text-[10px] sm:text-[11px] shadow max-w-full truncate">
+                          {s.type}
+                        </span>
+                        {s.chain_or_brand && (
+                          <span className="chip bg-black/60 text-white backdrop-blur text-[10px] sm:text-[11px] font-semibold border border-white/20 max-w-full truncate">
+                            {s.chain_or_brand}
+                          </span>
+                        )}
+                      </div>
+                      <span className="chip bg-laxRed-600 text-white font-bold text-[10px] sm:text-[11px] shadow shrink-0 pointer-events-auto">
+                        ★ {s.rating}
+                      </span>
+                    </div>
                     <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
                       <div className="text-white font-grotesk font-bold text-lg leading-tight">
                         {s.name}
