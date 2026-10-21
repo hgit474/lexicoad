@@ -20,6 +20,7 @@ export default function AdminInquiries() {
   const [locations, setLocations] = useState([]);
 
   const [stageFilter, setStageFilter] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [selectedLead, setSelectedLead] = useState(null);
@@ -128,13 +129,18 @@ export default function AdminInquiries() {
 
   const filtered = inquiries.filter(i => {
     if (stageFilter !== 'All' && i.stage !== stageFilter) return false;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchText = `${i.name || ''} ${i.phone || ''} ${i.email || ''} ${i.company || ''} ${i.message || ''}`.toLowerCase();
+      if (!matchText.includes(q)) return false;
+    }
     return true;
   });
 
   // Reset page when filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [stageFilter, itemsPerPage]);
+  }, [stageFilter, searchQuery, itemsPerPage]);
 
   // Paginated Inquiries Slice
   const paginatedInquiries = filtered.slice(
@@ -179,8 +185,126 @@ export default function AdminInquiries() {
     setLeadModalOpen(true);
   };
 
+  // Export Inquiries to CSV
+  const handleExportCSV = () => {
+    if (inquiries.length === 0) {
+      showToast('No inquiries to export', 'info');
+      return;
+    }
+    const headers = ['ID', 'Date', 'Name', 'Phone', 'Email', 'Company', 'Stage', 'Budget', 'Duration', 'Followup', 'Message'];
+    const rows = inquiries.map(i => [
+      i.id,
+      i.date || '',
+      `"${(i.name || '').replace(/"/g, '""')}"`,
+      `"${(i.phone || '').replace(/"/g, '""')}"`,
+      `"${(i.email || '').replace(/"/g, '""')}"`,
+      `"${(i.company || '').replace(/"/g, '""')}"`,
+      i.stage || 'New',
+      `"${(i.budget || '').replace(/"/g, '""')}"`,
+      i.duration || '',
+      i.followup || '',
+      `"${(i.message || '').replace(/"/g, '""')}"`
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `lexicoad_inquiries_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast('Inquiries exported to CSV', 'success');
+  };
+
+  const newCount = inquiries.filter(i => i.stage === 'New').length;
+  const contactedCount = inquiries.filter(i => i.stage === 'Contacted').length;
+  const quotedCount = inquiries.filter(i => i.stage === 'Quoted').length;
+  const convertedCount = inquiries.filter(i => i.stage === 'Converted').length;
+
   return (
     <div className="space-y-6 w-full max-w-full overflow-hidden">
+      {/* Lead Metric Summary Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-[#0c1747] border border-white/10 rounded-2xl p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-lg shrink-0">
+            <i className="fa-solid fa-users"></i>
+          </div>
+          <div>
+            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Leads</div>
+            <div className="text-xl sm:text-2xl font-bold font-grotesk text-white">{inquiries.length}</div>
+          </div>
+        </div>
+
+        <div className="bg-[#0c1747] border border-amber-500/30 rounded-2xl p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg shrink-0">
+            <i className="fa-solid fa-bell animate-pulse"></i>
+          </div>
+          <div>
+            <div className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">New Actionable</div>
+            <div className="text-xl sm:text-2xl font-bold font-grotesk text-amber-400">{newCount}</div>
+          </div>
+        </div>
+
+        <div className="bg-[#0c1747] border border-white/10 rounded-2xl p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-lg shrink-0">
+            <i className="fa-solid fa-comments-dollar"></i>
+          </div>
+          <div>
+            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">In Negotiation</div>
+            <div className="text-xl sm:text-2xl font-bold font-grotesk text-white">{contactedCount + quotedCount}</div>
+          </div>
+        </div>
+
+        <div className="bg-[#0c1747] border border-emerald-500/30 rounded-2xl p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg shrink-0">
+            <i className="fa-solid fa-trophy"></i>
+          </div>
+          <div>
+            <div className="text-[11px] font-bold text-emerald-300 uppercase tracking-wider">Converted</div>
+            <div className="text-xl sm:text-2xl font-bold font-grotesk text-emerald-400">{convertedCount}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Search & Actions Bar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div className="relative flex-1 max-w-md">
+          <i className="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search leads by name, phone, company, message..."
+            className="w-full bg-[#0c1747] border border-white/15 focus:border-laxBlue-400 rounded-xl py-2 pl-9 pr-4 text-xs text-white placeholder-slate-400 outline-none transition"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs"
+            >
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportCSV}
+            className="text-xs bg-white/5 hover:bg-white/15 text-slate-200 border border-white/10 px-3 py-2 rounded-xl font-bold transition flex items-center gap-1.5"
+            title="Export leads to CSV"
+          >
+            <i className="fa-solid fa-file-csv text-emerald-400"></i> Export CSV
+          </button>
+          <button
+            onClick={openAddModal}
+            className="grad-btn text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-1.5 shadow"
+          >
+            <i className="fa-solid fa-plus text-[10px]"></i> Log New Lead
+          </button>
+        </div>
+      </div>
+
       {/* Stage Filter Pills */}
       <div className="flex flex-wrap gap-2">
         {['All', ...stages].map(s => {
@@ -275,6 +399,28 @@ export default function AdminInquiries() {
                     </td>
 
                     <td className="text-right whitespace-nowrap">
+                      {q.phone && (
+                        <a
+                          href={`https://wa.me/91${q.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi ${q.name}, following up on your advertising inquiry with Laxico Advertising.`)}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="w-9 h-9 rounded-lg bg-green-500/20 text-green-300 hover:bg-green-500 hover:text-white transition inline-flex items-center justify-center mr-1.5"
+                          title={`Chat with ${q.name} on WhatsApp`}
+                        >
+                          <i className="fa-brands fa-whatsapp text-sm"></i>
+                        </a>
+                      )}
+
+                      {q.email && (
+                        <a
+                          href={`mailto:${q.email}?subject=${encodeURIComponent(`Laxico Advertising Consultation: ${s?.name || 'OOH Services'}`)}`}
+                          className="w-9 h-9 rounded-lg bg-blue-500/20 text-blue-300 hover:bg-blue-600 hover:text-white transition inline-flex items-center justify-center mr-1.5"
+                          title={`Email ${q.email}`}
+                        >
+                          <i className="fa-solid fa-envelope text-xs"></i>
+                        </a>
+                      )}
+
                       <button
                         onClick={() => openLeadModal(q)}
                         className="w-9 h-9 rounded-lg bg-blue-50 text-laxBlue-700 hover:bg-laxBlue-700 hover:text-white transition mr-1.5"
@@ -395,10 +541,33 @@ export default function AdminInquiries() {
             </div>
 
             <div className="mt-4">
-              <div className="rounded-2xl bg-blue-50 border border-blue-100 p-4">
-                <div className="font-grotesk font-bold text-lg">{selectedLead.name}</div>
-                <div className="text-sm font-semibold text-slate-500">
-                  {selectedLead.company} • {selectedLead.email} • {selectedLead.phone}
+              <div className="rounded-2xl bg-blue-50 border border-blue-100 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div>
+                  <div className="font-grotesk font-bold text-lg">{selectedLead.name}</div>
+                  <div className="text-sm font-semibold text-slate-500">
+                    {selectedLead.company} • {selectedLead.email} • {selectedLead.phone}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  {selectedLead.phone && (
+                    <a
+                      href={`https://wa.me/91${selectedLead.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi ${selectedLead.name}, following up regarding your advertising inquiry on Laxico Advertising.`)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-500 hover:bg-green-600 text-white text-xs font-bold transition shadow"
+                    >
+                      <i className="fa-brands fa-whatsapp"></i> WhatsApp
+                    </a>
+                  )}
+                  {selectedLead.email && (
+                    <a
+                      href={`mailto:${selectedLead.email}?subject=${encodeURIComponent('Laxico Advertising Consultation')}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow"
+                    >
+                      <i className="fa-solid fa-envelope"></i> Email
+                    </a>
+                  )}
                 </div>
               </div>
 

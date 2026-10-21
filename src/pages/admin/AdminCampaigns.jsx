@@ -298,32 +298,121 @@ export default function AdminCampaigns() {
     }
   };
 
-  return (
-    <div className="bg-[#0c1747] border border-white/10 rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-xl w-full max-w-full overflow-hidden">
-      {/* Controls Bar */}
-      <div className="flex flex-wrap gap-2 sm:gap-3 items-center mb-5 w-full">
-        <select
-          value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value)}
-          className="bg-white/5 border border-white/10 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-bold outline-none cursor-pointer flex-1 sm:flex-initial"
-        >
-          <option value="All">All statuses</option>
-          <option>Live</option>
-          <option>Scheduled</option>
-          <option>Paused</option>
-          <option>Completed</option>
-        </select>
+  // Export Campaigns to CSV
+  const handleExportCSV = () => {
+    if (filtered.length === 0) {
+      showToast('No campaigns to export', 'info');
+      return;
+    }
+    const headers = ['ID', 'Campaign Title', 'Client', 'Status', 'Budget (INR)', 'Start Date', 'End Date', 'Artwork URL', 'Notes'];
+    const rows = filtered.map(c => [
+      c.id,
+      `"${(c.title || '').replace(/"/g, '""')}"`,
+      `"${(c.client || '').replace(/"/g, '""')}"`,
+      c.status || 'Scheduled',
+      c.budget || 0,
+      c.start_date || '',
+      c.end_date || '',
+      `"${(c.artwork || '').replace(/"/g, '""')}"`,
+      `"${(c.notes || '').replace(/"/g, '""')}"`
+    ]);
 
-        <div className="relative flex-1 min-w-[140px] sm:min-w-[200px]">
-          <i className="fa-solid fa-magnifying-glass absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs sm:text-sm"></i>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search brand, client..."
-            className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 sm:pl-11 pr-3 sm:pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white placeholder:text-slate-500 outline-none focus:border-laxBlue-600"
-          />
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `lexicoad_campaigns_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast(`Exported ${filtered.length} campaigns to CSV!`, 'success');
+  };
+
+  const totalBudget = campaigns.reduce((sum, c) => sum + (Number(c.budget) || 0), 0);
+  const liveCount = campaigns.filter(c => c.status === 'Live').length;
+  const schedCount = campaigns.filter(c => c.status === 'Scheduled').length;
+  const compCount = campaigns.filter(c => c.status === 'Completed').length;
+
+  return (
+    <div className="space-y-5 w-full max-w-full overflow-hidden">
+      {/* Campaign KPI Metrics Banner */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-[#0c1747] border border-white/10 rounded-2xl p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-lg shrink-0">
+            <i className="fa-solid fa-indian-rupee-sign"></i>
+          </div>
+          <div>
+            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Value</div>
+            <div className="text-xl sm:text-2xl font-bold font-grotesk text-white">{fmtK(totalBudget)}</div>
+          </div>
         </div>
+
+        <div className="bg-[#0c1747] border border-green-500/30 rounded-2xl p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-green-500/20 text-green-400 flex items-center justify-center text-lg shrink-0">
+            <i className="fa-solid fa-tower-broadcast animate-pulse"></i>
+          </div>
+          <div>
+            <div className="text-[11px] font-bold text-green-300 uppercase tracking-wider">Live Active</div>
+            <div className="text-xl sm:text-2xl font-bold font-grotesk text-green-400">{liveCount}</div>
+          </div>
+        </div>
+
+        <div className="bg-[#0c1747] border border-amber-500/30 rounded-2xl p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg shrink-0">
+            <i className="fa-solid fa-calendar-check"></i>
+          </div>
+          <div>
+            <div className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">Scheduled</div>
+            <div className="text-xl sm:text-2xl font-bold font-grotesk text-amber-400">{schedCount}</div>
+          </div>
+        </div>
+
+        <div className="bg-[#0c1747] border border-white/10 rounded-2xl p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-lg shrink-0">
+            <i className="fa-solid fa-flag-checkered"></i>
+          </div>
+          <div>
+            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Completed</div>
+            <div className="text-xl sm:text-2xl font-bold font-grotesk text-white">{compCount}</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-[#0c1747] border border-white/10 rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-xl w-full max-w-full overflow-hidden">
+        {/* Controls Bar */}
+        <div className="flex flex-wrap gap-2 sm:gap-3 items-center mb-5 w-full">
+          <select
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+            className="bg-white/5 border border-white/10 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white font-bold outline-none cursor-pointer flex-1 sm:flex-initial"
+          >
+            <option value="All">All statuses ({campaigns.length})</option>
+            <option value="Live">Live ({liveCount})</option>
+            <option value="Scheduled">Scheduled ({schedCount})</option>
+            <option value="Paused">Paused</option>
+            <option value="Completed">Completed ({compCount})</option>
+          </select>
+
+          <div className="relative flex-1 min-w-[140px] sm:min-w-[200px]">
+            <i className="fa-solid fa-magnifying-glass absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs sm:text-sm"></i>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search brand, client..."
+              className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 sm:pl-11 pr-3 sm:pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white placeholder:text-slate-500 outline-none focus:border-laxBlue-600"
+            />
+          </div>
+
+          {/* Export CSV */}
+          <button
+            onClick={handleExportCSV}
+            className="inline-flex items-center gap-1.5 bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 text-xs sm:text-sm font-bold px-3 sm:px-3.5 py-2.5 sm:py-3 rounded-xl transition"
+            title="Export filtered campaigns to CSV"
+          >
+            <i className="fa-solid fa-file-csv text-emerald-400"></i>
+            <span>Export CSV</span>
+          </button>
 
         {/* Delete Selected Button */}
         {selectedIds.size > 0 && (
@@ -804,6 +893,7 @@ export default function AdminCampaigns() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

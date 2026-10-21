@@ -301,6 +301,44 @@ export default function AdminListings() {
     }
   };
 
+  // Export Filtered Listings to Excel (.xlsx)
+  const handleExportFilteredExcel = async () => {
+    if (filteredListings.length === 0) {
+      showToast('No listings to export', 'info');
+      return;
+    }
+    try {
+      const XLSX = await import('xlsx');
+      const dataRows = [
+        ['category', 'subcategory', 'title', 'location', 'price', 'media_type', 'reach', 'description', 'image_url']
+      ];
+      filteredListings.forEach(l => {
+        dataRows.push([
+          l.category || '',
+          l.subcategory || '',
+          l.title || '',
+          l.location || '',
+          l.price || 0,
+          l.media_type || '',
+          l.reach || '',
+          l.description || '',
+          l.image_url || ''
+        ]);
+      });
+      const ws = XLSX.utils.aoa_to_sheet(dataRows);
+      ws['!cols'] = [{ wch: 16 }, { wch: 18 }, { wch: 35 }, { wch: 20 }, { wch: 14 }, { wch: 18 }, { wch: 14 }, { wch: 45 }, { wch: 35 }];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Listings');
+      const catSlug = selectedCategory === 'All' ? 'all' : selectedCategory.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      const filename = `lexicoad_listings_${catSlug}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      XLSX.writeFile(wb, filename);
+      showToast(`Exported ${filteredListings.length} listings to Excel (.xlsx)!`, 'success');
+    } catch (err) {
+      console.error('Export error:', err);
+      showToast('Failed to export listings to Excel', 'error');
+    }
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6 w-full max-w-full overflow-hidden">
       {/* Header Bar */}
@@ -354,6 +392,16 @@ export default function AdminListings() {
           >
             <i className="fa-solid fa-trash-can"></i>
             <span>Wipe All</span>
+          </button>
+
+          {/* Export Filtered to Excel */}
+          <button
+            onClick={handleExportFilteredExcel}
+            className="inline-flex items-center gap-1.5 bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 text-xs font-bold px-3 py-2 rounded-xl transition shadow"
+            title="Export currently filtered listings to Excel (.xlsx)"
+          >
+            <i className="fa-solid fa-file-export"></i>
+            <span>Export ({filteredListings.length})</span>
           </button>
 
           {/* Download Template (Category aware) */}

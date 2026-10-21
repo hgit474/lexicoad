@@ -21,6 +21,8 @@ export default function AdminLocations() {
   const [serviceLocations, setServiceLocations] = useState([]);
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [cityFilter, setCityFilter] = useState('All');
+  const [statusFilter, setStatusFilter] = useState('All');
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -70,9 +72,9 @@ export default function AdminLocations() {
       getServices(),
       getServiceLocations()
     ]);
-    setLocations(locs);
-    setServices(svcs);
-    setServiceLocations(sl);
+    setLocations(locs || []);
+    setServices(svcs || []);
+    setServiceLocations(sl || []);
   };
 
   useEffect(() => {
@@ -92,10 +94,15 @@ export default function AdminLocations() {
     return () => window.removeEventListener('admin-open-modal', handleOpen);
   }, [location.state]);
 
+  // Unique cities from locations
+  const availableCities = ['All', ...new Set(locations.map(l => l.city).filter(Boolean))].sort();
+
   const filtered = locations.filter(l => {
+    if (cityFilter !== 'All' && (l.city || '').toLowerCase() !== cityFilter.toLowerCase()) return false;
+    if (statusFilter !== 'All' && l.status !== statusFilter) return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      return (l.name + l.city + l.zone).toLowerCase().includes(q);
+      return (l.name + ' ' + (l.city || '') + ' ' + (l.zone || '') + ' ' + (l.size || '')).toLowerCase().includes(q);
     }
     return true;
   });
@@ -103,7 +110,36 @@ export default function AdminLocations() {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, itemsPerPage]);
+  }, [searchQuery, cityFilter, statusFilter, itemsPerPage]);
+
+  // Export Locations to CSV
+  const handleExportCSV = () => {
+    if (filtered.length === 0) {
+      showToast('No locations to export', 'info');
+      return;
+    }
+    const headers = ['ID', 'Name', 'City', 'Zone', 'Status', 'Daily Footfall', 'Format / Size', 'Image URL'];
+    const rows = filtered.map(l => [
+      l.id,
+      `"${(l.name || '').replace(/"/g, '""')}"`,
+      `"${(l.city || '').replace(/"/g, '""')}"`,
+      `"${(l.zone || '').replace(/"/g, '""')}"`,
+      l.status || 'Available',
+      l.footfall || 0,
+      `"${(l.size || '').replace(/"/g, '""')}"`,
+      `"${(l.image || '').replace(/"/g, '""')}"`
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `lexicoad_locations_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast(`Exported ${filtered.length} locations to CSV!`, 'success');
+  };
 
   // Paginated Locations Slice
   const paginatedLocations = filtered.slice(
@@ -274,18 +310,53 @@ export default function AdminLocations() {
 
   return (
     <div className="bg-[#0c1747] border border-white/10 rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-xl w-full max-w-full overflow-hidden">
-      {/* Search and Action */}
+      {/* Search and Action Toolbar */}
       <div className="flex flex-wrap gap-2 sm:gap-3 items-center mb-5 w-full">
-        <div className="relative flex-1 min-w-[140px] sm:min-w-[200px]">
+        <div className="relative flex-1 min-w-[180px]">
           <i className="fa-solid fa-magnifying-glass absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs sm:text-sm"></i>
           <input
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search locations, cities..."
+            placeholder="Search locations, zones, sizes..."
             className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 sm:pl-11 pr-3 sm:pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white placeholder:text-slate-500 outline-none focus:border-laxBlue-600"
           />
         </div>
+
+        {/* City Filter */}
+        <select
+          value={cityFilter}
+          onChange={e => setCityFilter(e.target.value)}
+          className="bg-[#040A29] border border-white/10 rounded-xl px-3 py-2.5 sm:py-3 text-xs sm:text-sm text-white outline-none focus:border-laxBlue-600"
+          title="Filter by City"
+        >
+          {availableCities.map(c => (
+            <option key={c} value={c}>{c === 'All' ? 'All Cities' : c}</option>
+          ))}
+        </select>
+
+        {/* Status Filter */}
+        <select
+          value={statusFilter}
+          onChange={e => setStatusFilter(e.target.value)}
+          className="bg-[#040A29] border border-white/10 rounded-xl px-3 py-2.5 sm:py-3 text-xs sm:text-sm text-white outline-none focus:border-laxBlue-600"
+          title="Filter by Status"
+        >
+          <option value="All">All Statuses</option>
+          <option value="Available">Available</option>
+          <option value="Occupied">Occupied</option>
+          <option value="Maintenance">Maintenance</option>
+        </select>
+
+        {/* Export CSV */}
+        <button
+          onClick={handleExportCSV}
+          className="inline-flex items-center gap-1.5 bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 text-xs sm:text-sm font-bold px-3 sm:px-3.5 py-2.5 sm:py-3 rounded-xl transition"
+          title="Export visible locations to CSV"
+        >
+          <i className="fa-solid fa-file-csv text-emerald-400"></i>
+          <span>Export CSV</span>
+        </button>
 
         {/* Select / Deselect All */}
         {filtered.length > 0 && (
