@@ -98,6 +98,30 @@ export const MEDIA_GENRES = [
     icon: 'fa-solid fa-tv',
     tagline: 'National news, business & regional feeds',
     popular: false
+  },
+  {
+    id: 'Socialmedia',
+    name: 'SOCIAL MEDIA',
+    shortName: 'Social Media',
+    icon: 'fa-solid fa-hashtag',
+    tagline: 'Meta, Instagram, YouTube & Influencer ads',
+    popular: true
+  },
+  {
+    id: 'Development',
+    name: 'DEVELOPMENT',
+    shortName: 'Development',
+    icon: 'fa-solid fa-code',
+    tagline: 'High-conversion web, landing pages & ad tech',
+    popular: true
+  },
+  {
+    id: 'Drone Marketing',
+    name: 'DRONES MARKETING',
+    shortName: 'Drones',
+    icon: 'fa-solid fa-helicopter',
+    tagline: 'Sky light shows & aerial drone brand formations',
+    popular: true
   }
 ];
 
@@ -113,7 +137,10 @@ export const DEFAULT_GENRE_BADGES = {
   Print: { active: false, text: 'CLASSIC', color: 'blue' },
   Radio: { active: false, text: 'TRENDING', color: 'amber' },
   Sports: { active: false, text: 'HOT', color: 'red' },
-  Television: { active: false, text: 'PRIME', color: 'purple' }
+  Television: { active: false, text: 'PRIME', color: 'purple' },
+  Socialmedia: { active: true, text: 'TRENDING', color: 'red' },
+  Development: { active: true, text: 'NEW', color: 'emerald' },
+  'Drone Marketing': { active: true, text: 'HOT', color: 'purple' }
 };
 
 export default function BrowseByGenre({ activeGenre = 'All', onSelectGenre, services = [] }) {
@@ -190,7 +217,7 @@ export default function BrowseByGenre({ activeGenre = 'All', onSelectGenre, serv
         )}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
         {MEDIA_GENRES.map(genre => {
           const isActive = activeGenre.toLowerCase() === genre.id.toLowerCase();
           const count = getGenreCount(genre.id);

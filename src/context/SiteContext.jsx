@@ -2,6 +2,35 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getSiteSettings, saveSiteSettings } from '../services/dataService';
 import { initialSettings } from '../lib/initialData';
 
+const SESSION_STORAGE_KEY = 'laxico_admin_session';
+const SESSION_DURATION_MS = 4 * 60 * 60 * 1000; // 4 hours
+
+const getValidSession = () => {
+  try {
+    const raw = localStorage.getItem(SESSION_STORAGE_KEY);
+    if (!raw) {
+      // Legacy fallback check: if legacy flag without timestamp, invalidate for security
+      localStorage.removeItem('laxico_admin_auth');
+      localStorage.removeItem('laxico_admin_user');
+      return null;
+    }
+    const session = JSON.parse(raw);
+    if (session && session.user && session.expiresAt && session.expiresAt > Date.now()) {
+      return session;
+    }
+    // Expired or invalid
+    localStorage.removeItem(SESSION_STORAGE_KEY);
+    localStorage.removeItem('laxico_admin_auth');
+    localStorage.removeItem('laxico_admin_user');
+    return null;
+  } catch {
+    localStorage.removeItem(SESSION_STORAGE_KEY);
+    localStorage.removeItem('laxico_admin_auth');
+    localStorage.removeItem('laxico_admin_user');
+    return null;
+  }
+};
+
 const SiteContext = createContext();
 
 export const SiteProvider = ({ children }) => {
@@ -9,9 +38,8 @@ export const SiteProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [toasts, setToasts] = useState([]);
   const [lightbox, setLightbox] = useState({ isOpen: false, src: '', title: '', sub: '' });
-  const [isAdmin, setIsAdmin] = useState(() => {
-    return localStorage.getItem('laxico_admin_auth') === 'true';
-  });
+  const [adminSession, setAdminSession] = useState(() => getValidSession());
+  const isAdmin = Boolean(adminSession && adminSession.expiresAt > Date.now());
   const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   // Load initial settings
@@ -92,7 +120,18 @@ export const SiteProvider = ({ children }) => {
     setLightbox(prev => ({ ...prev, isOpen: false }));
   };
 
-  const [adminUser, setAdminUser] = useState(() => localStorage.getItem('laxico_admin_user') || '');
+  const adminUser = adminSession?.user || '';
+
+  // Periodic check for session expiration
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (adminSession && adminSession.expiresAt <= Date.now()) {
+        logout();
+        showToast('Admin session expired. Please sign in again.', 'warning');
+      }
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [adminSession]);
 
   // Auth: Pure ENV-controlled Admin credentials (no hardcoded fallbacks)
   const login = (identifier, password) => {
@@ -131,8 +170,14 @@ export const SiteProvider = ({ children }) => {
     const isListMatch = envUsers.length > 0 && envPasses.length > 0 && envUsers.includes(cleanId) && envPasses.includes(cleanPass);
 
     if (isDirectMatch || isListMatch) {
-      setIsAdmin(true);
-      setAdminUser(cleanId);
+      const newSession = {
+        user: cleanId,
+        token: `session_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+        loginTime: Date.now(),
+        expiresAt: Date.now() + SESSION_DURATION_MS
+      };
+      setAdminSession(newSession);
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(newSession));
       localStorage.setItem('laxico_admin_auth', 'true');
       localStorage.setItem('laxico_admin_user', cleanId);
       setLoginModalOpen(false);
@@ -145,8 +190,8 @@ export const SiteProvider = ({ children }) => {
   };
 
   const logout = () => {
-    setIsAdmin(false);
-    setAdminUser('');
+    setAdminSession(null);
+    localStorage.removeItem(SESSION_STORAGE_KEY);
     localStorage.removeItem('laxico_admin_auth');
     localStorage.removeItem('laxico_admin_user');
     showToast('Logged out securely', 'info');

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Routes, Route, useLocation, Outlet, Navigate } from 'react-router-dom';
-import { SiteProvider } from './context/SiteContext';
+import { SiteProvider, useSite } from './context/SiteContext';
 
 // Components
 import Navbar from './components/Navbar';
@@ -30,16 +30,16 @@ import AdminAnalytics from './pages/admin/AdminAnalytics';
 import AdminDatabase from './pages/admin/AdminDatabase';
 import AdminSettings from './pages/admin/AdminSettings';
 
-// Route metadata updater (Scroll, Dynamic Canonical URL, Title, OG URL)
+// Route metadata updater (Scroll, Dynamic Canonical URL, Title, OG URL, Twitter URL)
 function RouteMetadataUpdater() {
   const { pathname } = useLocation();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // 1. Dynamic Canonical URL to match exact current page
+    // 1. Authoritative Canonical URL across all domains pointing to primary lexicoadvertising.com
     const cleanPath = pathname === '/' ? '' : pathname.replace(/\/$/, '');
-    const canonicalHref = `https://lexicoad-two.vercel.app${cleanPath}`;
+    const canonicalHref = `https://lexicoadvertising.com${cleanPath}`;
 
     let canonical = document.querySelector("link[rel='canonical']");
     if (!canonical) {
@@ -50,10 +50,22 @@ function RouteMetadataUpdater() {
     canonical.setAttribute('href', canonicalHref);
 
     // 2. Dynamic OpenGraph URL
-    const ogUrl = document.querySelector("meta[property='og:url']");
-    if (ogUrl) {
-      ogUrl.setAttribute('content', canonicalHref);
+    let ogUrl = document.querySelector("meta[property='og:url']");
+    if (!ogUrl) {
+      ogUrl = document.createElement('meta');
+      ogUrl.setAttribute('property', 'og:url');
+      document.head.appendChild(ogUrl);
     }
+    ogUrl.setAttribute('content', canonicalHref);
+
+    // 3. Dynamic Twitter URL
+    let twitterUrl = document.querySelector("meta[name='twitter:url']");
+    if (!twitterUrl) {
+      twitterUrl = document.createElement('meta');
+      twitterUrl.setAttribute('name', 'twitter:url');
+      document.head.appendChild(twitterUrl);
+    }
+    twitterUrl.setAttribute('content', canonicalHref);
 
     // 3. Dynamic Page Titles for SEO
     const pageTitles = {
@@ -94,6 +106,17 @@ function PublicLayout() {
   );
 }
 
+// Synchronous Route Guard for Admin Panel (Blocks any unauthorized direct link access)
+function AdminProtectedRoute({ children }) {
+  const { isAdmin } = useSite();
+  const location = useLocation();
+
+  if (!isAdmin) {
+    return <Navigate to="/lexico" replace state={{ from: location.pathname }} />;
+  }
+  return children;
+}
+
 export default function App() {
   return (
     <SiteProvider>
@@ -119,8 +142,15 @@ export default function App() {
         <Route path="/laxico" element={<Navigate to="/lexico" replace />} />
         <Route path="/admin/login" element={<Navigate to="/lexico" replace />} />
 
-        {/* Admin Dashboard & Management Routes */}
-        <Route path="/admin" element={<AdminLayout />}>
+        {/* Admin Dashboard & Management Routes (Strictly Protected) */}
+        <Route
+          path="/admin"
+          element={
+            <AdminProtectedRoute>
+              <AdminLayout />
+            </AdminProtectedRoute>
+          }
+        >
           <Route index element={<AdminDashboard />} />
           <Route path="services" element={<AdminServices />} />
           <Route path="locations" element={<AdminLocations />} />

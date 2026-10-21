@@ -74,7 +74,10 @@ export const initialSettings = {
     Print: { active: false, text: 'CLASSIC', color: 'blue' },
     Radio: { active: false, text: 'TRENDING', color: 'amber' },
     Sports: { active: false, text: 'HOT', color: 'red' },
-    Television: { active: false, text: 'PRIME', color: 'purple' }
+    Television: { active: false, text: 'PRIME', color: 'purple' },
+    Socialmedia: { active: true, text: 'TRENDING', color: 'red' },
+    Development: { active: true, text: 'NEW', color: 'emerald' },
+    'Drone Marketing': { active: true, text: 'HOT', color: 'purple' }
   })
 };
 
@@ -306,6 +309,63 @@ export const initialServices = [
     cities: 'Delhi NCR, Mumbai, Bengaluru, Hyderabad',
     image: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',
     description: 'Full page jackets, display ads, and custom inserts in leading English & regional newspapers. Maximum credibility and immediate city-wide buzz for brand launches.'
+  },
+  {
+    id: 'svc_social_media',
+    name: 'Meta & Social Media Ad Campaigns',
+    type: 'Socialmedia',
+    genre: 'Socialmedia',
+    sub_type: 'Reels, Story Ads & Performance Collabs',
+    chain_or_brand: 'Meta & Social Ads Network',
+    audience_metric: '10M+ Targeted Monthly Reach • 3.2% CTR',
+    min_spend: 25000,
+    price: 55000,
+    rating: 4.9,
+    popularity: 96,
+    status: 'Active',
+    dims: '9:16 Reels • 1:1 Feed • Story Motion Creatives',
+    durations: '2 Weeks, 1 Month, 3 Months, 6 Months',
+    cities: 'Pan India • Delhi NCR, Mumbai, Bengaluru, Hyderabad',
+    image: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=800&auto=format&fit=crop',
+    description: 'Hyper-targeted social media advertising across Instagram, Facebook, YouTube and LinkedIn. Complete high-converting video creative generation, demographic targeting, scaling, and daily analytics.'
+  },
+  {
+    id: 'svc_web_dev',
+    name: 'Campaign Landing Pages & Web Development',
+    type: 'Development',
+    genre: 'Development',
+    sub_type: 'High-Speed Web Apps & Ad Tech Portals',
+    chain_or_brand: 'Laxico AdTech Suite',
+    audience_metric: '99.9% Uptime • Sub-second Load • Lead Capture',
+    min_spend: 35000,
+    price: 75000,
+    rating: 4.9,
+    popularity: 92,
+    status: 'Active',
+    dims: 'Mobile & Desktop Responsive • Fast Web Apps',
+    durations: 'One-Time Project, 1 Month Support, 3 Months Support',
+    cities: 'Pan India • Remote / Global Delivery',
+    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop',
+    description: 'High-performance marketing landing pages, interactive campaign websites, QR code scan tracking, and lead CRM integrations engineered for maximum conversion.'
+  },
+  {
+    id: 'svc_drone_shows',
+    name: 'Aerial Drone Light Shows & Sky Branding',
+    type: 'Drone Marketing',
+    genre: 'Drone Marketing',
+    sub_type: 'Synchronized LED Drone Swarm Shows',
+    chain_or_brand: 'Laxico SkyFleet Drones',
+    audience_metric: '5L+ Live Viewers • Massive Viral Social Reach',
+    min_spend: 150000,
+    price: 250000,
+    rating: 5.0,
+    popularity: 99,
+    status: 'Active',
+    dims: '100–500 Swarm Drones • 400ft Sky Canvas',
+    durations: '1 Night Event, 3 Days Festival, 1 Week Tour',
+    cities: 'Delhi NCR, Mumbai, Bengaluru, Goa, Hyderabad',
+    image: 'https://images.unsplash.com/photo-1508614589041-895b88991e3e?q=80&w=800&auto=format&fit=crop',
+    description: 'Spectacular synchronized drone light shows painting 3D company logos, animated figures, and scannable QR codes across the night sky. Unmatched viral impact for launches and major events.'
   }
 ];
 

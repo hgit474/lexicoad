@@ -114,7 +114,9 @@ export default function AdminLayout() {
 
   const pageMeta = getPageMeta();
 
-  if (!isAdmin) return null;
+  if (!isAdmin) {
+    return <Navigate to="/lexico" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-[#040A29] text-white flex flex-col font-jakarta">

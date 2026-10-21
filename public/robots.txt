@@ -3,6 +3,7 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /lexico
 
 # Point to XML Sitemap
-Sitemap: https://lexicoad-two.vercel.app/sitemap.xml
+Sitemap: https://lexicoadvertising.com/sitemap.xml

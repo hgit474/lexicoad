@@ -76,7 +76,21 @@ export const getLocalDB = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      // Auto-migrate: ensure any newly added initial services exist
+      let updated = false;
+      if (Array.isArray(parsed.services)) {
+        initialServices.forEach(initSvc => {
+          if (!parsed.services.some(s => s.id === initSvc.id)) {
+            parsed.services.push(initSvc);
+            updated = true;
+          }
+        });
+      }
+      if (updated) {
+        saveLocalDB(parsed);
+      }
+      return parsed;
     }
   } catch (e) {
     console.warn('Error reading local storage:', e);

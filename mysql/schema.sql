@@ -301,7 +301,10 @@ INSERT INTO `media_genres` (`id`, `name`, `short_name`, `icon`, `tagline`, `is_p
 ('Print', 'NEWSPAPER / PRINT', 'Print', 'fa-solid fa-newspaper', 'Leading English & regional dailies', 0, 9),
 ('Radio', 'RADIO & AUDIO', 'Radio', 'fa-solid fa-radio', 'Prime FM channels & metro RJ mentions', 0, 10),
 ('Sports', 'SPORTS & ARENA', 'Sports', 'fa-solid fa-person-running', 'Stadium perimeter LEDs & tour sponsorships', 0, 11),
-('Television', 'TELEVISION', 'Television', 'fa-solid fa-tv', 'National news, business & regional feeds', 0, 12)
+('Television', 'TELEVISION', 'Television', 'fa-solid fa-tv', 'National news, business & regional feeds', 0, 12),
+('Socialmedia', 'SOCIAL MEDIA', 'Social Media', 'fa-solid fa-hashtag', 'Meta, Instagram, YouTube & Influencer ads', 1, 13),
+('Development', 'DEVELOPMENT', 'Development', 'fa-solid fa-code', 'High-conversion web, landing pages & ad tech', 1, 14),
+('Drone Marketing', 'DRONES MARKETING', 'Drones', 'fa-solid fa-helicopter', 'Sky light shows & aerial drone brand formations', 1, 15)
 ON DUPLICATE KEY UPDATE `name` = VALUES(`name`);
 
 -- 3. Services Seed
@@ -525,6 +528,60 @@ INSERT INTO `services` (
   'Delhi NCR, Mumbai, Bengaluru, Hyderabad',
   'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',
   'Full page jackets, display ads, and custom inserts in leading English & regional newspapers. Maximum credibility and immediate city-wide buzz for brand launches.'
+),
+(
+  'svc_social_media',
+  'Meta & Social Media Ad Campaigns',
+  'Socialmedia',
+  'Socialmedia',
+  'Reels, Story Ads & Performance Collabs',
+  'Meta & Social Ads Network',
+  '10M+ Targeted Monthly Reach • 3.2% CTR',
+  25000,
+  55000,
+  4.9,
+  96,
+  '9:16 Reels • 1:1 Feed • Story Motion Creatives',
+  '2 Weeks, 1 Month, 3 Months, 6 Months',
+  'Pan India • Delhi NCR, Mumbai, Bengaluru, Hyderabad',
+  'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=800&auto=format&fit=crop',
+  'Hyper-targeted social media advertising across Instagram, Facebook, YouTube and LinkedIn. Complete high-converting video creative generation, demographic targeting, scaling, and daily analytics.'
+),
+(
+  'svc_web_dev',
+  'Campaign Landing Pages & Web Development',
+  'Development',
+  'Development',
+  'High-Speed Web Apps & Ad Tech Portals',
+  'Laxico AdTech Suite',
+  '99.9% Uptime • Sub-second Load • Lead Capture',
+  35000,
+  75000,
+  4.9,
+  92,
+  'Mobile & Desktop Responsive • Fast Web Apps',
+  'One-Time Project, 1 Month Support, 3 Months Support',
+  'Pan India • Remote / Global Delivery',
+  'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop',
+  'High-performance marketing landing pages, interactive campaign websites, QR code scan tracking, and lead CRM integrations engineered for maximum conversion.'
+),
+(
+  'svc_drone_shows',
+  'Aerial Drone Light Shows & Sky Branding',
+  'Drone Marketing',
+  'Drone Marketing',
+  'Synchronized LED Drone Swarm Shows',
+  'Laxico SkyFleet Drones',
+  '5L+ Live Viewers • Massive Viral Social Reach',
+  150000,
+  250000,
+  5.0,
+  99,
+  '100–500 Swarm Drones • 400ft Sky Canvas',
+  '1 Night Event, 3 Days Festival, 1 Week Tour',
+  'Delhi NCR, Mumbai, Bengaluru, Goa, Hyderabad',
+  'https://images.unsplash.com/photo-1508614589041-895b88991e3e?q=80&w=800&auto=format&fit=crop',
+  'Spectacular synchronized drone light shows painting 3D company logos, animated figures, and scannable QR codes across the night sky. Unmatched viral impact for launches and major events.'
 )
 ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `price` = VALUES(`price`);
 

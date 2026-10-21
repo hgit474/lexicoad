@@ -12,6 +12,8 @@ import {
 } from '../../services/dataService';
 import { useSite } from '../../context/SiteContext';
 
+import { MEDIA_GENRES } from '../../components/BrowseByGenre';
+
 export default function AdminDatabase() {
   const { showToast } = useSite();
   const [activeTab, setActiveTab] = useState('mysql'); // 'mysql' | 'postgres'
@@ -25,7 +27,7 @@ export default function AdminDatabase() {
     clients: 5,
     inquiries: 0,
     media: 0,
-    genres: 12
+    genres: MEDIA_GENRES.length
   });
 
   useEffect(() => {
@@ -46,7 +48,7 @@ export default function AdminDatabase() {
         clients: db.clients?.length || 5,
         inquiries: i.length,
         media: m.length,
-        genres: 12
+        genres: MEDIA_GENRES.length
       });
     });
   }, []);

@@ -6,7 +6,8 @@
 - Name: Laxico Advertising Pvt. Ltd.
 - Industry: Outdoor Advertising (OOH), Digital Out-of-Home (DOOH), Transit Media
 - Operating Regions: Delhi NCR, Mumbai, Bengaluru, Hyderabad, Chennai, Pune, Kolkata, Ahmedabad, Jaipur, Lucknow, Chandigarh, Kochi
-- Primary Website: https://lexicoad-two.vercel.app/
+- Primary Website: https://lexicoadvertising.com/
+- Alternate Domains: https://lexicoadvertising.in | https://lexicoadvertising.org | https://lexicoad-two.vercel.app
 - GST Number: 29CTIPS2521P1ZZ
 - UDYAM Registration: UDYAM-KR-03-0664055
 - Headquarters: No 1 Nandini Complex, Chandra Layout, Bangalore, Karnataka 560040, India
@@ -39,6 +40,22 @@
    - Venues: Top tier A malls across metro cities
    - Formats: Giant atrium hanging banners, escalator side graphics, standees, elevator wraps
    - Pricing: Starting from ₹45,000 / month
+
+6. Social Media Marketing & Meta Ads
+   - Channels: Instagram Reels, Facebook Feeds, YouTube Pre-Roll, LinkedIn Sponsored Content
+   - Target Reach: Hyper-local geo-fencing synchronized with physical billboard placements
+   - Pricing: Starting from ₹40,000 / campaign
+
+7. Web & App Development / AdTech
+   - Scope: Campaign landing pages, interactive QR-code experiences, mobile lead funnels, analytics tracking
+   - Stack: Next.js, React, High-Performance Edge Hosting, CRM Webhooks
+   - Pricing: Starting from ₹55,000 / project
+
+8. Drone Advertising & Aerial Light Shows
+   - Fleet: 100 to 1,000+ synchronized RGB LED micro-drones
+   - Shows: Aerial logo formations, 3D animated sky QR codes, festival light spectacles
+   - Approvals: DGCA-certified flight plans, airspace clearances, and geo-fenced safety protocols
+   - Pricing: Starting from ₹2,50,000 / show
 
 ## Client Verification & Execution Workflow
 - Step 1: Media Selection & Availability Check via online platform
