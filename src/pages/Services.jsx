@@ -1,25 +1,38 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getServices, getLocations, getServiceLocations } from '../services/dataService';
+import { useSite } from '../context/SiteContext';
 import BrowseByGenre from '../components/BrowseByGenre';
 import InquiryModal from '../components/InquiryModal';
+import ServiceFilters from '../components/ServiceFilters';
+import FilterConfigModal from '../components/admin/FilterConfigModal';
+import { getParsedFilterConfig } from '../lib/filterConfig';
 
 export default function Services() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { settings, isAdmin } = useSite();
+  const filterConfig = useMemo(() => getParsedFilterConfig(settings), [settings]);
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
+
   const [services, setServices] = useState([]);
   const [locations, setLocations] = useState([]);
   const [serviceLocations, setServiceLocations] = useState([]);
 
-  // Filters
-  const initialType = searchParams.get('type') || searchParams.get('genre') || 'All';
-  const [activeGenre, setActiveGenre] = useState(initialType);
-  const [selectedCity, setSelectedCity] = useState(searchParams.get('city') || 'All');
+  // URL Initial Filters
+  const initialType = searchParams.get('type') || searchParams.get('genre');
+  const initialCity = searchParams.get('city');
+
+  const [filters, setFilters] = useState({
+    cities: initialCity && initialCity !== 'All' ? [initialCity] : [],
+    categories: initialType && initialType !== 'All' ? [initialType] : [],
+    subTypes: [],
+    budgetBracket: 'all',
+    reaches: [],
+    durations: []
+  });
+
   const [searchQuery, setSearchQuery] = useState('');
-  const [citySearchQuery, setCitySearchQuery] = useState('');
-  const [subTypeSearchQuery, setSubTypeSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('popular');
-  const [maxBudget, setMaxBudget] = useState(100000);
-  const [selectedSubType, setSelectedSubType] = useState('All');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
@@ -38,17 +51,25 @@ export default function Services() {
   // Sync URL search params
   useEffect(() => {
     const typeParam = searchParams.get('type') || searchParams.get('genre');
-    if (typeParam && typeParam !== activeGenre) {
-      setActiveGenre(typeParam);
+    if (typeParam && typeParam !== 'All') {
+      setFilters(prev => {
+        if (!prev.categories.includes(typeParam)) {
+          return { ...prev, categories: [typeParam] };
+        }
+        return prev;
+      });
     }
   }, [searchParams]);
 
+  const activeGenre = filters.categories.length === 1 ? filters.categories[0] : (filters.categories.length > 1 ? 'Multiple' : 'All');
+
   const handleSelectGenre = (genreId) => {
-    setActiveGenre(genreId);
     if (genreId === 'All') {
+      setFilters(prev => ({ ...prev, categories: [] }));
       searchParams.delete('type');
       searchParams.delete('genre');
     } else {
+      setFilters(prev => ({ ...prev, categories: [genreId] }));
       searchParams.set('type', genreId);
     }
     setSearchParams(searchParams);
@@ -68,54 +89,75 @@ export default function Services() {
     return [...new Set([...explicitCities, ...mappedCities])];
   };
 
-  const cityOptions = useMemo(() => {
-    return ['All', ...[...new Set(services.flatMap(getServiceCities))].sort()];
+  const allCitiesList = useMemo(() => {
+    return [...new Set(services.flatMap(getServiceCities))].sort();
   }, [services, serviceLocations, locations]);
-
-  const subTypeOptions = useMemo(() => {
-    const types = services
-      .filter(s => activeGenre === 'All' || (s.genre || s.type).toLowerCase() === activeGenre.toLowerCase())
-      .map(s => s.sub_type)
-      .filter(Boolean);
-    return ['All', ...new Set(types)];
-  }, [services, activeGenre]);
-
-  const filteredCityOptions = useMemo(() => {
-    if (!citySearchQuery.trim()) return cityOptions;
-    const q = citySearchQuery.toLowerCase().trim();
-    return cityOptions.filter(c => {
-      if (c === 'All') return 'all locations'.includes(q);
-      return c.toLowerCase().includes(q);
-    });
-  }, [cityOptions, citySearchQuery]);
-
-  const filteredSubTypeOptions = useMemo(() => {
-    if (!subTypeSearchQuery.trim()) return subTypeOptions;
-    const q = subTypeSearchQuery.toLowerCase().trim();
-    return subTypeOptions.filter(opt => {
-      if (opt === 'All') return 'all ad options'.includes(q);
-      return opt.toLowerCase().includes(q);
-    });
-  }, [subTypeOptions, subTypeSearchQuery]);
 
   const filteredServices = useMemo(() => {
     return services.filter(s => {
-      const sGenre = s.genre || s.type;
-      if (activeGenre !== 'All' && sGenre.toLowerCase() !== activeGenre.toLowerCase()) {
-        return false;
-      }
-      if (selectedCity !== 'All') {
-        const cities = getServiceCities(s);
-        if (!cities.some(c => c.toLowerCase() === selectedCity.toLowerCase())) {
+      const sGenre = s.genre || s.type || '';
+
+      // 1. Categories / Genres
+      if (filters.categories && filters.categories.length > 0) {
+        if (!filters.categories.some(c => c.toLowerCase() === sGenre.toLowerCase())) {
           return false;
         }
       }
-      if (selectedSubType !== 'All' && s.sub_type !== selectedSubType) {
-        return false;
+
+      // 2. Cities / Locations (multi-select)
+      if (filters.cities && filters.cities.length > 0) {
+        const cities = getServiceCities(s);
+        const matchCity = filters.cities.some(fc =>
+          cities.some(c => c.toLowerCase() === fc.toLowerCase())
+        );
+        if (!matchCity) return false;
       }
-      if (s.min_spend && s.min_spend > maxBudget) {
-        return false;
+
+      // 3. Ad Options / Formats (sub_types)
+      if (filters.subTypes && filters.subTypes.length > 0) {
+        if (!s.sub_type || !filters.subTypes.includes(s.sub_type)) {
+          return false;
+        }
       }
+
+      // 4. Budget Bracket
+      if (filters.budgetBracket && filters.budgetBracket !== 'all') {
+        const bracket = (filterConfig.budget_brackets || []).find(b => b.id === filters.budgetBracket);
+        if (bracket) {
+          const val = s.min_spend || s.price || 0;
+          if (val < bracket.min || (bracket.max !== Infinity && val > bracket.max)) {
+            return false;
+          }
+        }
+      }
+
+      // 5. Audience & Reach
+      if (filters.reaches && filters.reaches.length > 0) {
+        const metric = s.audience_metric || '';
+        const matchAny = filters.reaches.some(r => {
+          if (r === 'mega') return /([1-9]\d*M|\d+\.\d+M|crore|cr)/i.test(metric);
+          if (r === 'high') return /(500K|[5-9]\d\dK|600K|700K|800K|900K)/i.test(metric);
+          if (r === 'mid') return /(100K|150K|200K|250K|300K|400K|lakh)/i.test(metric);
+          if (r === 'local') return /(under 100k|50k|75k|neighbourhood|ward)/i.test(metric);
+          return true;
+        });
+        if (!matchAny) return false;
+      }
+
+      // 6. Durations
+      if (filters.durations && filters.durations.length > 0) {
+        const dur = s.durations || '';
+        const matchAny = filters.durations.some(d => {
+          if (d === 'short') return /(10|15|two weeks|2 weeks)/i.test(dur);
+          if (d === '1month') return /(1 month|monthly|30 days)/i.test(dur);
+          if (d === '3months') return /(3 months|quarterly)/i.test(dur);
+          if (d === 'long') return /(6 months|annual|1 year)/i.test(dur);
+          return true;
+        });
+        if (!matchAny) return false;
+      }
+
+      // 7. Search Query
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
         const mappedLocs = getMappedLocations(s.id);
@@ -123,6 +165,7 @@ export default function Services() {
         const matchLoc = mappedLocs.some(l => (l.name + ' ' + l.city).toLowerCase().includes(q));
         if (!matchText.includes(q) && !matchLoc) return false;
       }
+
       return true;
     }).sort((a, b) => {
       if (sortBy === 'low') return (a.min_spend || a.price) - (b.min_spend || b.price);
@@ -130,7 +173,7 @@ export default function Services() {
       if (sortBy === 'name') return a.name.localeCompare(b.name);
       return (b.popularity || 0) - (a.popularity || 0);
     });
-  }, [services, activeGenre, selectedCity, selectedSubType, maxBudget, searchQuery, sortBy, serviceLocations, locations]);
+  }, [services, filters, searchQuery, sortBy, filterConfig, serviceLocations, locations]);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -139,7 +182,7 @@ export default function Services() {
   // Reset page when filters or search change
   useEffect(() => {
     setCurrentPage(1);
-  }, [activeGenre, selectedCity, selectedSubType, maxBudget, searchQuery, sortBy, itemsPerPage]);
+  }, [filters, searchQuery, sortBy, itemsPerPage]);
 
   const totalPages = useMemo(() => {
     if (itemsPerPage === 'all') return 1;
@@ -163,16 +206,19 @@ export default function Services() {
   };
 
   const resetAllFilters = () => {
-    setActiveGenre('All');
-    setSelectedCity('All');
-    setSelectedSubType('All');
-    setMaxBudget(100000);
+    setFilters({
+      cities: [],
+      categories: [],
+      subTypes: [],
+      budgetBracket: 'all',
+      reaches: [],
+      durations: []
+    });
     setSearchQuery('');
-    setCitySearchQuery('');
-    setSubTypeSearchQuery('');
     setCurrentPage(1);
     searchParams.delete('type');
     searchParams.delete('genre');
+    searchParams.delete('city');
     setSearchParams(searchParams);
   };
 
@@ -181,10 +227,13 @@ export default function Services() {
     setQuoteModalOpen(true);
   };
 
-  const activeFiltersCount = (activeGenre !== 'All' ? 1 : 0) +
-    (selectedCity !== 'All' ? 1 : 0) +
-    (selectedSubType !== 'All' ? 1 : 0) +
-    (maxBudget < 100000 ? 1 : 0) +
+  const activeFiltersCount =
+    (filters.cities?.length || 0) +
+    (filters.categories?.length || 0) +
+    (filters.subTypes?.length || 0) +
+    (filters.budgetBracket && filters.budgetBracket !== 'all' ? 1 : 0) +
+    (filters.reaches?.length || 0) +
+    (filters.durations?.length || 0) +
     (searchQuery ? 1 : 0);
 
   return (
@@ -229,14 +278,18 @@ export default function Services() {
 
             <div className="flex gap-2">
               <select
-                value={selectedCity}
-                onChange={e => setSelectedCity(e.target.value)}
+                value={filters.cities[0] || 'All'}
+                onChange={e => {
+                  const val = e.target.value;
+                  setFilters(prev => ({ ...prev, cities: val === 'All' ? [] : [val] }));
+                }}
                 aria-label="Filter media by city"
                 className="flex-1 md:w-44 px-3 py-3 text-xs sm:text-sm font-bold bg-slate-50 rounded-xl outline-none text-laxBlue-950 cursor-pointer border border-slate-200/80"
               >
-                {cityOptions.map(city => (
+                <option value="All">📍 All Cities</option>
+                {allCitiesList.map(city => (
                   <option key={city} value={city}>
-                    {city === 'All' ? '📍 All Cities' : `📍 ${city}`}
+                    📍 {city}
                   </option>
                 ))}
               </select>
@@ -264,212 +317,44 @@ export default function Services() {
 
         {/* Main Catalog View: Left Sidebar + Right Inventory */}
         <div className="grid lg:grid-cols-4 gap-6 items-start mt-3 sm:mt-4">
-          {/* Left Filter Sidebar */}
+          {/* Left Filter Sidebar (The Media Ant style) */}
           <aside className={`
-            lg:block lg:sticky lg:top-24 bg-white rounded-3xl border border-blue-100 p-6 shadow-sm z-30
-            ${mobileFilterOpen ? 'fixed inset-x-4 top-20 bottom-6 overflow-y-auto z-50 shadow-2xl block' : 'hidden'}
+            lg:block lg:sticky lg:top-24 z-30
+            ${mobileFilterOpen ? 'fixed inset-x-4 top-20 bottom-6 overflow-y-auto z-50 block' : 'hidden'}
           `}>
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
-              <div className="flex items-center gap-2">
-                <i className="fa-solid fa-filter text-laxRed-600"></i>
-                <h3 className="font-grotesk font-bold text-lg text-laxBlue-950">Filters</h3>
-              </div>
-              {activeFiltersCount > 0 && (
+            {/* Mobile Close Button */}
+            {mobileFilterOpen && (
+              <div className="lg:hidden flex items-center justify-between bg-white px-4 py-3 border-b border-slate-200 rounded-t-2xl shadow-sm mb-2">
+                <span className="font-grotesk font-bold text-sm text-slate-900">Filters</span>
                 <button
-                  onClick={resetAllFilters}
-                  className="text-xs font-bold text-laxRed-600 hover:underline"
+                  type="button"
+                  onClick={() => setMobileFilterOpen(false)}
+                  className="w-7 h-7 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center"
                 >
-                  Reset All
+                  <i className="fa-solid fa-xmark text-xs"></i>
                 </button>
-              )}
-              <button
-                onClick={() => setMobileFilterOpen(false)}
-                className="lg:hidden text-slate-400 hover:text-slate-600"
-              >
-                <i className="fa-solid fa-xmark text-lg"></i>
-              </button>
-            </div>
-
-            {/* City Selector */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
-                  Location / City
-                </label>
-                {citySearchQuery && (
-                  <span className="text-[10px] text-slate-400 font-bold">
-                    {filteredCityOptions.length} found
-                  </span>
-                )}
-              </div>
-
-              {/* Search Bar for City Filter Options */}
-              <div className="relative mb-2.5">
-                <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                <input
-                  type="text"
-                  value={citySearchQuery}
-                  onChange={e => setCitySearchQuery(e.target.value)}
-                  placeholder="Search city..."
-                  aria-label="Search city filter options"
-                  className="w-full pl-8 pr-7 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-laxBlue-950 focus:bg-white focus:ring-1 focus:ring-laxBlue-950/20 transition"
-                />
-                {citySearchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setCitySearchQuery('')}
-                    aria-label="Clear city search"
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
-                  >
-                    <i className="fa-solid fa-xmark text-xs"></i>
-                  </button>
-                )}
-              </div>
-
-              <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1">
-                {filteredCityOptions.length === 0 ? (
-                  <div className="py-3 px-2 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                    <p className="text-[11px] text-slate-500 font-medium">No cities match "{citySearchQuery}"</p>
-                    <button
-                      type="button"
-                      onClick={() => setCitySearchQuery('')}
-                      className="mt-1 text-[11px] font-bold text-laxRed-600 hover:underline"
-                    >
-                      Clear search
-                    </button>
-                  </div>
-                ) : (
-                  filteredCityOptions.map(city => {
-                    const isChecked = selectedCity === city;
-                    return (
-                      <button
-                        key={city}
-                        type="button"
-                        onClick={() => setSelectedCity(city)}
-                        className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition ${
-                          isChecked
-                            ? 'bg-laxBlue-950 text-white font-bold'
-                            : 'text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span>{city === 'All' ? 'All Locations' : city}</span>
-                        {isChecked && <i className="fa-solid fa-check text-[10px]"></i>}
-                      </button>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-
-            {/* Ad Options / Sub-Types */}
-            {subTypeOptions.length > 2 && (
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
-                    Ad Option / Format
-                  </label>
-                  {subTypeSearchQuery && (
-                    <span className="text-[10px] text-slate-400 font-bold">
-                      {filteredSubTypeOptions.length} found
-                    </span>
-                  )}
-                </div>
-
-                {subTypeOptions.length > 4 && (
-                  <div className="relative mb-2.5">
-                    <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                    <input
-                      type="text"
-                      value={subTypeSearchQuery}
-                      onChange={e => setSubTypeSearchQuery(e.target.value)}
-                      placeholder="Search format..."
-                      aria-label="Search format filter options"
-                      className="w-full pl-8 pr-7 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-laxBlue-950 focus:bg-white focus:ring-1 focus:ring-laxBlue-950/20 transition"
-                    />
-                    {subTypeSearchQuery && (
-                      <button
-                        type="button"
-                        onClick={() => setSubTypeSearchQuery('')}
-                        aria-label="Clear format search"
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
-                      >
-                        <i className="fa-solid fa-xmark text-xs"></i>
-                      </button>
-                    )}
-                  </div>
-                )}
-
-                <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
-                  {filteredSubTypeOptions.length === 0 ? (
-                    <div className="py-3 px-2 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                      <p className="text-[11px] text-slate-500 font-medium">No format matches "{subTypeSearchQuery}"</p>
-                      <button
-                        type="button"
-                        onClick={() => setSubTypeSearchQuery('')}
-                        className="mt-1 text-[11px] font-bold text-laxRed-600 hover:underline"
-                      >
-                        Clear search
-                      </button>
-                    </div>
-                  ) : (
-                    filteredSubTypeOptions.map(opt => {
-                      const isChecked = selectedSubType === opt;
-                      return (
-                        <button
-                          key={opt}
-                          type="button"
-                          onClick={() => setSelectedSubType(opt)}
-                          className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition ${
-                            isChecked
-                              ? 'bg-laxRed-600 text-white font-bold'
-                              : 'text-slate-700 hover:bg-slate-100'
-                          }`}
-                        >
-                          <span className="truncate">{opt === 'All' ? 'All Ad Options' : opt}</span>
-                          {isChecked && <i className="fa-solid fa-check text-[10px]"></i>}
-                        </button>
-                      );
-                    })
-                  )}
-                </div>
               </div>
             )}
 
-            {/* Min Spend Range Slider */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
-                  Budget Ceiling
-                </label>
-                <span className="text-xs font-bold text-laxBlue-950 font-grotesk">
-                  ₹{maxBudget.toLocaleString('en-IN')}
-                </span>
-              </div>
-              <input
-                type="range"
-                min="5000"
-                max="100000"
-                step="5000"
-                value={maxBudget}
-                onChange={e => setMaxBudget(Number(e.target.value))}
-                className="w-full accent-laxBlue-900 cursor-pointer"
-              />
-              <div className="flex justify-between text-[10px] text-slate-400 font-bold mt-1">
-                <span>₹5K</span>
-                <span>₹50K</span>
-                <span>₹100K+</span>
-              </div>
-            </div>
+            <ServiceFilters
+              services={services}
+              filters={filters}
+              onFilterChange={setFilters}
+              onResetFilters={resetAllFilters}
+              config={filterConfig}
+              isAdmin={isAdmin}
+              onOpenAdminConfig={() => setFilterModalOpen(true)}
+            />
 
             {/* Direct Assistance Card */}
-            <div className="rounded-2xl bg-gradient-to-br from-[#052F42] to-[#8E0808] p-4 text-white text-xs">
+            <div className="mt-4 rounded-2xl bg-gradient-to-br from-[#052F42] to-[#8E0808] p-4 text-white text-xs shadow-sm">
               <div className="font-grotesk font-bold text-sm mb-1">Need a Custom Media Plan?</div>
               <p className="text-blue-100 text-[11px] leading-relaxed mb-3">
                 Our outdoor media strategist will build a geo-targeted plan within 4 hours.
               </p>
               <button
                 onClick={() => handleOpenQuote(null)}
-                className="w-full py-2 bg-white text-laxBlue-950 rounded-xl font-extrabold hover:bg-slate-100 transition"
+                className="w-full py-2 bg-white text-laxBlue-950 rounded-xl font-extrabold hover:bg-slate-100 transition shadow"
               >
                 Request Media Plan
               </button>
@@ -479,7 +364,7 @@ export default function Services() {
           {/* Right Inventory Listing */}
           <main className="lg:col-span-3">
             {/* Top Toolbar: Result Count, Sort By, View Mode */}
-            <div id="services-catalog-top" className="bg-white rounded-2xl border border-blue-100 px-4 py-3 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-3 scroll-mt-24">
+            <div id="services-catalog-top" className="bg-white rounded-2xl border border-blue-100 px-4 py-3 shadow-sm mb-4 flex flex-wrap items-center justify-between gap-3 scroll-mt-24">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm font-extrabold text-laxBlue-950">
                   {filteredServices.length} Media Properties
@@ -489,15 +374,16 @@ export default function Services() {
                     Page {currentPage} of {totalPages}
                   </span>
                 )}
-                {activeGenre !== 'All' && (
-                  <span className="chip bg-blue-50 text-laxBlue-700 border border-blue-100 text-[11px] font-bold">
-                    {activeGenre}
-                  </span>
-                )}
-                {selectedCity !== 'All' && (
-                  <span className="chip bg-red-50 text-laxRed-700 border border-red-100 text-[11px] font-bold">
-                    {selectedCity}
-                  </span>
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => setFilterModalOpen(true)}
+                    className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-lg flex items-center gap-1 transition ml-1"
+                    title="Customize marketplace filters"
+                  >
+                    <i className="fa-solid fa-sliders text-[10px]"></i>
+                    <span>Customize Filters</span>
+                  </button>
                 )}
               </div>
 
@@ -534,6 +420,124 @@ export default function Services() {
                 </div>
               </div>
             </div>
+
+            {/* Active Filter Chips / Pills (Media Ant style) */}
+            {activeFiltersCount > 0 && (
+              <div className="bg-white border border-slate-200 rounded-2xl px-4 py-2.5 mb-5 flex flex-wrap items-center gap-2 text-xs shadow-xs">
+                <span className="font-bold text-slate-400 text-[11px] uppercase tracking-wider mr-1">
+                  Active Filters:
+                </span>
+
+                {filters.cities.map(city => (
+                  <span
+                    key={`chip-city-${city}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200"
+                  >
+                    <i className="fa-solid fa-location-dot text-[10px]"></i>
+                    <span>{city}</span>
+                    <button
+                      type="button"
+                      onClick={() => setFilters(prev => ({ ...prev, cities: prev.cities.filter(c => c !== city) }))}
+                      className="hover:text-indigo-900 ml-0.5"
+                    >
+                      <i className="fa-solid fa-xmark text-[10px]"></i>
+                    </button>
+                  </span>
+                ))}
+
+                {filters.categories.map(cat => (
+                  <span
+                    key={`chip-cat-${cat}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200"
+                  >
+                    <i className="fa-solid fa-tag text-[10px]"></i>
+                    <span>{cat}</span>
+                    <button
+                      type="button"
+                      onClick={() => setFilters(prev => ({ ...prev, categories: prev.categories.filter(c => c !== cat) }))}
+                      className="hover:text-blue-900 ml-0.5"
+                    >
+                      <i className="fa-solid fa-xmark text-[10px]"></i>
+                    </button>
+                  </span>
+                ))}
+
+                {filters.subTypes.map(st => (
+                  <span
+                    key={`chip-st-${st}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200"
+                  >
+                    <i className="fa-solid fa-shapes text-[10px]"></i>
+                    <span className="max-w-[150px] truncate">{st}</span>
+                    <button
+                      type="button"
+                      onClick={() => setFilters(prev => ({ ...prev, subTypes: prev.subTypes.filter(s => s !== st) }))}
+                      className="hover:text-purple-900 ml-0.5"
+                    >
+                      <i className="fa-solid fa-xmark text-[10px]"></i>
+                    </button>
+                  </span>
+                ))}
+
+                {filters.budgetBracket && filters.budgetBracket !== 'all' && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <i className="fa-solid fa-indian-rupee-sign text-[10px]"></i>
+                    <span>
+                      {(filterConfig.budget_brackets || []).find(b => b.id === filters.budgetBracket)?.label || filters.budgetBracket}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setFilters(prev => ({ ...prev, budgetBracket: 'all' }))}
+                      className="hover:text-emerald-900 ml-0.5"
+                    >
+                      <i className="fa-solid fa-xmark text-[10px]"></i>
+                    </button>
+                  </span>
+                )}
+
+                {filters.reaches.map(r => (
+                  <span
+                    key={`chip-reach-${r}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200"
+                  >
+                    <i className="fa-solid fa-users text-[10px]"></i>
+                    <span className="uppercase">{r} REACH</span>
+                    <button
+                      type="button"
+                      onClick={() => setFilters(prev => ({ ...prev, reaches: prev.reaches.filter(x => x !== r) }))}
+                      className="hover:text-amber-900 ml-0.5"
+                    >
+                      <i className="fa-solid fa-xmark text-[10px]"></i>
+                    </button>
+                  </span>
+                ))}
+
+                {filters.durations.map(d => (
+                  <span
+                    key={`chip-dur-${d}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200"
+                  >
+                    <i className="fa-solid fa-clock text-[10px]"></i>
+                    <span>{d}</span>
+                    <button
+                      type="button"
+                      onClick={() => setFilters(prev => ({ ...prev, durations: prev.durations.filter(x => x !== d) }))}
+                      className="hover:text-slate-900 ml-0.5"
+                    >
+                      <i className="fa-solid fa-xmark text-[10px]"></i>
+                    </button>
+                  </span>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={resetAllFilters}
+                  className="text-xs font-extrabold text-laxRed-600 hover:text-laxRed-700 ml-auto transition hover:underline"
+                >
+                  Clear All
+                </button>
+              </div>
+            )}
 
             {/* Empty State */}
             {filteredServices.length === 0 && (
@@ -857,6 +861,12 @@ export default function Services() {
         servicesList={services}
         locationsList={locations}
         onSuccess={() => setQuoteModalOpen(false)}
+      />
+
+      {/* Admin Filter Configurator Modal */}
+      <FilterConfigModal
+        isOpen={filterModalOpen}
+        onClose={() => setFilterModalOpen(false)}
       />
     </div>
   );

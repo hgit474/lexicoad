@@ -11,6 +11,7 @@ import {
 import { useSite } from '../../context/SiteContext';
 import { MEDIA_GENRES } from '../../components/BrowseByGenre';
 import GenreBadgesModal from '../../components/admin/GenreBadgesModal';
+import FilterConfigModal from '../../components/admin/FilterConfigModal';
 import AdminPagination from '../../components/admin/AdminPagination';
 
 export default function AdminServices() {
@@ -29,6 +30,7 @@ export default function AdminServices() {
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
   const [badgeModalOpen, setBadgeModalOpen] = useState(false);
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({
     name: '',
@@ -297,6 +299,16 @@ export default function AdminServices() {
             <i className="fa-solid fa-tags text-laxRed-400"></i>
             <span className="hidden sm:inline">Genre Badges</span>
             <span className="sm:hidden">Badges</span>
+          </button>
+
+          <button
+            onClick={() => setFilterModalOpen(true)}
+            className="bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs sm:text-sm font-extrabold px-3 sm:px-3.5 py-2.5 sm:py-3 rounded-xl flex items-center gap-1.5 sm:gap-2 shadow shrink-0 transition"
+            title="Customize marketplace filter panels (The Media Ant style)"
+          >
+            <i className="fa-solid fa-sliders text-indigo-400"></i>
+            <span className="hidden sm:inline">Customize Filters</span>
+            <span className="sm:hidden">Filters</span>
           </button>
 
           <button
@@ -729,6 +741,12 @@ export default function AdminServices() {
       <GenreBadgesModal
         isOpen={badgeModalOpen}
         onClose={() => setBadgeModalOpen(false)}
+      />
+
+      {/* Marketplace Filter Configurator Modal */}
+      <FilterConfigModal
+        isOpen={filterModalOpen}
+        onClose={() => setFilterModalOpen(false)}
       />
     </div>
   );

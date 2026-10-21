@@ -78,6 +78,31 @@ export const initialSettings = {
     Socialmedia: { active: true, text: 'TRENDING', color: 'red' },
     Development: { active: true, text: 'NEW', color: 'emerald' },
     'Drone Marketing': { active: true, text: 'HOT', color: 'purple' }
+  }),
+  filter_config: JSON.stringify({
+    show_location: true,
+    show_category: true,
+    show_format: true,
+    show_budget: true,
+    show_reach: true,
+    show_duration: true,
+    location_title: 'LOCATION',
+    category_title: 'CATEGORY',
+    format_title: 'AD OPTIONS',
+    budget_title: 'BUDGET',
+    reach_title: 'AUDIENCE & REACH',
+    duration_title: 'CAMPAIGN DURATION',
+    max_visible_items: 5,
+    allow_multi_location: true,
+    allow_multi_category: true,
+    budget_brackets: [
+      { id: 'all', label: 'All Budgets', min: 0, max: 999999999 },
+      { id: 'under_25k', label: 'Under ₹25K', min: 0, max: 25000 },
+      { id: '25k_50k', label: '₹25K - ₹50K', min: 25000, max: 50000 },
+      { id: '50k_100k', label: '₹50K - ₹1L', min: 50000, max: 100000 },
+      { id: '100k_300k', label: '₹1L - ₹3L', min: 100000, max: 300000 },
+      { id: 'above_300k', label: '₹3L+', min: 300000, max: 999999999 }
+    ]
   })
 };
 

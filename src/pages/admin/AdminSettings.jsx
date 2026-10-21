@@ -7,10 +7,12 @@ import {
   testSupabaseConnection
 } from '../../lib/supabase';
 import GenreBadgesModal from '../../components/admin/GenreBadgesModal';
+import FilterConfigModal from '../../components/admin/FilterConfigModal';
 
 export default function AdminSettings() {
   const { settings, updateSettings, showToast } = useSite();
   const [badgeModalOpen, setBadgeModalOpen] = useState(false);
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
 
   // CMS Form State
   const [form, setForm] = useState({
@@ -312,6 +314,32 @@ export default function AdminSettings() {
               >
                 <i className="fa-solid fa-pen-to-square"></i>
                 <span>Manage Badges</span>
+              </button>
+            </div>
+
+            {/* Marketplace Filters (The Media Ant Style) Configurator Card */}
+            <div className="sm:col-span-2 lg:col-span-3 rounded-2xl bg-gradient-to-r from-indigo-950/30 via-blue-950/20 to-transparent border border-indigo-500/20 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg border border-indigo-500/30 shrink-0">
+                  <i className="fa-solid fa-sliders"></i>
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-white flex items-center gap-2">
+                    Marketplace Filters Configurator (The Media Ant Style)
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">FACETS</span>
+                  </div>
+                  <div className="text-xs text-slate-400 mt-0.5">
+                    Customize visible filter sections (Location, Category, Ad Options, Budget, Reach, Duration), section headers, and price brackets.
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFilterModalOpen(true)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 shadow shrink-0 transition"
+              >
+                <i className="fa-solid fa-sliders"></i>
+                <span>Configure Filters</span>
               </button>
             </div>
           </div>
@@ -877,6 +905,12 @@ export default function AdminSettings() {
       <GenreBadgesModal
         isOpen={badgeModalOpen}
         onClose={() => setBadgeModalOpen(false)}
+      />
+
+      {/* Marketplace Filter Configurator Modal */}
+      <FilterConfigModal
+        isOpen={filterModalOpen}
+        onClose={() => setFilterModalOpen(false)}
       />
     </div>
   );
