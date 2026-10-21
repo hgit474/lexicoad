@@ -92,22 +92,37 @@ export const SiteProvider = ({ children }) => {
     setLightbox(prev => ({ ...prev, isOpen: false }));
   };
 
-  // Auth
+  // Auth: Pure ENV-controlled Admin credentials (no hardcoded fallbacks)
   const login = (identifier, password) => {
     const cleanId = (identifier || '').trim().toLowerCase();
-    const cleanPass = (password || '').trim().toLowerCase();
-    
-    // Allow configuration via Environment Variables
-    const envUser = (import.meta.env.VITE_ADMIN_USER || '').trim().toLowerCase();
-    const envPass = (import.meta.env.VITE_ADMIN_PASS || '').trim().toLowerCase();
+    const cleanPass = (password || '').trim();
 
-    const validIds = ['lexicoadmin', 'lexicoadmin@laxico.com', 'lexicoadvertising@gmail.com', 'admin'];
-    if (envUser) validIds.push(envUser);
+    const adminPairs = [];
 
-    const validPasswords = ['laxico@4321'];
-    if (envPass) validPasswords.push(envPass);
+    // Format 1: VITE_ADMIN_CREDS="user1:pass1,user2:pass2,user3:pass3"
+    const envCredsStr = import.meta.env.VITE_ADMIN_CREDS || '';
+    if (envCredsStr) {
+      envCredsStr.split(',').forEach(pair => {
+        const parts = pair.split(':');
+        if (parts.length >= 2) {
+          const u = parts[0].trim().toLowerCase();
+          const p = parts.slice(1).join(':').trim();
+          if (u && p) adminPairs.push({ user: u, pass: p });
+        }
+      });
+    }
 
-    if (validIds.includes(cleanId) && validPasswords.includes(cleanPass)) {
+    // Format 2: VITE_ADMIN_USERS="user1,user2" & VITE_ADMIN_PASSWORDS="pass1,pass2"
+    const envUsersStr = import.meta.env.VITE_ADMIN_USERS || import.meta.env.VITE_ADMIN_USER || '';
+    const envPassStr = import.meta.env.VITE_ADMIN_PASSWORDS || import.meta.env.VITE_ADMIN_PASS || '';
+
+    const envUsers = envUsersStr.split(',').map(u => u.trim().toLowerCase()).filter(Boolean);
+    const envPasses = envPassStr.split(',').map(p => p.trim()).filter(Boolean);
+
+    const isDirectMatch = adminPairs.some(a => a.user === cleanId && a.pass === cleanPass);
+    const isListMatch = envUsers.length > 0 && envPasses.length > 0 && envUsers.includes(cleanId) && envPasses.includes(cleanPass);
+
+    if (isDirectMatch || isListMatch) {
       setIsAdmin(true);
       localStorage.setItem('laxico_admin_auth', 'true');
       setLoginModalOpen(false);
