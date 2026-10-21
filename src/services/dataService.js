@@ -1293,15 +1293,15 @@ export const bulkUpsertListingsByCategory = async (
 
   // Quick lookup map for existing listings by upsert_key or composite signature
   const existingMap = new Map();
-  existingListings.forEach((item, idx) => {
+  existingListings.forEach((item) => {
     if (item.upsert_key) {
-      existingMap.set(String(item.upsert_key).toLowerCase(), idx);
+      existingMap.set(String(item.upsert_key).toLowerCase(), item);
     }
     const compKey = `${item.category || ''}:${item.title || ''}:${item.location || ''}`
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '');
     if (compKey) {
-      existingMap.set(compKey, idx);
+      existingMap.set(compKey, item);
     }
   });
 
@@ -1324,26 +1324,22 @@ export const bulkUpsertListingsByCategory = async (
         .toLowerCase()
         .replace(/[^a-z0-9]/g, '');
 
-      const matchIdx = (uKey && existingMap.has(uKey))
+      const existing = (uKey && existingMap.has(uKey))
         ? existingMap.get(uKey)
-        : (compKey && existingMap.has(compKey) ? existingMap.get(compKey) : -1);
+        : (compKey && existingMap.has(compKey) ? existingMap.get(compKey) : null);
 
-      if (matchIdx >= 0 && existingListings[matchIdx]) {
-        // Update existing record with refreshed pricing, reach, specs
-        const existing = existingListings[matchIdx];
-        const updatedItem = {
-          ...existing,
-          price: row.price,
-          reach: row.reach !== null && row.reach !== undefined ? row.reach : existing.reach,
-          description: row.description || existing.description,
-          image_url: row.image_url || existing.image_url,
-          media_type: row.media_type || existing.media_type,
-          location: row.location || existing.location,
-          upsert_key: row.upsert_key || existing.upsert_key,
-          metadata: { ...(existing.metadata || {}), ...(row.metadata || {}) }
-        };
-        existingListings[matchIdx] = updatedItem;
-        batchToUpsertSupabase.push(updatedItem);
+      if (existing) {
+        // Update existing record in place with refreshed pricing, reach, specs
+        existing.price = row.price;
+        existing.reach = row.reach !== null && row.reach !== undefined ? row.reach : existing.reach;
+        existing.description = row.description || existing.description;
+        existing.image_url = row.image_url || existing.image_url;
+        existing.media_type = row.media_type || existing.media_type;
+        existing.location = row.location || existing.location;
+        existing.upsert_key = row.upsert_key || existing.upsert_key;
+        existing.metadata = { ...(existing.metadata || {}), ...(row.metadata || {}) };
+
+        batchToUpsertSupabase.push(existing);
         updated++;
       } else {
         // Insert brand new listing
@@ -1363,8 +1359,8 @@ export const bulkUpsertListingsByCategory = async (
           created_at: new Date().toISOString()
         };
         existingListings.unshift(newItem);
-        if (uKey) existingMap.set(uKey, 0);
-        if (compKey) existingMap.set(compKey, 0);
+        if (uKey) existingMap.set(uKey, newItem);
+        if (compKey) existingMap.set(compKey, newItem);
         batchToUpsertSupabase.push(newItem);
         added++;
       }
