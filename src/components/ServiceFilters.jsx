@@ -37,8 +37,22 @@ export default function ServiceFilters({
   });
 
   // Internal search queries for options
+  const [globalFilterSearch, setGlobalFilterSearch] = useState('');
   const [locationSearch, setLocationSearch] = useState('');
+  const [categorySearch, setCategorySearch] = useState('');
   const [formatSearch, setFormatSearch] = useState('');
+
+  // Auto-expand sections if global search is typed
+  useEffect(() => {
+    if (globalFilterSearch.trim()) {
+      setOpenSections(prev => ({
+        ...prev,
+        location: true,
+        category: true,
+        format: true
+      }));
+    }
+  }, [globalFilterSearch]);
 
   const toggleSection = (section) => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -77,10 +91,10 @@ export default function ServiceFilters({
   }, [services]);
 
   const filteredLocations = useMemo(() => {
-    if (!locationSearch.trim()) return locationStats;
-    const q = locationSearch.toLowerCase().trim();
+    const q = (globalFilterSearch || locationSearch).toLowerCase().trim();
+    if (!q) return locationStats;
     return locationStats.filter(item => item.name.toLowerCase().includes(q));
-  }, [locationStats, locationSearch]);
+  }, [locationStats, locationSearch, globalFilterSearch]);
 
   // 2. Category / Media Genre counts & list
   const categoryStats = useMemo(() => {
@@ -94,6 +108,12 @@ export default function ServiceFilters({
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
   }, [services]);
+
+  const filteredCategories = useMemo(() => {
+    const q = (globalFilterSearch || categorySearch).toLowerCase().trim();
+    if (!q) return categoryStats;
+    return categoryStats.filter(item => item.name.toLowerCase().includes(q));
+  }, [categoryStats, categorySearch, globalFilterSearch]);
 
   // 3. Ad Options / Formats (sub_types) counts & list
   const formatStats = useMemo(() => {
@@ -111,10 +131,10 @@ export default function ServiceFilters({
   }, [services]);
 
   const filteredFormats = useMemo(() => {
-    if (!formatSearch.trim()) return formatStats;
-    const q = formatSearch.toLowerCase().trim();
+    const q = (globalFilterSearch || formatSearch).toLowerCase().trim();
+    if (!q) return formatStats;
     return formatStats.filter(item => item.name.toLowerCase().includes(q));
-  }, [formatStats, formatSearch]);
+  }, [formatStats, formatSearch, globalFilterSearch]);
 
   // 4. Budget brackets counts
   const budgetBrackets = config.budget_brackets || [
@@ -280,6 +300,31 @@ export default function ServiceFilters({
         )}
       </div>
 
+      {/* Global Quick Search across all filter options */}
+      <div className="px-4 py-3 bg-slate-50/80 border-b border-slate-100">
+        <div className="relative">
+          <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <input
+            type="text"
+            value={globalFilterSearch}
+            onChange={e => setGlobalFilterSearch(e.target.value)}
+            placeholder="Search filter options..."
+            aria-label="Search all filter options"
+            className="w-full pl-8 pr-7 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/30 transition shadow-2xs"
+          />
+          {globalFilterSearch && (
+            <button
+              type="button"
+              onClick={() => setGlobalFilterSearch('')}
+              aria-label="Clear filter search"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+            >
+              <i className="fa-solid fa-xmark text-xs"></i>
+            </button>
+          )}
+        </div>
+      </div>
+
       <div className="divide-y divide-slate-100">
         {/* 1. LOCATION SECTION */}
         {config.show_location !== false && (
@@ -303,12 +348,13 @@ export default function ServiceFilters({
               <div className="mt-3">
                 {/* Search inside Location */}
                 <div className="relative mb-3">
+                  <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
                   <input
                     type="text"
                     value={locationSearch}
                     onChange={e => setLocationSearch(e.target.value)}
                     placeholder="Type to search"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/30 transition"
+                    className="w-full pl-8 pr-7 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/30 transition"
                   />
                   {locationSearch && (
                     <button
@@ -393,37 +439,62 @@ export default function ServiceFilters({
 
             {openSections.category && (
               <div className="mt-3">
-                <div className="space-y-2">
-                  {(expandedSections.category
-                    ? categoryStats
-                    : categoryStats.slice(0, maxVisible)
-                  ).map(item => {
-                    const isChecked = filters.categories.includes(item.name);
-                    return (
-                      <label
-                        key={item.name}
-                        className="flex items-center justify-between text-xs text-slate-700 hover:text-slate-900 cursor-pointer select-none group py-0.5"
-                      >
-                        <span className="flex items-center gap-2.5">
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => handleCategoryClick(item.name)}
-                            className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600"
-                          />
-                          <span className={isChecked ? 'font-bold text-indigo-950' : 'font-medium'}>
-                            {item.name}
-                          </span>
-                        </span>
-                        <span className="text-slate-400 text-xs font-normal">
-                          ({item.count})
-                        </span>
-                      </label>
-                    );
-                  })}
+                {/* Search inside Category */}
+                <div className="relative mb-3">
+                  <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                  <input
+                    type="text"
+                    value={categorySearch}
+                    onChange={e => setCategorySearch(e.target.value)}
+                    placeholder="Type to search"
+                    className="w-full pl-8 pr-7 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/30 transition"
+                  />
+                  {categorySearch && (
+                    <button
+                      type="button"
+                      onClick={() => setCategorySearch('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      <i className="fa-solid fa-xmark text-xs"></i>
+                    </button>
+                  )}
                 </div>
 
-                {categoryStats.length > maxVisible && (
+                <div className="space-y-2">
+                  {filteredCategories.length === 0 ? (
+                    <p className="text-xs text-slate-400 italic py-1">No matching categories</p>
+                  ) : (
+                    (expandedSections.category
+                      ? filteredCategories
+                      : filteredCategories.slice(0, maxVisible)
+                    ).map(item => {
+                      const isChecked = filters.categories.includes(item.name);
+                      return (
+                        <label
+                          key={item.name}
+                          className="flex items-center justify-between text-xs text-slate-700 hover:text-slate-900 cursor-pointer select-none group py-0.5"
+                        >
+                          <span className="flex items-center gap-2.5">
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => handleCategoryClick(item.name)}
+                              className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600"
+                            />
+                            <span className={isChecked ? 'font-bold text-indigo-950' : 'font-medium'}>
+                              {item.name}
+                            </span>
+                          </span>
+                          <span className="text-slate-400 text-xs font-normal">
+                            ({item.count})
+                          </span>
+                        </label>
+                      );
+                    })
+                  )}
+                </div>
+
+                {filteredCategories.length > maxVisible && (
                   <button
                     type="button"
                     onClick={() => toggleExpanded('category')}
@@ -431,7 +502,7 @@ export default function ServiceFilters({
                   >
                     {expandedSections.category
                       ? 'Show Less'
-                      : `${categoryStats.length - maxVisible} More`}
+                      : `${filteredCategories.length - maxVisible} More`}
                   </button>
                 )}
               </div>
@@ -459,26 +530,25 @@ export default function ServiceFilters({
 
             {openSections.format && (
               <div className="mt-3">
-                {formatStats.length > 5 && (
-                  <div className="relative mb-3">
-                    <input
-                      type="text"
-                      value={formatSearch}
-                      onChange={e => setFormatSearch(e.target.value)}
-                      placeholder="Type to search"
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/30 transition"
-                    />
-                    {formatSearch && (
-                      <button
-                        type="button"
-                        onClick={() => setFormatSearch('')}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                      >
-                        <i className="fa-solid fa-xmark text-xs"></i>
-                      </button>
-                    )}
-                  </div>
-                )}
+                <div className="relative mb-3">
+                  <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                  <input
+                    type="text"
+                    value={formatSearch}
+                    onChange={e => setFormatSearch(e.target.value)}
+                    placeholder="Type to search"
+                    className="w-full pl-8 pr-7 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/30 transition"
+                  />
+                  {formatSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setFormatSearch('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      <i className="fa-solid fa-xmark text-xs"></i>
+                    </button>
+                  )}
+                </div>
 
                 <div className="space-y-2">
                   {filteredFormats.length === 0 ? (
