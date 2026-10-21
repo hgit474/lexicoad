@@ -7,6 +7,13 @@ Production-grade outdoor and billboard advertising platform with integrated Admi
 - **Backend & CMS**: Supabase (PostgreSQL) with automatic LocalStorage dual-mode fallback
 - **Admin Portal**: Restricted route at `/lexico`
 
+## Environment Variables (.env)
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_ADMIN_CREDS=user1:pass1,user2:pass2
+```
+
 ## Running Locally
 ```bash
 npm install
@@ -15,11 +22,11 @@ npm run dev
 
 ## Admin Control Tower
 - **URL**: `/lexico`
-- **Username**: `lexicoadmin`
-- **Password**: `laxico@4321`
+- **Default Login**: Configured via `VITE_ADMIN_CREDS` environment variable.
 
-## Build for Production
+## Build & Deploy for Production
 ```bash
 npm run build
 ```
-Deploy the generated `dist/` directory to Vercel, Netlify, or your preferred hosting provider.
+Deploy the generated `dist/` directory to Vercel connected to your GitHub repo (`xngdinesh/lexicoad`).
+

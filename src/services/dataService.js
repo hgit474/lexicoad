@@ -286,13 +286,12 @@ export const getLocations = async () => {
     try {
       const { data, error } = await supabase.from('locations').select('*');
       if (!error && Array.isArray(data)) {
-        if (data.length > 0) {
-          const db = getLocalDB();
-          db.locations = data;
-          saveLocalDB(db);
-        }
+        const db = getLocalDB();
+        db.locations = data;
+        saveLocalDB(db);
         return data;
       }
+      if (error) console.error('Supabase getLocations error:', error);
     } catch (err) {
       console.warn('Supabase locations read failed, using local:', err);
     }
@@ -302,6 +301,19 @@ export const getLocations = async () => {
 };
 
 export const saveLocation = async (location) => {
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      const { error } = await supabase.from('locations').upsert(location);
+      if (error) {
+        console.error('Supabase saveLocation error:', error);
+        throw new Error(`Database save failed: ${error.message}`);
+      }
+    } catch (err) {
+      console.error('Supabase saveLocation exception:', err);
+      throw err;
+    }
+  }
+
   const db = getLocalDB();
   const existingIdx = db.locations.findIndex(l => l.id === location.id);
   if (existingIdx >= 0) {
@@ -310,32 +322,24 @@ export const saveLocation = async (location) => {
     db.locations.push(location);
   }
   saveLocalDB(db);
-
-  if (isSupabaseConfigured() && supabase) {
-    try {
-      const { error } = await supabase.from('locations').upsert(location);
-      if (error) console.error('Supabase saveLocation error:', error);
-    } catch (err) {
-      console.warn('Supabase saveLocation failed:', err);
-    }
-  }
   return location;
 };
 
 export const deleteLocation = async (id) => {
-  const db = getLocalDB();
-  db.locations = db.locations.filter(l => l.id !== id);
-  db.service_locations = db.service_locations.filter(m => m.location_id !== id);
-  saveLocalDB(db);
-
   if (isSupabaseConfigured() && supabase) {
     try {
-      await supabase.from('locations').delete().eq('id', id);
+      const { error } = await supabase.from('locations').delete().eq('id', id);
+      if (error) console.error('Supabase deleteLocation error:', error);
       await supabase.from('service_locations').delete().eq('location_id', id);
     } catch (err) {
       console.warn('Supabase deleteLocation failed:', err);
     }
   }
+
+  const db = getLocalDB();
+  db.locations = db.locations.filter(l => l.id !== id);
+  db.service_locations = db.service_locations.filter(m => m.location_id !== id);
+  saveLocalDB(db);
   return true;
 };
 
@@ -347,13 +351,12 @@ export const getServiceLocations = async () => {
     try {
       const { data, error } = await supabase.from('service_locations').select('*');
       if (!error && Array.isArray(data)) {
-        if (data.length > 0) {
-          const db = getLocalDB();
-          db.service_locations = data;
-          saveLocalDB(db);
-        }
+        const db = getLocalDB();
+        db.service_locations = data;
+        saveLocalDB(db);
         return data;
       }
+      if (error) console.error('Supabase getServiceLocations error:', error);
     } catch (err) {
       console.warn('Supabase service_locations read failed, using local:', err);
     }
@@ -373,13 +376,12 @@ export const getCampaigns = async () => {
         .select('*')
         .order('start_date', { ascending: false });
       if (!error && Array.isArray(data)) {
-        if (data.length > 0) {
-          const db = getLocalDB();
-          db.campaigns = data;
-          saveLocalDB(db);
-        }
+        const db = getLocalDB();
+        db.campaigns = data;
+        saveLocalDB(db);
         return data;
       }
+      if (error) console.error('Supabase getCampaigns error:', error);
     } catch (err) {
       console.warn('Supabase campaigns read failed, using local:', err);
     }
@@ -389,6 +391,19 @@ export const getCampaigns = async () => {
 };
 
 export const saveCampaign = async (campaign) => {
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      const { error } = await supabase.from('campaigns').upsert(campaign);
+      if (error) {
+        console.error('Supabase saveCampaign error:', error);
+        throw new Error(`Database save failed: ${error.message}`);
+      }
+    } catch (err) {
+      console.error('Supabase saveCampaign exception:', err);
+      throw err;
+    }
+  }
+
   const db = getLocalDB();
   const existingIdx = db.campaigns.findIndex(c => c.id === campaign.id);
   if (existingIdx >= 0) {
@@ -403,15 +418,6 @@ export const saveCampaign = async (campaign) => {
     if (loc) loc.status = 'Occupied';
   }
   saveLocalDB(db);
-
-  if (isSupabaseConfigured() && supabase) {
-    try {
-      const { error } = await supabase.from('campaigns').upsert(campaign);
-      if (error) console.error('Supabase saveCampaign error:', error);
-    } catch (err) {
-      console.warn('Supabase saveCampaign failed:', err);
-    }
-  }
   return campaign;
 };
 
