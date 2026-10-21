@@ -148,23 +148,23 @@ export default function Contact() {
           </div>
 
           <div className="flex gap-4 lg:justify-end">
-            <div className="glass rounded-2xl px-5 py-4 text-white flex items-center gap-3">
+            <div className="bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl px-5 py-4 text-white flex items-center gap-3 shadow-lg">
               <div className="w-11 h-11 rounded-xl bg-green-500 flex items-center justify-center text-xl shadow">
                 <i className="fa-solid fa-headset"></i>
               </div>
               <div>
                 <div className="font-extrabold text-sm">{settings.contact_response_title || '4-hr response'}</div>
-                <div className="text-xs text-blue-200 font-semibold">{settings.support_hours || 'Mon–Sat, 10am–7pm'}</div>
+                <div className="text-xs text-blue-100 font-medium">{settings.support_hours || 'Mon–Sat, 10am–7pm'}</div>
               </div>
             </div>
 
-            <div className="glass rounded-2xl px-5 py-4 text-white hidden sm:flex items-center gap-3">
+            <div className="bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl px-5 py-4 text-white hidden sm:flex items-center gap-3 shadow-lg">
               <div className="w-11 h-11 rounded-xl bg-laxRed-500 flex items-center justify-center text-xl shadow">
                 <i className="fa-solid fa-circle-check"></i>
               </div>
               <div>
                 <div className="font-extrabold text-sm">{settings.contact_approved_title || '100% Approved'}</div>
-                <div className="text-xs text-blue-200 font-semibold">Govt. compliant sites</div>
+                <div className="text-xs text-blue-100 font-medium">Govt. compliant sites</div>
               </div>
             </div>
           </div>
@@ -172,7 +172,7 @@ export default function Contact() {
       </div>
 
       {/* Main Grid */}
-      <div className="max-w-7xl mx-auto px-4 py-10 grid lg:grid-cols-5 gap-8">
+      <div className="max-w-7xl mx-auto px-4 py-10 grid lg:grid-cols-5 gap-8 items-start">
         {/* Left Col: Request Form */}
         <div className="lg:col-span-3 bg-white rounded-3xl border border-blue-100 shadow-card p-6 sm:p-8">
           <h2 className="font-grotesk font-bold text-2xl text-laxBlue-950">
@@ -326,8 +326,8 @@ export default function Contact() {
           </form>
         </div>
 
-        {/* Right Col: Info, Checker & FAQs */}
-        <div className="space-y-5">
+        {/* Right Col: Info & Live Availability */}
+        <div className="space-y-5 lg:col-span-2">
           {/* Prefer to talk? card */}
           <div className="rounded-3xl grad-bg-2 p-6 text-white relative overflow-hidden shadow-xl">
             <div className="absolute inset-0 hero-grid"></div>
@@ -335,31 +335,45 @@ export default function Contact() {
               <h3 className="font-grotesk font-bold text-lg">Prefer to talk?</h3>
               <div className="mt-4 space-y-3 text-sm font-semibold">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
                     <i className="fa-solid fa-phone"></i>
                   </div>
-                  {settings.phone || '9742313705'}
+                  <a href={`tel:${settings.phone || '9742313705'}`} className="hover:underline">
+                    {settings.phone || '9742313705'}
+                  </a>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
                     <i className="fa-brands fa-whatsapp"></i>
                   </div>
-                  WhatsApp: {settings.whatsapp || '9742313705'}
+                  <a
+                    href={`https://wa.me/91${settings.whatsapp || '9742313705'}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:underline"
+                  >
+                    WhatsApp: {settings.whatsapp || '9742313705'}
+                  </a>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
                     <i className="fa-solid fa-envelope"></i>
                   </div>
-                  {settings.email || 'lexicoadvertising@gmail.com'}
+                  <a
+                    href={`mailto:${settings.email || 'lexicoadvertising@gmail.com'}`}
+                    className="break-all hover:underline"
+                  >
+                    {settings.email || 'lexicoadvertising@gmail.com'}
+                  </a>
                 </div>
 
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
                     <i className="fa-solid fa-location-dot"></i>
                   </div>
-                  {settings.head_office || 'No 1 Nandini Complex, Chandra Layout, Bangalore 560040'}
+                  <span>{settings.head_office || 'No 1 Nandini Complex, Chandra Layout, Bangalore 560040'}</span>
                 </div>
               </div>
             </div>
@@ -367,37 +381,46 @@ export default function Contact() {
 
           {/* Availability Checker */}
           <AvailabilityChecker />
+        </div>
+      </div>
 
-          {/* FAQs */}
-          <div className="bg-white rounded-3xl border border-blue-100 p-6 shadow-sm">
-            <h3 className="font-grotesk font-bold mb-3 text-laxBlue-950 text-lg">Frequently Asked Questions</h3>
-            <div className="space-y-2">
-              {faqs.map((faq, idx) => {
-                const isOpen = openFaq === idx;
-                return (
-                  <div key={idx} className="border border-blue-100 rounded-2xl overflow-hidden">
-                    <button
-                      type="button"
-                      onClick={() => setOpenFaq(isOpen ? null : idx)}
-                      className="w-full flex items-center justify-between gap-3 p-4 text-left font-extrabold text-sm text-laxBlue-950"
-                    >
-                      {faq.q}
-                      <span className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-laxBlue-700 shrink-0 font-bold">
-                        {isOpen ? '−' : '+'}
-                      </span>
-                    </button>
-                    {isOpen && (
-                      <div className="px-4 pb-4">
-                        <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                          {faq.a}
-                        </p>
-                      </div>
-                    )}
+      {/* Dedicated FAQ Section */}
+      <div className="max-w-4xl mx-auto px-4 pb-16 pt-6">
+        <div className="text-center mb-8">
+          <span className="section-label text-laxRed-600">Common Queries</span>
+          <h2 className="font-grotesk font-bold text-2xl sm:text-3xl text-laxBlue-950 mt-1">
+            Frequently Asked Questions
+          </h2>
+          <p className="text-sm text-slate-500 font-medium mt-2 max-w-lg mx-auto">
+            Everything you need to know about our outdoor advertising, campaign timelines, and printing.
+          </p>
+        </div>
+
+        <div className="bg-white rounded-3xl border border-blue-100 p-6 sm:p-8 shadow-card space-y-3">
+          {faqs.map((faq, idx) => {
+            const isOpen = openFaq === idx;
+            return (
+              <div key={idx} className="border border-blue-100 rounded-2xl overflow-hidden transition-colors">
+                <button
+                  type="button"
+                  onClick={() => setOpenFaq(isOpen ? null : idx)}
+                  className="w-full flex items-center justify-between gap-3 p-4 sm:p-5 text-left font-extrabold text-sm sm:text-base text-laxBlue-950 hover:bg-slate-50/70 transition"
+                >
+                  <span>{faq.q}</span>
+                  <span className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-laxBlue-700 shrink-0 font-bold text-base">
+                    {isOpen ? '−' : '+'}
+                  </span>
+                </button>
+                {isOpen && (
+                  <div className="px-4 sm:px-5 pb-5 pt-1 border-t border-blue-50">
+                    <p className="text-sm text-slate-600 font-medium leading-relaxed">
+                      {faq.a}
+                    </p>
                   </div>
-                );
-              })}
-            </div>
-          </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
