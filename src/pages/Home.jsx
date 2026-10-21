@@ -161,16 +161,9 @@ export default function Home() {
 
         <div className="relative max-w-7xl mx-auto px-4 pt-12 pb-16 lg:pt-20 lg:pb-24 grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <div
-              className="inline-flex items-center gap-2 border border-white/20 text-white text-[11px] font-extrabold tracking-[.18em] px-4 py-2 rounded-full mb-6"
-              style={{ background: 'rgba(255,255,255,.12)' }}
-            >
-              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span> INDIA'S PERFORMANCE OUTDOOR NETWORK • EST. 2009
-            </div>
-
             <h1 className="font-grotesk font-bold text-white leading-[1.02] text-[2.6rem] sm:text-6xl">
               Your Brand.<br />
-              Every <span className="relative inline-block">Street.
+              Every <span className="relative inline-block">
                 <span className="absolute left-0 -bottom-1 w-full h-3 bg-laxRed-500/80 -z-0 rounded"></span>
                 <span className="relative z-10">Street.</span>
               </span><br />
