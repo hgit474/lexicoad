@@ -15,6 +15,8 @@ export default function Navbar() {
             <img
               src={settings.logo_url}
               alt={settings.site_name}
+              width="44"
+              height="44"
               className="h-11 max-w-[160px] object-contain rounded-xl"
             />
           ) : (

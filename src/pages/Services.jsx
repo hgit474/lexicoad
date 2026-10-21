@@ -159,11 +159,14 @@ export default function Services() {
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search 'PVR INOX', 'Metro Stations', 'Cinepolis', 'Airport Unipole'..."
+                aria-label="Search media services"
                 className="w-full pl-11 pr-4 py-3.5 text-sm font-semibold rounded-xl sm:rounded-2xl outline-none focus:ring-2 focus:ring-laxBlue-600 bg-slate-50 md:bg-transparent"
               />
               {searchQuery && (
                 <button
+                  type="button"
                   onClick={() => setSearchQuery('')}
+                  aria-label="Clear search query"
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
                 >
                   <i className="fa-solid fa-xmark"></i>
@@ -175,6 +178,7 @@ export default function Services() {
               <select
                 value={selectedCity}
                 onChange={e => setSelectedCity(e.target.value)}
+                aria-label="Filter media by city"
                 className="flex-1 md:w-44 px-3 py-3 text-xs sm:text-sm font-bold bg-slate-50 rounded-xl outline-none text-laxBlue-950 cursor-pointer border border-slate-200/80"
               >
                 {cityOptions.map(city => (
@@ -197,7 +201,7 @@ export default function Services() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
         {/* Browse Media By Genre Grid */}
         <BrowseByGenre
           activeGenre={activeGenre}
@@ -206,7 +210,7 @@ export default function Services() {
         />
 
         {/* Main Catalog View: Left Sidebar + Right Inventory */}
-        <div className="grid lg:grid-cols-4 gap-8 items-start mt-6">
+        <div className="grid lg:grid-cols-4 gap-6 items-start mt-3 sm:mt-4">
           {/* Left Filter Sidebar */}
           <aside className={`
             lg:block lg:sticky lg:top-24 bg-white rounded-3xl border border-blue-100 p-6 shadow-sm z-30
@@ -421,6 +425,10 @@ export default function Services() {
                           <img
                             src={service.image}
                             alt={service.name}
+                            loading="lazy"
+                            decoding="async"
+                            width="400"
+                            height="240"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             onError={e => {
                               e.target.src = `https://picsum.photos/seed/${service.id}/800/500`;

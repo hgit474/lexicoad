@@ -160,7 +160,7 @@ export default function Home() {
         <div className="absolute -top-24 -left-24 w-[420px] h-[420px] bg-laxRed-500/30 blur-[110px] rounded-full"></div>
         <div className="absolute top-20 right-0 w-[520px] h-[520px] bg-blue-400/30 blur-[120px] rounded-full"></div>
 
-        <div className="relative max-w-7xl mx-auto px-4 pt-12 pb-16 lg:pt-20 lg:pb-24 grid lg:grid-cols-2 gap-12 items-center">
+        <div className="relative max-w-7xl mx-auto px-4 pt-6 pb-8 lg:pt-10 lg:pb-12 grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           <div>
             <h1 className="font-grotesk font-bold text-white leading-[1.02] text-[2.6rem] sm:text-6xl">
               Your Brand.<br />
@@ -281,8 +281,8 @@ export default function Home() {
             </div>
 
             <div className="flex justify-center gap-6 mt-0">
-              <div className="w-3 h-16 bg-[#0d1533] rounded-b-lg"></div>
-              <div className="w-3 h-16 bg-[#0d1533] rounded-b-lg"></div>
+              <div className="w-3 h-5 bg-[#0d1533] rounded-b-lg"></div>
+              <div className="w-3 h-5 bg-[#0d1533] rounded-b-lg"></div>
             </div>
 
           </div>
@@ -290,7 +290,7 @@ export default function Home() {
 
         {/* Marquee Track */}
         <div className="relative border-t border-white/10" style={{ background: 'rgba(0,0,0,.22)' }}>
-          <div className="max-w-7xl mx-auto px-4 py-4 overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 py-2.5 overflow-hidden">
             <div className="marquee-track text-white/80 text-sm font-extrabold tracking-[.22em]">
               {[...Array(2)].flatMap((_, rep) =>
                 featuredBrands.map((brand, bIdx) => (
@@ -306,16 +306,16 @@ export default function Home() {
       </div>
 
       {/* ================= BROWSE MEDIA BY GENRE (THE MEDIA ANT STYLE) ================= */}
-      <div className="max-w-7xl mx-auto px-4 pt-10 sm:pt-14">
+      <div className="max-w-7xl mx-auto px-4 pt-3 sm:pt-4">
         <BrowseByGenre services={services} />
       </div>
 
       {/* ================= FEATURED SERVICES ================= */}
-      <div className="max-w-7xl mx-auto px-4 py-12 sm:py-16">
-        <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
+      <div className="max-w-7xl mx-auto px-4 pt-3 pb-8 sm:pt-4 sm:pb-10">
+        <div className="flex flex-wrap items-end justify-between gap-4 mb-3">
           <div>
             <span className="section-label text-laxRed-600">What we do</span>
-            <h2 className="font-grotesk font-bold text-3xl sm:text-4xl mt-2 text-laxBlue-950">
+            <h2 className="font-grotesk font-bold text-2xl sm:text-3xl mt-1.5 text-laxBlue-950">
               Featured <span className="grad-text">Services Showcase</span>
             </h2>
             <p className="text-slate-500 font-medium mt-2 max-w-xl">
@@ -345,7 +345,7 @@ export default function Home() {
         </div>
 
         {/* Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-4">
           {filteredServices.map(s => {
             const locCount = getMappedCount(s.id);
             const durs = (s.durations || '').split(',').slice(0, 3).map(d => d.trim()).filter(Boolean);
@@ -359,9 +359,13 @@ export default function Home() {
                     <img
                       src={s.image}
                       alt={s.name}
+                      loading="lazy"
+                      decoding="async"
+                      width="400"
+                      height="250"
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        e.target.src = `https://picsum.photos/seed/${s.id}/800/500`;
+                        e.target.src = `https://picsum.photos/seed/${s.id}/600/380`;
                       }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-laxBlue-950/70 via-transparent to-transparent"></div>
@@ -428,7 +432,7 @@ export default function Home() {
       {/* ================= HOW IT WORKS + CALCULATOR ================= */}
       <div className="bg-laxBlue-950 relative overflow-hidden">
         <div className="absolute inset-0 hero-grid opacity-60"></div>
-        <div className="relative max-w-7xl mx-auto px-4 py-16 grid lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
+        <div className="relative max-w-7xl mx-auto px-4 py-8 sm:py-10 grid lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
           <div className="flex flex-col justify-between h-full space-y-6">
             <div>
               <span className="section-label text-red-400">Simple process</span>
@@ -486,18 +490,18 @@ export default function Home() {
       </div>
 
       {/* ================= LOCATIONS ================= */}
-      <div className="max-w-7xl mx-auto px-4 py-16">
+      <div className="max-w-7xl mx-auto px-4 py-8 sm:py-10">
         <div className="text-center max-w-2xl mx-auto">
           <span className="section-label text-laxRed-600 justify-center">Network</span>
-          <h2 className="font-grotesk font-bold text-3xl sm:text-4xl mt-2 text-laxBlue-950">
+          <h2 className="font-grotesk font-bold text-2xl sm:text-3xl mt-1.5 text-laxBlue-950">
             Prime locations, <span className="grad-text">verified footfall</span>
           </h2>
-          <p className="text-slate-500 font-medium mt-2">
+          <p className="text-slate-500 font-medium mt-1.5 text-sm">
             A glimpse of our highest-demand inventory. Full list lives inside each service.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
           {locations.slice(0, 4).map(l => (
             <div
               key={l.id}
@@ -507,6 +511,10 @@ export default function Home() {
                 <img
                   src={l.image}
                   alt={l.name}
+                  loading="lazy"
+                  decoding="async"
+                  width="300"
+                  height="200"
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.src = `https://picsum.photos/seed/${l.id}/600/400`;
@@ -544,7 +552,7 @@ export default function Home() {
       </div>
 
       {/* ================= WHY LAXICO ================= */}
-      <div className="max-w-7xl mx-auto px-4 pb-16">
+      <div className="max-w-7xl mx-auto px-4 pb-8 sm:pb-10">
         <div className="rounded-[28px] overflow-hidden grid lg:grid-cols-2 items-stretch grad-bg-2 relative">
           <div className="absolute inset-0 hero-grid"></div>
 
@@ -667,7 +675,7 @@ export default function Home() {
       </div>
 
       {/* ================= CTA BANNER ================= */}
-      <div className="max-w-7xl mx-auto px-4 pb-20">
+      <div className="max-w-7xl mx-auto px-4 pb-12 sm:pb-14">
         <div className="rounded-[28px] bg-white border border-blue-100 shadow-card p-8 sm:p-12 grid lg:grid-cols-3 gap-8 items-center relative overflow-hidden">
           <div className="absolute -right-20 -top-20 w-72 h-72 rounded-full bg-gradient-to-br from-blue-200 to-red-200 blur-2xl opacity-60"></div>
           <div className="lg:col-span-2 relative">

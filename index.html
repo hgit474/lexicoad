@@ -2,17 +2,99 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link id="app-favicon" rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title id="app-title">Laxico Advertising — Billboard & Poster Placements Across India</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- FontAwesome 6 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Chart.js 4 -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Laxico Advertising manages 250+ premium billboard, metro, airport, transit and digital LED DOOH placements across Delhi NCR, Mumbai, Bengaluru, and Hyderabad. Plan campaigns with verified footfall and 48-hour launch." />
+    <meta name="keywords" content="billboard advertising, outdoor advertising india, DOOH screens, metro train branding, bus shelter ads, airport advertising, cinema ads, hoarding placements" />
+    <meta name="author" content="Laxico Advertising" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="https://lexicoad-two.vercel.app/" />
+
+    <!-- Open Graph (Facebook / LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://lexicoad-two.vercel.app/" />
+    <meta property="og:title" content="Laxico Advertising — Billboard & Poster Placements Across India" />
+    <meta property="og:description" content="Plan and launch outdoor media campaigns across 250+ verified locations in India with real-time pricing and geo-tagged proof." />
+    <meta property="og:image" content="https://lexicoad-two.vercel.app/logo.png" />
+    <meta property="og:site_name" content="Laxico Advertising" />
+    <meta property="og:locale" content="en_IN" />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://lexicoad-two.vercel.app/" />
+    <meta name="twitter:title" content="Laxico Advertising — Billboard & Poster Placements Across India" />
+    <meta name="twitter:description" content="Plan and launch outdoor media campaigns across 250+ verified locations in India." />
+    <meta name="twitter:image" content="https://lexicoad-two.vercel.app/logo.png" />
+
+    <!-- Favicon & Mobile Icons -->
+    <link id="app-favicon" rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <meta name="theme-color" content="#040A29" />
+
+    <!-- Performance: Resource Hints & Preconnects -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+
+    <!-- Web Fonts (display=swap to prevent render blocking) -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <!-- FontAwesome 6 (asynchronous non-render-blocking with fallback) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'" />
+    <noscript>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    </noscript>
+
+    <!-- Chart.js (Deferred execution to unblock LCP/FCP) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+
+    <!-- Structured Data (Schema.org JSON-LD for LocalBusiness / AdvertisingAgency) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "AdvertisingAgency",
+      "name": "Laxico Advertising",
+      "url": "https://lexicoad-two.vercel.app/",
+      "logo": "https://lexicoad-two.vercel.app/logo.png",
+      "image": "https://lexicoad-two.vercel.app/logo.png",
+      "description": "Billboard & poster placements across metros, airports, highways, and malls in India.",
+      "telephone": "+91-9742313705",
+      "email": "lexicoadvertising@gmail.com",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "No 1 Nandini Complex, Chandra Layout",
+        "addressLocality": "Bangalore",
+        "postalCode": "560040",
+        "addressCountry": "IN"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "12.9601",
+        "longitude": "77.5255"
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday"
+        ],
+        "opens": "10:00",
+        "closes": "19:00"
+      },
+      "priceRange": "₹₹",
+      "areaServed": ["Delhi NCR", "Mumbai", "Bengaluru", "Hyderabad", "Pune"]
+    }
+    </script>
   </head>
   <body class="antialiased bg-[#F6F8FF] text-[#071343] font-jakarta overflow-x-hidden selection:bg-laxRed-500 selection:text-white">
     <div id="root"></div>

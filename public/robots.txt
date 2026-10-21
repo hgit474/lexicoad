@@ -1,0 +1,8 @@
+# Allow all legitimate search engine web crawlers
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
+# Point to XML Sitemap
+Sitemap: https://lexicoad-two.vercel.app/sitemap.xml

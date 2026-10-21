@@ -1,6 +1,7 @@
 -- ==============================================================================
--- Laxico Advertising - Billboard & Poster Placements Database Schema (Supabase)
--- Full CMS Support: site_settings, services, locations, campaigns, inquiries, media
+-- POSTGRESQL SCHEMA FOR SUPABASE (Also saved as supabase/postgresql_schema.sql)
+-- NOTE: THIS SCRIPT IS WRITTEN IN POSTGRESQL DIALECT FOR SUPABASE.
+-- DO NOT RUN THIS IN MYSQL. (FOR MYSQL, USE mysql/schema.sql).
 -- ==============================================================================
 
 -- 1. SITE_SETTINGS TABLE (Full CMS: Logo, Favicon, Name, Phone, Email, etc.)

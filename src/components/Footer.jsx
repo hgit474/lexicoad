@@ -37,6 +37,8 @@ export default function Footer() {
                 <img
                   src={settings.logo_url}
                   alt={settings.site_name}
+                  width="44"
+                  height="44"
                   className="h-11 max-w-[140px] object-contain rounded-xl"
                 />
               ) : (
@@ -61,33 +63,39 @@ export default function Footer() {
                 className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center hover:bg-laxRed-600 transition"
                 href={settings.social_links?.facebook || 'https://facebook.com'}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
+                aria-label="Visit our Facebook page"
                 title="Facebook"
               >
                 <i className="fa-brands fa-facebook-f"></i>
               </a>
               <a
                 className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center hover:bg-laxRed-600 transition"
-                href={settings.social_links?.instagram || '#'}
+                href={settings.social_links?.instagram || 'https://instagram.com'}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
+                aria-label="Visit our Instagram page"
                 title="Instagram"
               >
                 <i className="fa-brands fa-instagram"></i>
               </a>
               <a
                 className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center hover:bg-laxRed-600 transition"
-                href={settings.social_links?.twitter || '#'}
+                href={settings.social_links?.twitter || 'https://twitter.com'}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
+                aria-label="Visit our Twitter / X profile"
+                title="Twitter"
               >
                 <i className="fa-brands fa-x-twitter"></i>
               </a>
               <a
                 className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center hover:bg-laxRed-600 transition"
-                href={settings.social_links?.youtube || '#'}
+                href={settings.social_links?.youtube || 'https://youtube.com'}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
+                aria-label="Visit our YouTube channel"
+                title="YouTube"
               >
                 <i className="fa-brands fa-youtube"></i>
               </a>

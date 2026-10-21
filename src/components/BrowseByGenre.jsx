@@ -164,8 +164,8 @@ export default function BrowseByGenre({ activeGenre = 'All', onSelectGenre, serv
   };
 
   return (
-    <section className="py-6 sm:py-8">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+    <section className="py-2 sm:py-3">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-3">
         <div>
           <span className="section-label text-laxRed-600">Media Categories</span>
           <h2 className="font-grotesk font-bold text-2xl sm:text-3xl text-laxBlue-950 mt-1">
