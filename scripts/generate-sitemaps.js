@@ -6,10 +6,14 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const primaryOrigin = (process.env.VITE_SITE_URL || 'https://lexicoadvertising.com').replace(/\/$/, '');
+const inOrigin = (process.env.VITE_IN_SITE_URL || 'https://lexicoadvertising.in').replace(/\/$/, '');
+const orgOrigin = (process.env.VITE_ORG_SITE_URL || 'https://lexicoadvertising.org').replace(/\/$/, '');
+
 const DOMAINS = [
-  { domain: 'lexicoadvertising.com', origin: 'https://lexicoadvertising.com', name: 'com', label: 'Global / Primary' },
-  { domain: 'lexicoadvertising.in', origin: 'https://lexicoadvertising.in', name: 'in', label: 'India Regional' },
-  { domain: 'lexicoadvertising.org', origin: 'https://lexicoadvertising.org', name: 'org', label: 'Corporate & Org' }
+  { domain: new URL(primaryOrigin).hostname, origin: primaryOrigin, name: 'com', label: 'Global / Primary' },
+  { domain: new URL(inOrigin).hostname, origin: inOrigin, name: 'in', label: 'India Regional' },
+  { domain: new URL(orgOrigin).hostname, origin: orgOrigin, name: 'org', label: 'Corporate & Org' }
 ];
 
 const TODAY = '2026-10-05';

@@ -42,20 +42,24 @@ function RouteMetadataUpdater() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // Determine current host domain
+    // Determine current host domain via environment or window location
     const host = window.location.hostname || '';
-    let currentDomain = 'https://lexicoadvertising.com';
+    const configuredPrimary = (import.meta.env.VITE_SITE_URL || 'https://lexicoadvertising.com').replace(/\/$/, '');
+    const configuredIn = (import.meta.env.VITE_IN_SITE_URL || 'https://lexicoadvertising.in').replace(/\/$/, '');
+    const configuredOrg = (import.meta.env.VITE_ORG_SITE_URL || 'https://lexicoadvertising.org').replace(/\/$/, '');
+
+    let currentDomain = configuredPrimary;
     if (host.endsWith('.in') || host.includes('lexicoadvertising.in')) {
-      currentDomain = 'https://lexicoadvertising.in';
+      currentDomain = configuredIn;
     } else if (host.endsWith('.org') || host.includes('lexicoadvertising.org')) {
-      currentDomain = 'https://lexicoadvertising.org';
+      currentDomain = configuredOrg;
     }
 
     const cleanPath = pathname === '/' ? '' : pathname.replace(/\/$/, '');
     const canonicalHref = `${currentDomain}${cleanPath}`;
-    const primaryComHref = `https://lexicoadvertising.com${cleanPath}`;
-    const inHref = `https://lexicoadvertising.in${cleanPath}`;
-    const orgHref = `https://lexicoadvertising.org${cleanPath}`;
+    const primaryComHref = `${configuredPrimary}${cleanPath}`;
+    const inHref = `${configuredIn}${cleanPath}`;
+    const orgHref = `${configuredOrg}${cleanPath}`;
 
     // 1. Authoritative Canonical URL
     let canonical = document.querySelector("link[rel='canonical']");
