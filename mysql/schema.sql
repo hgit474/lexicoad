@@ -317,7 +317,49 @@ INSERT INTO `site_settings` (
   98,
   '{"facebook": "https://facebook.com", "instagram": "https://instagram.com", "twitter": "https://twitter.com", "youtube": "https://youtube.com"}',
   '{"Airport": {"active": true, "text": "HOT", "color": "red"}, "Cinema": {"active": true, "text": "HOT", "color": "red"}, "Digital": {"active": true, "text": "HOT", "color": "red"}, "Outdoor": {"active": true, "text": "HOT", "color": "red"}, "Transit": {"active": true, "text": "HOT", "color": "red"}, "Retail": {"active": false, "text": "POPULAR", "color": "purple"}, "Street Furniture": {"active": false, "text": "TRENDING", "color": "amber"}, "BTL": {"active": false, "text": "NEW", "color": "emerald"}, "Print": {"active": false, "text": "CLASSIC", "color": "blue"}, "Radio": {"active": false, "text": "TRENDING", "color": "amber"}, "Sports": {"active": false, "text": "HOT", "color": "red"}, "Television": {"active": false, "text": "PRIME", "color": "purple"}, "Socialmedia": {"active": true, "text": "TRENDING", "color": "red"}, "Development": {"active": true, "text": "NEW", "color": "emerald"}, "Drone Marketing": {"active": true, "text": "HOT", "color": "purple"}}'
-) ON DUPLICATE KEY UPDATE `updated_at` = NOW();
+) ON DUPLICATE KEY UPDATE
+  `site_name` = VALUES(`site_name`),
+  `tagline` = VALUES(`tagline`),
+  `featured_brands` = VALUES(`featured_brands`),
+  `brand_subtitle` = VALUES(`brand_subtitle`),
+  `phone` = VALUES(`phone`),
+  `phone_alt` = VALUES(`phone_alt`),
+  `whatsapp` = VALUES(`whatsapp`),
+  `email` = VALUES(`email`),
+  `email_sales` = VALUES(`email_sales`),
+  `udyam_number` = VALUES(`udyam_number`),
+  `gst_number` = VALUES(`gst_number`),
+  `about_label` = VALUES(`about_label`),
+  `about_title` = VALUES(`about_title`),
+  `about_description` = VALUES(`about_description`),
+  `about_years` = VALUES(`about_years`),
+  `about_team_count` = VALUES(`about_team_count`),
+  `about_ad_spend` = VALUES(`about_ad_spend`),
+  `about_mission` = VALUES(`about_mission`),
+  `about_vision` = VALUES(`about_vision`),
+  `about_retention_title` = VALUES(`about_retention_title`),
+  `about_retention_description` = VALUES(`about_retention_description`),
+  `about_image_1` = VALUES(`about_image_1`),
+  `about_image_2` = VALUES(`about_image_2`),
+  `contact_label` = VALUES(`contact_label`),
+  `contact_title` = VALUES(`contact_title`),
+  `contact_description` = VALUES(`contact_description`),
+  `contact_response_title` = VALUES(`contact_response_title`),
+  `contact_approved_title` = VALUES(`contact_approved_title`),
+  `contact_faqs` = VALUES(`contact_faqs`),
+  `support_hours` = VALUES(`support_hours`),
+  `head_office` = VALUES(`head_office`),
+  `office_mumbai` = VALUES(`office_mumbai`),
+  `office_bengaluru` = VALUES(`office_bengaluru`),
+  `map_link` = VALUES(`map_link`),
+  `cities` = VALUES(`cities`),
+  `active_sites_count` = VALUES(`active_sites_count`),
+  `campaigns_count` = VALUES(`campaigns_count`),
+  `locations_count` = VALUES(`locations_count`),
+  `retention_rate` = VALUES(`retention_rate`),
+  `social_links` = VALUES(`social_links`),
+  `genre_badges` = VALUES(`genre_badges`),
+  `updated_at` = NOW();
 
 -- 2. Media Genres Seed
 INSERT INTO `media_genres` (`id`, `name`, `short_name`, `icon`, `tagline`, `is_popular`, `sort_order`) VALUES
@@ -336,7 +378,7 @@ INSERT INTO `media_genres` (`id`, `name`, `short_name`, `icon`, `tagline`, `is_p
 ('Socialmedia', 'SOCIAL MEDIA', 'Social Media', 'fa-solid fa-hashtag', 'Meta, Instagram, YouTube & Influencer ads', 1, 13),
 ('Development', 'DEVELOPMENT', 'Development', 'fa-solid fa-code', 'High-conversion web, landing pages & ad tech', 1, 14),
 ('Drone Marketing', 'DRONES MARKETING', 'Drones', 'fa-solid fa-helicopter', 'Sky light shows & aerial drone brand formations', 1, 15)
-ON DUPLICATE KEY UPDATE `name` = VALUES(`name`);
+ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `short_name` = VALUES(`short_name`), `icon` = VALUES(`icon`), `tagline` = VALUES(`tagline`), `is_popular` = VALUES(`is_popular`), `sort_order` = VALUES(`sort_order`);
 
 -- 3. Services Seed
 INSERT INTO `services` (
@@ -1047,7 +1089,23 @@ INSERT INTO `services` (
   'https://images.unsplash.com/photo-1534430480872-3498386e7856?q=80&w=800&auto=format&fit=crop',
   'Programmatic-grade LED walls at Cyber City, BKC, Manyata Tech Park & Whitefield. Day-parting, live data feeds and instant creative swaps. 120 spots/day guaranteed.'
 )
-ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `price` = VALUES(`price`);
+ON DUPLICATE KEY UPDATE
+  `name` = VALUES(`name`),
+  `type` = VALUES(`type`),
+  `genre` = VALUES(`genre`),
+  `sub_type` = VALUES(`sub_type`),
+  `chain_or_brand` = VALUES(`chain_or_brand`),
+  `audience_metric` = VALUES(`audience_metric`),
+  `min_spend` = VALUES(`min_spend`),
+  `price` = VALUES(`price`),
+  `rating` = VALUES(`rating`),
+  `popularity` = VALUES(`popularity`),
+  `status` = VALUES(`status`),
+  `dims` = VALUES(`dims`),
+  `durations` = VALUES(`durations`),
+  `cities` = VALUES(`cities`),
+  `image` = VALUES(`image`),
+  `description` = VALUES(`description`);
 
 -- 4. Locations Seed
 INSERT INTO `locations` (`id`, `name`, `city`, `zone`, `footfall`, `size`, `status`, `image`) VALUES
@@ -1159,6 +1217,15 @@ INSERT INTO `listings` (`id`, `category`, `subcategory`, `title`, `location`, `p
 ('b3c8f8b8-2e06-4e58-9a3b-287df53b1008', 'Outdoor', 'Billboards & Unipoles', 'Cyber City Arterial Unipole (Backlit)', 'Gurugram', 125000.00, 'Billboard', 980000.00, 'Front-facing highway unipole catching top corporate commuters.', 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=800&auto=format&fit=crop'),
 ('b3c8f8b8-2e06-4e58-9a3b-287df53b1009', 'Outdoor', 'Digital Hoardings', 'Bandra Flyover Curved DOOH Screen', 'Mumbai', 210000.00, 'Digital Screen', 1400000.00, 'P6 LED high-definition screen at Western Express Highway intersection.', 'https://images.unsplash.com/photo-1534430480872-3498386e7856?q=80&w=800&auto=format&fit=crop'),
 ('b3c8f8b8-2e06-4e58-9a3b-287df53b1010', 'Airport', 'Terminal Displays', 'T3 Departure Lounge Digital Totem', 'Delhi Airport', 275000.00, 'Digital Totem', 850000.00, 'Premium UHD digital totems targeting high-net-worth business travelers.', 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=800&auto=format&fit=crop')
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `price` = VALUES(`price`);
+ON DUPLICATE KEY UPDATE
+  `category` = VALUES(`category`),
+  `subcategory` = VALUES(`subcategory`),
+  `title` = VALUES(`title`),
+  `location` = VALUES(`location`),
+  `price` = VALUES(`price`),
+  `media_type` = VALUES(`media_type`),
+  `reach` = VALUES(`reach`),
+  `description` = VALUES(`description`),
+  `image_url` = VALUES(`image_url`);
 
 SET FOREIGN_KEY_CHECKS = 1;

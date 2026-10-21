@@ -180,7 +180,7 @@ export default function Footer() {
               <i className="fa-solid fa-envelope text-laxRed-500 mr-2"></i>
               {settings.email || 'lexicoadvertising@gmail.com'}
             </div>
-            <a href={settings.map_link || '#'} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-slate-400 mt-3 block hover:text-white">
+            <a href={settings.map_link || 'https://maps.google.com/?q=No+1+Nandini+Complex+Chandra+Layout+Bangalore+560040'} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-slate-400 mt-3 block hover:text-white">
               <i className="fa-solid fa-location-dot mr-1"></i>{settings.head_office || 'Head Office Location'}
             </a>
             <div className="text-xs font-semibold text-slate-400 mt-3 space-y-1">

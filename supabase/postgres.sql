@@ -356,7 +356,49 @@ INSERT INTO site_settings (
   'Mon–Sat • 10:00 AM – 7:00 PM IST', 'No 1 Nandini Complex, Chandra Layout, Bangalore — 560040', 'BKC Office, Bandra Kurla Complex, Mumbai — 400051', 'HSR Office, Sector 1, HSR Layout, Bengaluru — 560102', 'https://maps.google.com/?q=No+1+Nandini+Complex+Chandra+Layout+Bangalore+560040', 'Delhi • Mumbai • Bengaluru • Hyderabad', '248', 1250, 248, 98,
   '{"facebook": "https://facebook.com", "instagram": "https://instagram.com", "twitter": "https://twitter.com", "youtube": "https://youtube.com"}'::jsonb,
   '{"Airport": {"active": true, "text": "HOT", "color": "red"}, "Cinema": {"active": true, "text": "HOT", "color": "red"}, "Digital": {"active": true, "text": "HOT", "color": "red"}, "Outdoor": {"active": true, "text": "HOT", "color": "red"}, "Transit": {"active": true, "text": "HOT", "color": "red"}, "Retail": {"active": false, "text": "POPULAR", "color": "purple"}, "Street Furniture": {"active": false, "text": "TRENDING", "color": "amber"}, "BTL": {"active": false, "text": "NEW", "color": "emerald"}, "Print": {"active": false, "text": "CLASSIC", "color": "blue"}, "Radio": {"active": false, "text": "TRENDING", "color": "amber"}, "Sports": {"active": false, "text": "HOT", "color": "red"}, "Television": {"active": false, "text": "PRIME", "color": "purple"}, "Socialmedia": {"active": true, "text": "TRENDING", "color": "red"}, "Development": {"active": true, "text": "NEW", "color": "emerald"}, "Drone Marketing": {"active": true, "text": "HOT", "color": "purple"}}'::jsonb
-) ON CONFLICT (id) DO UPDATE SET updated_at = now();
+) ON CONFLICT (id) DO UPDATE SET
+  site_name = EXCLUDED.site_name,
+  tagline = EXCLUDED.tagline,
+  featured_brands = EXCLUDED.featured_brands,
+  brand_subtitle = EXCLUDED.brand_subtitle,
+  phone = EXCLUDED.phone,
+  phone_alt = EXCLUDED.phone_alt,
+  whatsapp = EXCLUDED.whatsapp,
+  email = EXCLUDED.email,
+  email_sales = EXCLUDED.email_sales,
+  udyam_number = EXCLUDED.udyam_number,
+  gst_number = EXCLUDED.gst_number,
+  about_label = EXCLUDED.about_label,
+  about_title = EXCLUDED.about_title,
+  about_description = EXCLUDED.about_description,
+  about_years = EXCLUDED.about_years,
+  about_team_count = EXCLUDED.about_team_count,
+  about_ad_spend = EXCLUDED.about_ad_spend,
+  about_mission = EXCLUDED.about_mission,
+  about_vision = EXCLUDED.about_vision,
+  about_retention_title = EXCLUDED.about_retention_title,
+  about_retention_description = EXCLUDED.about_retention_description,
+  about_image_1 = EXCLUDED.about_image_1,
+  about_image_2 = EXCLUDED.about_image_2,
+  contact_label = EXCLUDED.contact_label,
+  contact_title = EXCLUDED.contact_title,
+  contact_description = EXCLUDED.contact_description,
+  contact_response_title = EXCLUDED.contact_response_title,
+  contact_approved_title = EXCLUDED.contact_approved_title,
+  contact_faqs = EXCLUDED.contact_faqs,
+  support_hours = EXCLUDED.support_hours,
+  head_office = EXCLUDED.head_office,
+  office_mumbai = EXCLUDED.office_mumbai,
+  office_bengaluru = EXCLUDED.office_bengaluru,
+  map_link = EXCLUDED.map_link,
+  cities = EXCLUDED.cities,
+  active_sites_count = EXCLUDED.active_sites_count,
+  campaigns_count = EXCLUDED.campaigns_count,
+  locations_count = EXCLUDED.locations_count,
+  retention_rate = EXCLUDED.retention_rate,
+  social_links = EXCLUDED.social_links,
+  genre_badges = EXCLUDED.genre_badges,
+  updated_at = now();
 
 -- SEED: media_genres (The Media Ant 12 Channels + Modern Channels)
 INSERT INTO media_genres (id, name, short_name, icon, tagline, is_popular, sort_order) VALUES
@@ -418,7 +460,21 @@ INSERT INTO services (id, name, type, genre, sub_type, chain_or_brand, audience_
 ('svc_led', 'Tech Park & Mall Digital DOOH Screens', 'Digital', 'Digital', 'Digital DOOH LED Wall', 'Corporate Parks & Malls', '1.8L+ Daily Tech Professionals & Shoppers', 20000, 88000, 4.9, 92, 'Active', 'P6 LED • 15-sec loop, 120 plays/day', '1 Week, 2 Weeks, 1 Month, 3 Months', 'Bengaluru, Mumbai, Delhi NCR, Hyderabad', 'https://images.unsplash.com/photo-1534430480872-3498386e7856?q=80&w=800&auto=format&fit=crop', 'Programmatic-grade LED walls at Cyber City, BKC, Manyata Tech Park & Whitefield. Day-parting, live data feeds and instant creative swaps. 120 spots/day guaranteed.')
 ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,
-  price = EXCLUDED.price;
+  type = EXCLUDED.type,
+  genre = EXCLUDED.genre,
+  sub_type = EXCLUDED.sub_type,
+  chain_or_brand = EXCLUDED.chain_or_brand,
+  audience_metric = EXCLUDED.audience_metric,
+  min_spend = EXCLUDED.min_spend,
+  price = EXCLUDED.price,
+  rating = EXCLUDED.rating,
+  popularity = EXCLUDED.popularity,
+  status = EXCLUDED.status,
+  dims = EXCLUDED.dims,
+  durations = EXCLUDED.durations,
+  cities = EXCLUDED.cities,
+  image = EXCLUDED.image,
+  description = EXCLUDED.description;
 
 INSERT INTO locations (id, name, city, zone, footfall, size, status, image) VALUES
 ('loc_1', 'Central Metro Hub — Concourse', 'New Delhi', 'Central', 250000, '20 × 10 ft Backlit ×6', 'Occupied', 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?q=80&w=800&auto=format&fit=crop'),
@@ -529,6 +585,15 @@ INSERT INTO listings (id, category, subcategory, title, location, price, media_t
 ('b3c8f8b8-2e06-4e58-9a3b-287df53b1008', 'Outdoor', 'Billboards & Unipoles', 'Cyber City Arterial Unipole (Backlit)', 'Gurugram', 125000, 'Billboard', 980000, 'Front-facing highway unipole catching top corporate commuters.', 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=800&auto=format&fit=crop'),
 ('b3c8f8b8-2e06-4e58-9a3b-287df53b1009', 'Outdoor', 'Digital Hoardings', 'Bandra Flyover Curved DOOH Screen', 'Mumbai', 210000, 'Digital Screen', 1400000, 'P6 LED high-definition screen at Western Express Highway intersection.', 'https://images.unsplash.com/photo-1534430480872-3498386e7856?q=80&w=800&auto=format&fit=crop'),
 ('b3c8f8b8-2e06-4e58-9a3b-287df53b1010', 'Airport', 'Terminal Displays', 'T3 Departure Lounge Digital Totem', 'Delhi Airport', 275000, 'Digital Totem', 850000, 'Premium UHD digital totems targeting high-net-worth business travelers.', 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=800&auto=format&fit=crop')
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET
+  category = EXCLUDED.category,
+  subcategory = EXCLUDED.subcategory,
+  title = EXCLUDED.title,
+  location = EXCLUDED.location,
+  price = EXCLUDED.price,
+  media_type = EXCLUDED.media_type,
+  reach = EXCLUDED.reach,
+  description = EXCLUDED.description,
+  image_url = EXCLUDED.image_url;
 
 

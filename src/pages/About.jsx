@@ -201,7 +201,7 @@ export default function About() {
 
           <div className="p-6 grid grid-cols-3 gap-3 text-center">
             <a
-              href={settings.social_links?.facebook || '#'}
+              href={settings.social_links?.facebook || 'https://facebook.com'}
               target="_blank"
               rel="noreferrer"
               className="rounded-2xl bg-blue-50 p-4 hover:bg-blue-100 transition"
@@ -210,7 +210,7 @@ export default function About() {
               <div className="text-xs font-bold mt-1 text-laxBlue-950">Facebook</div>
             </a>
             <a
-              href={settings.social_links?.instagram || '#'}
+              href={settings.social_links?.instagram || 'https://instagram.com'}
               target="_blank"
               rel="noreferrer"
               className="rounded-2xl bg-blue-50 p-4 hover:bg-blue-100 transition"
@@ -219,7 +219,7 @@ export default function About() {
               <div className="text-xs font-bold mt-1 text-laxBlue-950">Instagram</div>
             </a>
             <a
-              href={settings.social_links?.twitter || '#'}
+              href={settings.social_links?.twitter || 'https://twitter.com'}
               target="_blank"
               rel="noreferrer"
               className="rounded-2xl bg-blue-50 p-4 hover:bg-blue-100 transition"

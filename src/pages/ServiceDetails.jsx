@@ -43,7 +43,7 @@ export default function ServiceDetails() {
       getCampaigns(),
       getMedia()
     ]).then(([svcs, locs, sl, camps, med]) => {
-      const found = svcs.find(s => s.id === id);
+      const found = svcs.find(s => s.id === id || s.id?.toLowerCase() === id?.toLowerCase() || (s.slug && s.slug === id));
       if (!found) {
         navigate('/services');
         return;
