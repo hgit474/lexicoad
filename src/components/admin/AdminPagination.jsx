@@ -30,7 +30,7 @@ export default function AdminPagination({
 
   // Compute page numbers with ellipsis for cleaner display
   const pageNumbers = useMemo(() => {
-    if (totalPages <= 7) {
+    if (totalPages <= 5) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
 
@@ -59,9 +59,9 @@ export default function AdminPagination({
   if (totalItems === 0) return null;
 
   return (
-    <div className="mt-6 bg-[#071343]/80 border border-white/10 rounded-2xl p-4 sm:p-5 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
+    <div className="mt-6 bg-[#071343]/80 border border-white/10 rounded-2xl p-4 sm:p-5 shadow-lg flex flex-col md:flex-row items-center justify-between gap-4 w-full">
       {/* Result count & Per Page Selector */}
-      <div className="flex items-center gap-3 text-xs text-slate-300 font-semibold w-full sm:w-auto justify-between sm:justify-start">
+      <div className="flex items-center gap-3 text-xs text-slate-300 font-semibold w-full md:w-auto justify-between md:justify-start">
         <span>
           Showing <strong className="text-white font-bold">{startItem}–{endItem}</strong> of{' '}
           <strong className="text-white font-bold">{totalItems}</strong> {itemLabel}
@@ -88,28 +88,29 @@ export default function AdminPagination({
 
       {/* Navigation Buttons: Previous, Page Numbers, Next Page */}
       {totalPages > 1 && (
-        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-center">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-nowrap w-full md:w-auto justify-center md:justify-end">
           {/* Previous Button */}
           <button
             type="button"
             onClick={() => onPageChange?.(currentPage - 1)}
             disabled={currentPage === 1}
-            className={`px-3 sm:px-3.5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition ${
+            className={`px-3 sm:px-3.5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition shrink-0 ${
               currentPage === 1
                 ? 'bg-white/5 text-slate-500 cursor-not-allowed border border-white/5'
                 : 'bg-white/10 hover:bg-white/20 text-white border border-white/15 shadow-xs'
             }`}
+            aria-label="Previous Page"
           >
             <i className="fa-solid fa-chevron-left text-[10px]"></i>
             <span className="hidden sm:inline">Previous</span>
           </button>
 
           {/* Page Numbers */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             {pageNumbers.map((page, idx) => {
               if (page === '...') {
                 return (
-                  <span key={`ellipsis-${idx}`} className="w-8 h-8 flex items-center justify-center text-slate-500 font-bold text-xs">
+                  <span key={`ellipsis-${idx}`} className="w-6 sm:w-8 flex items-center justify-center text-slate-500 font-bold text-xs">
                     …
                   </span>
                 );
@@ -121,7 +122,7 @@ export default function AdminPagination({
                   key={page}
                   type="button"
                   onClick={() => onPageChange?.(page)}
-                  className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl text-xs font-extrabold transition flex items-center justify-center ${
+                  className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl text-xs font-extrabold transition flex items-center justify-center shrink-0 ${
                     isCurrent
                       ? 'grad-btn text-white shadow-md ring-2 ring-blue-400/40'
                       : 'bg-white/5 hover:bg-white/15 text-slate-300 border border-white/10'
@@ -138,13 +139,14 @@ export default function AdminPagination({
             type="button"
             onClick={() => onPageChange?.(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition ${
+            className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition shrink-0 ${
               currentPage === totalPages
                 ? 'bg-white/5 text-slate-500 cursor-not-allowed border border-white/5'
-                : 'grad-btn text-white shadow-md hover:opacity-95'
+                : 'bg-white/10 hover:bg-white/20 text-white border border-white/15 shadow-xs'
             }`}
+            aria-label="Next Page"
           >
-            <span>Next Page</span>
+            <span className="hidden sm:inline">Next</span>
             <i className="fa-solid fa-chevron-right text-[10px]"></i>
           </button>
         </div>

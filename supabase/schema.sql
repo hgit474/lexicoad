@@ -58,9 +58,11 @@ CREATE TABLE IF NOT EXISTS site_settings (
     retention_rate INTEGER DEFAULT 98,
     social_links JSONB DEFAULT '{"facebook": "https://facebook.com", "instagram": "https://instagram.com", "twitter": "https://twitter.com", "youtube": "https://youtube.com"}'::jsonb,
     genre_badges JSONB DEFAULT '{}'::jsonb,
+    filter_config JSONB DEFAULT '{}'::jsonb,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS filter_config JSONB DEFAULT '{}'::jsonb;
 ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS featured_brands TEXT DEFAULT 'NIKE, ZOMATO, SAMSUNG, HDFC BANK, COCA-COLA, AMAZON, TATA, SWIGGY, BOAT, MYNTRA';
 ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS whatsapp VARCHAR(50) DEFAULT '9742313705';
 ALTER TABLE site_settings ALTER COLUMN phone SET DEFAULT '9742313705';
@@ -347,7 +349,7 @@ INSERT INTO site_settings (
   about_label, about_title, about_description, about_years, about_team_count, about_ad_spend, about_mission, about_vision, about_retention_title, about_retention_description, about_image_1, about_image_2,
   contact_label, contact_title, contact_description, contact_response_title, contact_approved_title, contact_faqs,
   support_hours, head_office, office_mumbai, office_bengaluru, map_link, cities, active_sites_count, campaigns_count, locations_count, retention_rate,
-  social_links, genre_badges
+  social_links, genre_badges, filter_config
 ) VALUES (
   'default', 'Laxico Advertising', 'Billboard & Poster Placements Across India', 'NIKE, ZOMATO, SAMSUNG, HDFC BANK, COCA-COLA, AMAZON, TATA, SWIGGY, BOAT, MYNTRA', 'OUTDOOR • TRANSIT • DIGITAL', 'LAXICO', 'ADS', 'L', '/logo.png', '/logo.png',
   '9742313705', '9742313705', '9742313705', 'lexicoadvertising@gmail.com', 'lexicoadvertising@gmail.com', 'UDYAM-KR-03-0664055', '29CTIPS2521P1ZZ',
@@ -355,7 +357,8 @@ INSERT INTO site_settings (
   'Get a quote', 'Contact / Inquiry', 'Select your service & location. Our strategist replies with photos, footfall & pricing within 4 working hours.', '4-hr response', '100% Approved', '[{"q": "How fast can my ad go live?", "a": "48 hours from artwork approval — including printing, mounting and illumination. Airport & metro sites may need 72 hrs for security clearance."}, {"q": "Are your sites government-approved?", "a": "Yes. Every Laxico site carries MCD / DMRC / AAI / railway approvals. We share permit copies with your invoice."}, {"q": "Do you handle printing?", "a": "In-house plant in Delhi. 720 DPI flex, vinyl & backlit from ₹8,500 per site with free installation."}, {"q": "How do I get proof my ad is displayed?", "a": "Geo-tagged day + night photos every week on WhatsApp, plus a completion report with traffic data."}, {"q": "What is the minimum booking?", "a": "Street kiosks: 20 poles / 1 month. Billboards & transit: 1 site / 1 month. LEDs: 1 week."}]'::jsonb,
   'Mon–Sat • 10:00 AM – 7:00 PM IST', 'No 1 Nandini Complex, Chandra Layout, Bangalore — 560040', 'BKC Office, Bandra Kurla Complex, Mumbai — 400051', 'HSR Office, Sector 1, HSR Layout, Bengaluru — 560102', 'https://maps.google.com/?q=No+1+Nandini+Complex+Chandra+Layout+Bangalore+560040', 'Delhi • Mumbai • Bengaluru • Hyderabad', '248', 1250, 248, 98,
   '{"facebook": "https://facebook.com", "instagram": "https://instagram.com", "twitter": "https://twitter.com", "youtube": "https://youtube.com"}'::jsonb,
-  '{"Airport": {"active": true, "text": "HOT", "color": "red"}, "Cinema": {"active": true, "text": "HOT", "color": "red"}, "Digital": {"active": true, "text": "HOT", "color": "red"}, "Outdoor": {"active": true, "text": "HOT", "color": "red"}, "Transit": {"active": true, "text": "HOT", "color": "red"}, "Retail": {"active": false, "text": "POPULAR", "color": "purple"}, "Street Furniture": {"active": false, "text": "TRENDING", "color": "amber"}, "BTL": {"active": false, "text": "NEW", "color": "emerald"}, "Print": {"active": false, "text": "CLASSIC", "color": "blue"}, "Radio": {"active": false, "text": "TRENDING", "color": "amber"}, "Sports": {"active": false, "text": "HOT", "color": "red"}, "Television": {"active": false, "text": "PRIME", "color": "purple"}, "Socialmedia": {"active": true, "text": "TRENDING", "color": "red"}, "Development": {"active": true, "text": "NEW", "color": "emerald"}, "Drone Marketing": {"active": true, "text": "HOT", "color": "purple"}}'::jsonb
+  '{"Airport": {"active": true, "text": "HOT", "color": "red"}, "Cinema": {"active": true, "text": "HOT", "color": "red"}, "Digital": {"active": true, "text": "HOT", "color": "red"}, "Outdoor": {"active": true, "text": "HOT", "color": "red"}, "Transit": {"active": true, "text": "HOT", "color": "red"}, "Retail": {"active": false, "text": "POPULAR", "color": "purple"}, "Street Furniture": {"active": false, "text": "TRENDING", "color": "amber"}, "BTL": {"active": false, "text": "NEW", "color": "emerald"}, "Print": {"active": false, "text": "CLASSIC", "color": "blue"}, "Radio": {"active": false, "text": "TRENDING", "color": "amber"}, "Sports": {"active": false, "text": "HOT", "color": "red"}, "Television": {"active": false, "text": "PRIME", "color": "purple"}, "Socialmedia": {"active": true, "text": "TRENDING", "color": "red"}, "Development": {"active": true, "text": "NEW", "color": "emerald"}, "Drone Marketing": {"active": true, "text": "HOT", "color": "purple"}}'::jsonb,
+  '{"show_location": true, "show_category": true, "show_format": true, "show_budget": true, "show_reach": true, "show_duration": true, "location_title": "LOCATION", "category_title": "CATEGORY", "format_title": "AD OPTIONS", "budget_title": "BUDGET BRACKET", "reach_title": "AUDIENCE & REACH", "duration_title": "CAMPAIGN DURATION", "budget_brackets": [{"id": "under_25k", "label": "Under ₹25,000", "min": 0, "max": 25000}, {"id": "25k_50k", "label": "₹25K – ₹50K", "min": 25000, "max": 50000}, {"id": "50k_1l", "label": "₹50K – ₹1 Lakh", "min": 50000, "max": 100000}, {"id": "1l_2l", "label": "₹1 Lakh – ₹2 Lakhs", "min": 100000, "max": 200000}, {"id": "above_2l", "label": "Above ₹2 Lakhs", "min": 200000, "max": 999999999}]}'::jsonb
 ) ON CONFLICT (id) DO UPDATE SET
   site_name = EXCLUDED.site_name,
   tagline = EXCLUDED.tagline,
@@ -398,6 +401,7 @@ INSERT INTO site_settings (
   retention_rate = EXCLUDED.retention_rate,
   social_links = EXCLUDED.social_links,
   genre_badges = EXCLUDED.genre_badges,
+  filter_config = EXCLUDED.filter_config,
   updated_at = now();
 
 -- SEED: media_genres (The Media Ant 12 Channels + Modern Channels)

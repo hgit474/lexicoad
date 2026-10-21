@@ -160,6 +160,13 @@ export const exportMySQLDump = async () => {
   sql += `-- ==============================================================================\n\n`;
   sql += `SET NAMES utf8mb4;\nSET FOREIGN_KEY_CHECKS = 0;\n\n`;
 
+  // Site Settings
+  if (db.settings) {
+    const st = db.settings;
+    sql += `-- Site Settings Table Data\n`;
+    sql += `INSERT INTO \`site_settings\` (\`id\`, \`site_name\`, \`tagline\`, \`featured_brands\`, \`phone\`, \`email\`, \`whatsapp\`, \`udyam_number\`, \`gst_number\`, \`map_link\`, \`cities\`, \`social_links\`, \`genre_badges\`, \`filter_config\`) VALUES (${escapeVal(st.id || 'default')}, ${escapeVal(st.site_name)}, ${escapeVal(st.tagline)}, ${escapeVal(st.featured_brands)}, ${escapeVal(st.phone)}, ${escapeVal(st.email)}, ${escapeVal(st.whatsapp)}, ${escapeVal(st.udyam_number)}, ${escapeVal(st.gst_number)}, ${escapeVal(st.map_link)}, ${escapeVal(st.cities)}, ${escapeVal(st.social_links)}, ${escapeVal(st.genre_badges)}, ${escapeVal(st.filter_config)}) ON DUPLICATE KEY UPDATE \`site_name\`=VALUES(\`site_name\`), \`filter_config\`=VALUES(\`filter_config\`);\n\n`;
+  }
+
   // Services
   if (db.services && db.services.length) {
     sql += `-- Services Table Data\n`;
@@ -232,9 +239,16 @@ export const exportPostgresDump = async () => {
   sql += `-- Generated at: ${new Date().toISOString()}\n`;
   sql += `-- ==============================================================================\n\n`;
 
+  // Site Settings
+  if (db.settings) {
+    const st = db.settings;
+    sql += `-- 1. Site Settings Data\n`;
+    sql += `INSERT INTO site_settings (id, site_name, tagline, featured_brands, phone, email, whatsapp, udyam_number, gst_number, map_link, cities, social_links, genre_badges, filter_config) VALUES (${escapeVal(st.id || 'default')}, ${escapeVal(st.site_name)}, ${escapeVal(st.tagline)}, ${escapeVal(st.featured_brands)}, ${escapeVal(st.phone)}, ${escapeVal(st.email)}, ${escapeVal(st.whatsapp)}, ${escapeVal(st.udyam_number)}, ${escapeVal(st.gst_number)}, ${escapeVal(st.map_link)}, ${escapeVal(st.cities)}, ${escapeVal(st.social_links)}, ${escapeVal(st.genre_badges)}, ${escapeVal(st.filter_config)}) ON CONFLICT (id) DO UPDATE SET site_name = EXCLUDED.site_name, filter_config = EXCLUDED.filter_config;\n\n`;
+  }
+
   // Services
   if (db.services && db.services.length) {
-    sql += `-- 1. Services Table Data\n`;
+    sql += `-- 2. Services Table Data\n`;
     db.services.forEach(s => {
       sql += `INSERT INTO services (id, name, type, genre, sub_type, chain_or_brand, audience_metric, min_spend, price, rating, popularity, status, dims, durations, cities, image, description) VALUES (${escapeVal(s.id)}, ${escapeVal(s.name)}, ${escapeVal(s.type)}, ${escapeVal(s.genre || s.type)}, ${escapeVal(s.sub_type || '')}, ${escapeVal(s.chain_or_brand || '')}, ${escapeVal(s.audience_metric || '')}, ${escapeVal(s.min_spend || s.price)}, ${escapeVal(s.price)}, ${escapeVal(s.rating)}, ${escapeVal(s.popularity)}, ${escapeVal(s.status)}, ${escapeVal(s.dims)}, ${escapeVal(s.durations)}, ${escapeVal(s.cities)}, ${escapeVal(s.image)}, ${escapeVal(s.description)}) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price, min_spend = EXCLUDED.min_spend;\n`;
     });

@@ -311,6 +311,8 @@ CREATE TABLE IF NOT EXISTS \`site_settings\` (
   \`gst_number\` VARCHAR(100) DEFAULT '29CTIPS2521P1ZZ',
   \`head_office\` TEXT,
   \`contact_faqs\` JSON,
+  \`genre_badges\` JSON,
+  \`filter_config\` JSON,
   PRIMARY KEY (\`id\`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -385,7 +387,9 @@ CREATE TABLE IF NOT EXISTS site_settings (
   site_name VARCHAR(255) NOT NULL,
   phone VARCHAR(50),
   email VARCHAR(255),
-  contact_faqs JSONB
+  contact_faqs JSONB,
+  genre_badges JSONB,
+  filter_config JSONB
 );
 
 CREATE TABLE IF NOT EXISTS services (

@@ -66,6 +66,7 @@ CREATE TABLE `site_settings` (
   `retention_rate` INT UNSIGNED DEFAULT 98,
   `social_links` JSON,
   `genre_badges` JSON,
+  `filter_config` JSON,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -268,7 +269,7 @@ INSERT INTO `site_settings` (
   `about_label`, `about_title`, `about_description`, `about_years`, `about_team_count`, `about_ad_spend`, `about_mission`, `about_vision`, `about_retention_title`, `about_retention_description`, `about_image_1`, `about_image_2`,
   `contact_label`, `contact_title`, `contact_description`, `contact_response_title`, `contact_approved_title`, `contact_faqs`,
   `support_hours`, `head_office`, `office_mumbai`, `office_bengaluru`, `map_link`, `cities`, `active_sites_count`, `campaigns_count`, `locations_count`, `retention_rate`,
-  `social_links`, `genre_badges`
+  `social_links`, `genre_badges`, `filter_config`
 ) VALUES (
   'default',
   'Laxico Advertising',
@@ -316,7 +317,8 @@ INSERT INTO `site_settings` (
   248,
   98,
   '{"facebook": "https://facebook.com", "instagram": "https://instagram.com", "twitter": "https://twitter.com", "youtube": "https://youtube.com"}',
-  '{"Airport": {"active": true, "text": "HOT", "color": "red"}, "Cinema": {"active": true, "text": "HOT", "color": "red"}, "Digital": {"active": true, "text": "HOT", "color": "red"}, "Outdoor": {"active": true, "text": "HOT", "color": "red"}, "Transit": {"active": true, "text": "HOT", "color": "red"}, "Retail": {"active": false, "text": "POPULAR", "color": "purple"}, "Street Furniture": {"active": false, "text": "TRENDING", "color": "amber"}, "BTL": {"active": false, "text": "NEW", "color": "emerald"}, "Print": {"active": false, "text": "CLASSIC", "color": "blue"}, "Radio": {"active": false, "text": "TRENDING", "color": "amber"}, "Sports": {"active": false, "text": "HOT", "color": "red"}, "Television": {"active": false, "text": "PRIME", "color": "purple"}, "Socialmedia": {"active": true, "text": "TRENDING", "color": "red"}, "Development": {"active": true, "text": "NEW", "color": "emerald"}, "Drone Marketing": {"active": true, "text": "HOT", "color": "purple"}}'
+  '{"Airport": {"active": true, "text": "HOT", "color": "red"}, "Cinema": {"active": true, "text": "HOT", "color": "red"}, "Digital": {"active": true, "text": "HOT", "color": "red"}, "Outdoor": {"active": true, "text": "HOT", "color": "red"}, "Transit": {"active": true, "text": "HOT", "color": "red"}, "Retail": {"active": false, "text": "POPULAR", "color": "purple"}, "Street Furniture": {"active": false, "text": "TRENDING", "color": "amber"}, "BTL": {"active": false, "text": "NEW", "color": "emerald"}, "Print": {"active": false, "text": "CLASSIC", "color": "blue"}, "Radio": {"active": false, "text": "TRENDING", "color": "amber"}, "Sports": {"active": false, "text": "HOT", "color": "red"}, "Television": {"active": false, "text": "PRIME", "color": "purple"}, "Socialmedia": {"active": true, "text": "TRENDING", "color": "red"}, "Development": {"active": true, "text": "NEW", "color": "emerald"}, "Drone Marketing": {"active": true, "text": "HOT", "color": "purple"}}',
+  '{"show_location": true, "show_category": true, "show_format": true, "show_budget": true, "show_reach": true, "show_duration": true, "location_title": "LOCATION", "category_title": "CATEGORY", "format_title": "AD OPTIONS", "budget_title": "BUDGET BRACKET", "reach_title": "AUDIENCE & REACH", "duration_title": "CAMPAIGN DURATION", "budget_brackets": [{"id": "under_25k", "label": "Under ₹25,000", "min": 0, "max": 25000}, {"id": "25k_50k", "label": "₹25K – ₹50K", "min": 25000, "max": 50000}, {"id": "50k_1l", "label": "₹50K – ₹1 Lakh", "min": 50000, "max": 100000}, {"id": "1l_2l", "label": "₹1 Lakh – ₹2 Lakhs", "min": 100000, "max": 200000}, {"id": "above_2l", "label": "Above ₹2 Lakhs", "min": 200000, "max": 999999999}]}'
 ) ON DUPLICATE KEY UPDATE
   `site_name` = VALUES(`site_name`),
   `tagline` = VALUES(`tagline`),
@@ -359,6 +361,7 @@ INSERT INTO `site_settings` (
   `retention_rate` = VALUES(`retention_rate`),
   `social_links` = VALUES(`social_links`),
   `genre_badges` = VALUES(`genre_badges`),
+  `filter_config` = VALUES(`filter_config`),
   `updated_at` = NOW();
 
 -- 2. Media Genres Seed
