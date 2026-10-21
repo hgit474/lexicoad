@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { useSite } from '../context/SiteContext';
 
 export default function Privacy() {
@@ -161,30 +160,6 @@ export default function Privacy() {
             </div>
           </div>
         ))}
-
-        {/* Contact Support Card */}
-        <div className="bg-gradient-to-br from-laxBlue-950 to-slate-900 rounded-3xl p-8 text-white text-center shadow-xl border border-white/10">
-          <h3 className="font-grotesk font-bold text-2xl">Need assistance with your data?</h3>
-          <p className="text-slate-300 text-sm mt-2 max-w-xl mx-auto">
-            Contact our dedicated privacy and grievance team for data access, corrections, or inquiries regarding your campaign records.
-          </p>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
-            <Link
-              to="/contact"
-              className="grad-btn px-6 py-3 rounded-xl text-white font-bold text-sm inline-flex items-center gap-2"
-            >
-              <i className="fa-solid fa-envelope"></i> Contact Grievance Officer
-            </Link>
-            <a
-              href="https://wa.me/919742313705"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-emerald-600 hover:bg-emerald-700 px-6 py-3 rounded-xl text-white font-bold text-sm transition-all inline-flex items-center gap-2 shadow-lg"
-            >
-              <i className="fa-brands fa-whatsapp"></i> Chat on WhatsApp
-            </a>
-          </div>
-        </div>
       </div>
     </div>
   );

@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { useSite } from '../context/SiteContext';
 
 export default function Terms() {
@@ -158,28 +157,6 @@ export default function Terms() {
             </div>
           </div>
         ))}
-
-        {/* Contact Assistance Box */}
-        <div className="bg-gradient-to-br from-laxBlue-950 to-slate-900 rounded-3xl p-8 text-white text-center shadow-xl border border-white/10">
-          <h3 className="font-grotesk font-bold text-2xl">Questions regarding our terms?</h3>
-          <p className="text-slate-300 text-sm mt-2 max-w-xl mx-auto">
-            Our operations team is available Monday through Saturday to clarify billboard specifications, site permits, or customized contracts.
-          </p>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
-            <Link
-              to="/contact"
-              className="grad-btn px-6 py-3 rounded-xl text-white font-bold text-sm inline-flex items-center gap-2"
-            >
-              <i className="fa-solid fa-paper-plane"></i> Contact Operations
-            </Link>
-            <a
-              href={`mailto:${settings.email || 'lexicoadvertising@gmail.com'}`}
-              className="bg-white/10 hover:bg-white/20 border border-white/20 px-6 py-3 rounded-xl text-white font-bold text-sm transition-all inline-flex items-center gap-2"
-            >
-              <i className="fa-solid fa-envelope"></i> Email Support
-            </a>
-          </div>
-        </div>
       </div>
     </div>
   );
