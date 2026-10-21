@@ -25,7 +25,7 @@ Live domains:
 3. Import this repository.
 4. Framework Preset: **Vite**
 5. Root Directory: `./` (or `lexicoad` if deployed from a mono-repo)
-6. Build Command: `npm run build` (auto-runs prebuild to generate fresh multi-domain sitemaps)
+6. Build Command: `npm run build`
 7. Output Directory: `dist`
 
 ### Step 2: Configure Environment Variables in Vercel
