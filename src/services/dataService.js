@@ -88,7 +88,7 @@ export const getLocalDB = () => {
           }
         });
       }
-      if (!Array.isArray(parsed.listings) || parsed.listings.length === 0) {
+      if (!Array.isArray(parsed.listings)) {
         parsed.listings = [...initialListings];
         updated = true;
       }
@@ -437,6 +437,68 @@ export const deleteLocation = async (id) => {
   return true;
 };
 
+export const deleteLocationsBulk = async (ids) => {
+  if (!Array.isArray(ids) || ids.length === 0) return true;
+  const idSet = new Set(ids);
+  const db = getLocalDB();
+  db.locations = (db.locations || []).filter(l => !idSet.has(l.id));
+  db.service_locations = (db.service_locations || []).filter(m => !idSet.has(m.location_id));
+  saveLocalDB(db);
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      await supabase.from('locations').delete().in('id', ids);
+      await supabase.from('service_locations').delete().in('location_id', ids);
+    } catch (err) {
+      console.warn('Supabase deleteLocationsBulk failed:', err);
+    }
+  }
+  return true;
+};
+
+export const clearAllLocations = async () => {
+  const db = getLocalDB();
+  db.locations = [];
+  db.service_locations = [];
+  saveLocalDB(db);
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      const { error } = await supabase.from('locations').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      if (error) console.warn('Supabase clearAllLocations error:', error);
+      await supabase.from('service_locations').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    } catch (err) {
+      console.warn('Supabase clearAllLocations failed:', err);
+    }
+  }
+  return true;
+};
+
+export const rollbackToExampleLocations = async () => {
+  const db = getLocalDB();
+  const demoLocations = Array.isArray(initialLocations) ? [...initialLocations] : [];
+  const demoServiceLocations = Array.isArray(initialServiceLocations) ? [...initialServiceLocations] : [];
+  db.locations = demoLocations;
+  db.service_locations = demoServiceLocations;
+  saveLocalDB(db);
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      await supabase.from('locations').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('service_locations').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      if (demoLocations.length > 0) {
+        await supabase.from('locations').upsert(demoLocations);
+      }
+      if (demoServiceLocations.length > 0) {
+        await supabase.from('service_locations').upsert(demoServiceLocations);
+      }
+    } catch (err) {
+      console.warn('Supabase rollbackToExampleLocations failed:', err);
+    }
+  }
+  return demoLocations;
+};
+
 // ==========================================
 // 4. SERVICE_LOCATIONS
 // ==========================================
@@ -528,6 +590,58 @@ export const deleteCampaign = async (id) => {
     }
   }
   return true;
+};
+
+export const deleteCampaignsBulk = async (ids) => {
+  if (!Array.isArray(ids) || ids.length === 0) return true;
+  const idSet = new Set(ids);
+  const db = getLocalDB();
+  db.campaigns = (db.campaigns || []).filter(c => !idSet.has(c.id));
+  saveLocalDB(db);
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      await supabase.from('campaigns').delete().in('id', ids);
+    } catch (err) {
+      console.warn('Supabase deleteCampaignsBulk failed:', err);
+    }
+  }
+  return true;
+};
+
+export const clearAllCampaigns = async () => {
+  const db = getLocalDB();
+  db.campaigns = [];
+  saveLocalDB(db);
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      const { error } = await supabase.from('campaigns').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      if (error) console.warn('Supabase clearAllCampaigns error:', error);
+    } catch (err) {
+      console.warn('Supabase clearAllCampaigns failed:', err);
+    }
+  }
+  return true;
+};
+
+export const rollbackToExampleCampaigns = async () => {
+  const db = getLocalDB();
+  const demoCampaigns = Array.isArray(initialCampaigns) ? [...initialCampaigns] : [];
+  db.campaigns = demoCampaigns;
+  saveLocalDB(db);
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      await supabase.from('campaigns').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      if (demoCampaigns.length > 0) {
+        await supabase.from('campaigns').upsert(demoCampaigns);
+      }
+    } catch (err) {
+      console.warn('Supabase rollbackToExampleCampaigns failed:', err);
+    }
+  }
+  return demoCampaigns;
 };
 
 export const cycleCampaignStatus = async (id) => {
