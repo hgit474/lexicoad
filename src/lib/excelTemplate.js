@@ -256,7 +256,279 @@ export const CATEGORY_SCHEMAS = {
     ],
     generateUpsertKey: (row) =>
       `digital:${cleanStr(row.venue_type)}:${cleanStr(row.location_name)}:${cleanStr(row.city)}:${cleanStr(row.title)}`
+  },
+
+  Retail: {
+    key: 'Retail',
+    label: 'Mall & Retail Spaces',
+    columns: [
+      'mall_name',
+      'zone_or_floor',
+      'city',
+      'title',
+      'media_type',
+      'dimensions',
+      'price',
+      'reach',
+      'footfall_weekend',
+      'available_from',
+      'description',
+      'image_url'
+    ],
+    colWidths: [24, 20, 16, 40, 20, 16, 14, 14, 16, 16, 45, 38],
+    sampleRow: [
+      'Phoenix Palladium',
+      'Central Atrium Lower Ground',
+      'Mumbai',
+      'Phoenix Palladium Grand Atrium Drop Banner',
+      'Hanging Atrium Banner',
+      '40x20 ft Double-sided',
+      165000,
+      850000,
+      120000,
+      '2026-11-01',
+      'Dominant high-dwell suspended atrium drop banner viewed across 4 shopping levels.',
+      'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?q=80&w=800&auto=format&fit=crop'
+    ],
+    generateUpsertKey: (row) =>
+      `retail:${cleanStr(row.mall_name)}:${cleanStr(row.zone_or_floor)}:${cleanStr(row.city)}:${cleanStr(row.title)}`
+  },
+
+  'Street Furniture': {
+    key: 'Street Furniture',
+    label: 'Street Furniture & Kiosks',
+    columns: [
+      'furniture_type',
+      'arterial_street',
+      'city',
+      'title',
+      'media_type',
+      'pole_or_unit_count',
+      'dimensions',
+      'price',
+      'reach',
+      'available_from',
+      'description',
+      'image_url'
+    ],
+    colWidths: [20, 26, 16, 40, 20, 18, 16, 14, 14, 16, 45, 38],
+    sampleRow: [
+      'Street Light Pole Kiosk',
+      'Indiranagar 100ft Road',
+      'Bengaluru',
+      'Indiranagar High Street Backlit Pole Kiosks (20 Units)',
+      'Pole Kiosk Cluster',
+      20,
+      '3x5 ft Each',
+      75000,
+      420000,
+      '2026-11-01',
+      'Sequential backlit pole kiosks down Bengaluru premier retail and dining high street corridor.',
+      'https://images.unsplash.com/photo-1514565131-fce0801e5785?q=80&w=800&auto=format&fit=crop'
+    ],
+    generateUpsertKey: (row) =>
+      `streetfurniture:${cleanStr(row.furniture_type)}:${cleanStr(row.arterial_street)}:${cleanStr(row.city)}:${cleanStr(row.title)}`
+  },
+
+  BTL: {
+    key: 'BTL',
+    label: 'BTL & Activations',
+    columns: [
+      'venue_type',
+      'landmark_location',
+      'city',
+      'title',
+      'media_type',
+      'footfall_estimate',
+      'price',
+      'duration_days',
+      'available_from',
+      'description',
+      'image_url'
+    ],
+    colWidths: [22, 28, 16, 40, 20, 18, 14, 14, 16, 45, 38],
+    sampleRow: [
+      'Tech Park Amphitheatre',
+      'Cyber City DLF Phase 2',
+      'Gurugram',
+      'Cyber City Central Amphitheatre Experiential Activation Zone',
+      'Experiential Booth',
+      180000,
+      130000,
+      7,
+      '2026-11-01',
+      'Direct consumer sampling & engagement pop-up kiosk at highest concentration of MNC tech workers.',
+      'https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=800&auto=format&fit=crop'
+    ],
+    generateUpsertKey: (row) =>
+      `btl:${cleanStr(row.venue_type)}:${cleanStr(row.landmark_location)}:${cleanStr(row.city)}:${cleanStr(row.title)}`
+  },
+
+  Print: {
+    key: 'Print',
+    label: 'Print & Publications',
+    columns: [
+      'publication_name',
+      'edition_city',
+      'position',
+      'title',
+      'media_type',
+      'circulation',
+      'price',
+      'dimensions',
+      'available_from',
+      'description',
+      'image_url'
+    ],
+    colWidths: [22, 16, 20, 40, 20, 16, 14, 16, 16, 45, 38],
+    sampleRow: [
+      'Economic Times',
+      'Delhi NCR',
+      'Front Page Jacket',
+      'Economic Times Delhi Executive Front Jacket Ad',
+      'Front Page Jacket',
+      420000,
+      350000,
+      'Full Page 33x52 cm',
+      '2026-11-01',
+      'Exclusive full-cover newspaper jacket delivered to C-suite and corporate readers across the capital.',
+      'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop'
+    ],
+    generateUpsertKey: (row) =>
+      `print:${cleanStr(row.publication_name)}:${cleanStr(row.edition_city)}:${cleanStr(row.position)}:${cleanStr(row.title)}`
+  },
+
+  Sports: {
+    key: 'Sports',
+    label: 'Stadium & Sports Media',
+    columns: [
+      'stadium_name',
+      'sport_type',
+      'zone_or_placement',
+      'city',
+      'title',
+      'media_type',
+      'tournament',
+      'price',
+      'reach',
+      'available_from',
+      'description',
+      'image_url'
+    ],
+    colWidths: [24, 16, 22, 16, 40, 20, 18, 14, 14, 16, 45, 38],
+    sampleRow: [
+      'Wankhede Stadium',
+      'Cricket',
+      'Ground Boundary Digital LED',
+      'Mumbai',
+      'Wankhede Pitch Boundary Dynamic Digital LED Board',
+      'Perimeter LED Ribbon',
+      'T20 Premier League',
+      450000,
+      12000000,
+      '2026-11-01',
+      'Prime broadcast-facing pitch perimeter digital board reaching millions of stadium & live TV viewers.',
+      'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=800&auto=format&fit=crop'
+    ],
+    generateUpsertKey: (row) =>
+      `sports:${cleanStr(row.stadium_name)}:${cleanStr(row.sport_type)}:${cleanStr(row.city)}:${cleanStr(row.title)}`
   }
+};
+
+/**
+ * Returns pre-built schema or dynamically generates Universal Schema for any category
+ */
+export const getCategorySchema = (category = 'Transit') => {
+  if (CATEGORY_SCHEMAS[category]) return CATEGORY_SCHEMAS[category];
+  const match = Object.values(CATEGORY_SCHEMAS).find(
+    s => s.key.toLowerCase() === (category || '').toLowerCase()
+  );
+  if (match) return match;
+
+  const safeCat = String(category || 'Custom').trim();
+  return {
+    key: safeCat,
+    label: `${safeCat} Inventory`,
+    columns: [
+      'sub_type',
+      'location_or_venue',
+      'city',
+      'title',
+      'media_type',
+      'dimensions_or_specs',
+      'price',
+      'reach',
+      'available_from',
+      'description',
+      'image_url'
+    ],
+    colWidths: [20, 26, 16, 38, 20, 20, 14, 14, 16, 45, 38],
+    sampleRow: [
+      `${safeCat} Premium`,
+      'Prime Commercial Center',
+      'Mumbai',
+      `Prime ${safeCat} High-Impact Asset`,
+      'Standard Display',
+      'Standard Format',
+      65000,
+      500000,
+      '2026-11-01',
+      `Verified high-impact ${safeCat} media placement with continuous high commercial visibility.`,
+      'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=800&auto=format&fit=crop'
+    ],
+    generateUpsertKey: (row) =>
+      `${cleanStr(safeCat)}:${cleanStr(row.sub_type)}:${cleanStr(row.location_or_venue)}:${cleanStr(row.city)}:${cleanStr(row.title)}`
+  };
+};
+
+/**
+ * Auto-detects category from uploaded spreadsheet columns and/or filename
+ */
+export const autoDetectCategoryFromHeaders = (headers = [], filename = '') => {
+  const normHeaders = headers.map(h => String(h).toLowerCase().replace(/[^a-z0-9]/g, ''));
+  const normFile = String(filename || '').toLowerCase();
+
+  // 1. Filename match against all registered keys
+  for (const cat of Object.keys(CATEGORY_SCHEMAS)) {
+    const cleanCat = cat.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (normFile.includes(cleanCat)) {
+      return cat;
+    }
+  }
+
+  // 2. Specific distinctive column signatures
+  if (normHeaders.includes('busoperator') || normHeaders.includes('routenumber') || normHeaders.includes('fleetsize')) {
+    return 'Bus';
+  }
+  if (normHeaders.includes('multiplexchain') || normHeaders.includes('screenumber') || normHeaders.includes('slottiming')) {
+    return 'Cinema';
+  }
+  if (normHeaders.includes('transittype') || normHeaders.includes('routeorline') || normHeaders.includes('stationordepot')) {
+    return 'Transit';
+  }
+  if (normHeaders.includes('airportname') || normHeaders.includes('terminal') || normHeaders.includes('aerobridge')) {
+    return 'Airport';
+  }
+  if (normHeaders.includes('venuetype') || normHeaders.includes('resolution') || normHeaders.includes('loopsperhour')) {
+    return 'Digital';
+  }
+  if (normHeaders.includes('mallname') || normHeaders.includes('zoneorfloor') || normHeaders.includes('footfallweekend')) {
+    return 'Retail';
+  }
+  if (normHeaders.includes('poleorunitcount') || normHeaders.includes('arterialstreet')) {
+    return 'Street Furniture';
+  }
+  if (normHeaders.includes('publicationname') || normHeaders.includes('editioncity') || normHeaders.includes('circulation')) {
+    return 'Print';
+  }
+  if (normHeaders.includes('stadiumname') || normHeaders.includes('sporttype') || normHeaders.includes('tournament')) {
+    return 'Sports';
+  }
+  if (normHeaders.includes('landmarklocation') || normHeaders.includes('placementtype')) {
+    return 'Outdoor';
+  }
+
+  return null;
 };
 
 /**
@@ -725,9 +997,12 @@ export const validateRowByCategory = (category, norm, rowNumber, context = {}) =
 /**
  * Generates and triggers download of category-specific .xlsx template
  */
+/**
+ * Generates and triggers download of category-specific .xlsx template
+ */
 export const downloadCategoryTemplate = async (category = 'Transit') => {
   const XLSX = await getXLSX();
-  const schema = CATEGORY_SCHEMAS[category] || CATEGORY_SCHEMAS.Transit;
+  const schema = getCategorySchema(category);
 
   const wsData = [
     schema.columns,
@@ -742,11 +1017,64 @@ export const downloadCategoryTemplate = async (category = 'Transit') => {
   }
 
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, `${schema.key} Inventory`);
+  XLSX.utils.book_append_sheet(wb, ws, `${schema.key} Template`);
 
-  const fileName = `lexicoad_${schema.key.toLowerCase()}_template.xlsx`;
+  const fileName = `lexicoad_${schema.key.toLowerCase().replace(/[^a-z0-9]/g, '_')}_template.xlsx`;
   XLSX.writeFile(wb, fileName);
   return true;
+};
+
+/**
+ * Exports existing database listings for a category directly to a populated Excel spreadsheet
+ */
+export const exportCategoryListingsToExcel = async (category = 'Transit', listings = []) => {
+  const XLSX = await getXLSX();
+  const schema = getCategorySchema(category);
+  const relevant = (listings || []).filter(
+    l => (l.category || '').toLowerCase() === category.toLowerCase()
+  );
+
+  const rows = [schema.columns];
+  if (relevant.length === 0) {
+    rows.push(schema.sampleRow);
+  } else {
+    relevant.forEach(item => {
+      const meta = item.metadata || {};
+      const row = schema.columns.map(col => {
+        const cleanCol = col.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (cleanCol === 'title') return item.title || '';
+        if (cleanCol === 'price') return item.price || 0;
+        if (cleanCol === 'reach') return item.reach || '';
+        if (cleanCol === 'mediatype') return item.media_type || '';
+        if (cleanCol === 'description') return item.description || '';
+        if (cleanCol === 'imageurl' || cleanCol === 'image') return item.image_url || '';
+        if (cleanCol === 'city' || cleanCol === 'location') return item.location || '';
+        if (cleanCol === 'availablefrom') return meta.available_from || '';
+        return meta[col] || meta[cleanCol] || item[col] || item[cleanCol] || '';
+      });
+      rows.push(row);
+    });
+  }
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  if (schema.colWidths) {
+    ws['!cols'] = schema.colWidths.map(w => ({ wch: w }));
+  }
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, `${schema.key} Inventory`);
+  const fileName = `lexicoad_${schema.key.toLowerCase().replace(/[^a-z0-9]/g, '_')}_inventory.xlsx`;
+  XLSX.writeFile(wb, fileName);
+  return true;
+};
+
+/**
+ * Generates ready-to-test mock demo rows for any category
+ */
+export const generateDemoRowsForCategory = (category = 'Transit') => {
+  const schema = getCategorySchema(category);
+  const sample1 = schema.sampleRow;
+  return [sample1];
 };
 
 /**
@@ -784,7 +1112,7 @@ export const downloadErrorReport = async (errorRows = [], category = 'Inventory'
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Validation Errors');
 
-  const fileName = `lexicoad_${category.toLowerCase()}_import_errors.xlsx`;
+  const fileName = `lexicoad_${category.toLowerCase().replace(/[^a-z0-9]/g, '_')}_import_errors.xlsx`;
   XLSX.writeFile(wb, fileName);
   return true;
 };
@@ -807,6 +1135,12 @@ export const parseCategoryExcel = async (fileBuffer, category = 'Transit', conte
     throw new Error('The uploaded sheet is empty. Please add rows or use our template.');
   }
 
+  // Auto-detect category from column headers or sheet name
+  const rawHeaders = Object.keys(rawData[0] || {});
+  const autoCategory = autoDetectCategoryFromHeaders(rawHeaders, context.filename || firstSheetName);
+
+  const targetCategory = context.forceCategory || category;
+
   const processedRows = [];
   const validRows = [];
   const errorRows = [];
@@ -818,7 +1152,7 @@ export const parseCategoryExcel = async (fileBuffer, category = 'Transit', conte
     const rowNumber = index + 2; // +1 for 0-index, +1 for header in spreadsheet
     const norm = normalizeRowKeys(row);
 
-    const report = validateRowByCategory(category, norm, rowNumber, context);
+    const report = validateRowByCategory(targetCategory, norm, rowNumber, context);
 
     // Duplicate detection within file
     const lowerKey = report.upsertKey.toLowerCase();
@@ -866,7 +1200,8 @@ export const parseCategoryExcel = async (fileBuffer, category = 'Transit', conte
     errorRows,
     totalCount: processedRows.length,
     successCount: validRows.length,
-    errorCount: errorRows.length
+    errorCount: errorRows.length,
+    autoDetectedCategory: autoCategory
   };
 };
 

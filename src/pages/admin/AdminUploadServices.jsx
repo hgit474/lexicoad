@@ -7,22 +7,33 @@ import {
   rollbackToExampleListings,
   getUploadLogs,
   getListings,
-  getLocations
+  getLocations,
+  getServices,
+  generateListingUUID
 } from '../../services/dataService';
 import {
   CATEGORY_SCHEMAS,
+  getCategorySchema,
   downloadCategoryTemplate,
   downloadErrorReport,
-  parseCategoryExcel
+  parseCategoryExcel,
+  exportCategoryListingsToExcel,
+  validateRowByCategory,
+  cleanPriceNumber
 } from '../../lib/excelTemplate';
 
-const INVENTORY_CATEGORIES = [
-  { key: 'Transit', label: 'Transit', icon: 'fa-train-subway', desc: 'Metro trains, railway concourses, coaches & station branding' },
+const DEFAULT_CATEGORIES = [
+  { key: 'Transit', label: 'Transit', icon: 'fa-train-subway', desc: 'Metro trains, concourses, coaches & station branding' },
   { key: 'Bus', label: 'Bus Fleet', icon: 'fa-bus', desc: 'City bus fleets, electric AC buses, back panels & depot kiosks' },
   { key: 'Cinema', label: 'Cinema', icon: 'fa-film', desc: 'Multiplex screens, on-screen video ads, lobby video walls & audis' },
   { key: 'Outdoor', label: 'Outdoor', icon: 'fa-signs-post', desc: 'Highway unipoles, arterial hoardings, gantries & bridge displays' },
   { key: 'Airport', label: 'Airport', icon: 'fa-plane-departure', desc: 'Terminal lightboxes, digital concourse totems & aerobridge wraps' },
-  { key: 'Digital', label: 'Digital DOOH', icon: 'fa-tv', desc: 'Iconic curved LED screens, mall digital totems & video walls' }
+  { key: 'Digital', label: 'Digital DOOH', icon: 'fa-tv', desc: 'Iconic curved LED screens, mall digital totems & video walls' },
+  { key: 'Retail', label: 'Mall & Retail', icon: 'fa-bag-shopping', desc: 'Atrium drop banners, food courts & mall digital facades' },
+  { key: 'Street Furniture', label: 'Street & Kiosks', icon: 'fa-signs-post', desc: 'Arterial street pole kiosks, traffic islands & public mupis' },
+  { key: 'BTL', label: 'BTL Activations', icon: 'fa-bullhorn', desc: 'Tech park activations, experiential pop-ups & brand sampling' },
+  { key: 'Print', label: 'Print Media', icon: 'fa-newspaper', desc: 'National newspaper jackets, business dailies & print insertions' },
+  { key: 'Sports', label: 'Stadium & Sports', icon: 'fa-trophy', desc: 'Cricket & football stadium pitch perimeter LED ribbons' }
 ];
 
 export default function AdminUploadServices() {
@@ -32,20 +43,72 @@ export default function AdminUploadServices() {
   const [searchParams, setSearchParams] = useSearchParams();
   const outletCtx = useOutletContext();
 
+  // Categories list: defaults + custom saved + auto-discovered from DB
+  const [categoriesList, setCategoriesList] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('laxico_custom_inventory_categories') || '[]');
+      return [...DEFAULT_CATEGORIES, ...saved];
+    } catch {
+      return DEFAULT_CATEGORIES;
+    }
+  });
+
+  // Modal to add a brand new category
+  const [customCatModalOpen, setCustomCatModalOpen] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
+  const [newCatDesc, setNewCatDesc] = useState('');
+
   // Active Category Selection (from URL ?category= or state or default Transit)
   const initialCat = searchParams.get('category') || location.state?.category || 'Transit';
-  const initialValid = INVENTORY_CATEGORIES.find(c => c.key.toLowerCase() === initialCat.toLowerCase())?.key || 'Transit';
-  const [selectedCategory, setSelectedCategory] = useState(initialValid);
+  const [selectedCategory, setSelectedCategory] = useState(initialCat);
+
+  // Auto-discover distinct categories from DB listings & services
+  useEffect(() => {
+    const discoverCategories = async () => {
+      try {
+        const [listingsData, servicesData] = await Promise.all([
+          getListings(),
+          getServices()
+        ]);
+        const dbCats = new Set();
+        (listingsData || []).forEach(l => l.category && dbCats.add(l.category.trim()));
+        (servicesData || []).forEach(s => {
+          if (s.type) dbCats.add(s.type.trim());
+          if (s.genre) dbCats.add(s.genre.trim());
+        });
+
+        setCategoriesList(prev => {
+          const existingKeys = new Set(prev.map(c => c.key.toLowerCase()));
+          const newOnes = [];
+          dbCats.forEach(cat => {
+            if (!existingKeys.has(cat.toLowerCase())) {
+              newOnes.push({
+                key: cat,
+                label: cat,
+                icon: 'fa-tag',
+                desc: 'Auto-discovered from database records',
+                isDynamic: true
+              });
+            }
+          });
+          return newOnes.length > 0 ? [...prev, ...newOnes] : prev;
+        });
+      } catch (e) {
+        console.warn('Category auto-discovery error:', e);
+      }
+    };
+    discoverCategories();
+  }, []);
 
   useEffect(() => {
     const catParam = searchParams.get('category') || location.state?.category;
     if (catParam) {
-      const match = INVENTORY_CATEGORIES.find(c => c.key.toLowerCase() === catParam.toLowerCase());
+      const match = categoriesList.find(c => c.key.toLowerCase() === catParam.toLowerCase());
       if (match && match.key !== selectedCategory) {
         setSelectedCategory(match.key);
       }
     }
-  }, [searchParams, location.state]);
+  }, [searchParams, location.state, categoriesList]);
 
   // File & Upload States
   const [dragActive, setDragActive] = useState(false);
@@ -174,8 +237,19 @@ export default function AdminUploadServices() {
       const buffer = await file.arrayBuffer();
       const result = await parseCategoryExcel(buffer, category, {
         existingUpsertKeys,
-        knownCities
+        knownCities,
+        filename: file.name
       });
+
+      // Smart auto-detect: if spreadsheet clearly matches a different category, auto switch!
+      if (result.autoDetectedCategory && result.autoDetectedCategory.toLowerCase() !== category.toLowerCase()) {
+        const detected = result.autoDetectedCategory;
+        showToast(`Auto-detected "${detected}" format from spreadsheet! Switched validator.`, 'info');
+        setSelectedCategory(detected);
+        setSearchParams({ category: detected }, { replace: true });
+        parseFile(file, detected);
+        return;
+      }
 
       setParseResult(result);
       setParsing(false);
@@ -193,6 +267,155 @@ export default function AdminUploadServices() {
       console.error('Error parsing file:', err);
       showToast(err.message || 'Failed to parse inventory file', 'error');
     }
+  };
+
+  // 1-Click Test Demo Data Generator
+  const handleTryDemoData = () => {
+    const schema = getCategorySchema(selectedCategory);
+    const demoRow1 = schema.sampleRow;
+    const demoRow2 = [...schema.sampleRow].map((val, idx) => {
+      const colName = (schema.columns[idx] || '').toLowerCase();
+      if (colName.includes('title')) return `${val} (Cluster B)`;
+      if (colName.includes('price')) return Math.round(Number(val) * 1.12);
+      if (colName.includes('reach')) return Math.round(Number(val) * 0.95);
+      return val;
+    });
+
+    const mockData = [demoRow1, demoRow2];
+    const processed = mockData.map((rowArr, idx) => {
+      const norm = {};
+      schema.columns.forEach((col, colIdx) => {
+        norm[col.toLowerCase().replace(/[^a-z0-9]/g, '')] = rowArr[colIdx];
+      });
+      return validateRowByCategory(selectedCategory, norm, idx + 2);
+    });
+
+    setParseResult({
+      rows: processed,
+      validRows: processed.filter(r => r.isValid).map(r => ({
+        id: generateListingUUID(),
+        category: r.category,
+        subcategory: r.subcategory,
+        title: r.title,
+        location: r.location,
+        price: r.price,
+        media_type: r.media_type,
+        reach: r.reach,
+        description: r.description,
+        image_url: r.image_url,
+        upsert_key: r.upsertKey,
+        metadata: r.metadata,
+        isExistingMatch: false,
+        created_at: new Date().toISOString()
+      })),
+      errorRows: processed.filter(r => !r.isValid),
+      totalCount: processed.length,
+      successCount: processed.filter(r => r.isValid).length,
+      errorCount: processed.filter(r => !r.isValid).length,
+      isDemoData: true
+    });
+    setSelectedFile({ name: `${selectedCategory.toLowerCase()}_sample_demo.xlsx` });
+    showToast(`Loaded 2 sample rows for ${selectedCategory}! Ready to preview & test import.`, 'success');
+  };
+
+  // Export current category inventory to Excel (.xlsx)
+  const handleExportCategoryInventory = async () => {
+    try {
+      const allListings = await getListings();
+      await exportCategoryListingsToExcel(selectedCategory, allListings);
+      showToast(`Exported ${selectedCategory} inventory to Excel (.xlsx)!`, 'success');
+    } catch (err) {
+      console.error('Export category error:', err);
+      showToast('Failed to export category inventory', 'error');
+    }
+  };
+
+  // Add brand new custom category
+  const handleAddCustomCategory = (e) => {
+    e.preventDefault();
+    const name = newCatName.trim();
+    if (!name) {
+      showToast('Please enter a valid category name', 'warning');
+      return;
+    }
+    const exists = categoriesList.some(c => c.key.toLowerCase() === name.toLowerCase());
+    if (exists) {
+      showToast(`Category "${name}" already exists`, 'info');
+      setSelectedCategory(name);
+      setCustomCatModalOpen(false);
+      return;
+    }
+
+    const newCatObj = {
+      key: name,
+      label: name,
+      icon: 'fa-sparkles',
+      desc: newCatDesc.trim() || `Custom ${name} inventory with dynamic Excel schema`,
+      isCustom: true
+    };
+
+    const updated = [...categoriesList, newCatObj];
+    setCategoriesList(updated);
+
+    try {
+      const customOnly = updated.filter(c => c.isCustom);
+      localStorage.setItem('laxico_custom_inventory_categories', JSON.stringify(customOnly));
+    } catch (err) {
+      console.warn('Failed to save custom category:', err);
+    }
+
+    setSelectedCategory(name);
+    setSearchParams({ category: name }, { replace: true });
+    setNewCatName('');
+    setNewCatDesc('');
+    setCustomCatModalOpen(false);
+    showToast(`Category "${name}" created! Excel template ready for download.`, 'success');
+  };
+
+  // In-table live cell editing for instant error fixes
+  const handleCellEdit = (rowIndex, field, value) => {
+    if (!parseResult || !parseResult.rows) return;
+    const updatedRows = [...parseResult.rows];
+    const target = updatedRows[rowIndex];
+    if (!target) return;
+
+    if (field === 'price') target.price = cleanPriceNumber(value);
+    else if (field === 'title') target.title = value;
+    else if (field === 'location') target.location = value;
+    else if (field === 'reach') target.reach = cleanPriceNumber(value);
+
+    // Re-verify row validity
+    const errs = [];
+    if (!target.title || !String(target.title).trim()) errs.push('Required: Title is missing');
+    if (isNaN(target.price) || target.price <= 0) errs.push('Required: Price must be a positive number');
+    target.errors = errs;
+    target.isValid = errs.length === 0;
+
+    const validList = updatedRows.filter(r => r.isValid).map(r => ({
+      id: r.id || generateListingUUID(),
+      category: r.category,
+      subcategory: r.subcategory,
+      title: r.title,
+      location: r.location,
+      price: r.price,
+      media_type: r.media_type,
+      reach: r.reach,
+      description: r.description,
+      image_url: r.image_url,
+      upsert_key: r.upsertKey,
+      metadata: r.metadata || {},
+      isExistingMatch: r.isExistingMatch,
+      created_at: new Date().toISOString()
+    }));
+
+    setParseResult(prev => ({
+      ...prev,
+      rows: updatedRows,
+      validRows: validList,
+      errorRows: updatedRows.filter(r => !r.isValid),
+      successCount: validList.length,
+      errorCount: updatedRows.filter(r => !r.isValid).length
+    }));
   };
 
   // Download Category-specific Template
@@ -391,7 +614,7 @@ export default function AdminUploadServices() {
     }
   };
 
-  const activeSchema = CATEGORY_SCHEMAS[selectedCategory] || CATEGORY_SCHEMAS.Transit;
+  const activeSchema = getCategorySchema(selectedCategory);
 
   return (
     <div className="space-y-4 sm:space-y-6 w-full max-w-full overflow-hidden">
@@ -401,15 +624,38 @@ export default function AdminUploadServices() {
           <div className="inline-flex items-center gap-2 bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full mb-2">
             <i className="fa-solid fa-file-excel"></i> PER-CATEGORY BULK INVENTORY UPLOADER
           </div>
-          <h2 className="text-xl sm:text-2xl font-grotesk font-bold text-white">
-            Upload Inventory (.xlsx / .csv)
+          <h2 className="text-xl sm:text-2xl font-grotesk font-bold text-white flex items-center gap-2.5">
+            <span>Upload Inventory (.xlsx / .csv)</span>
+            <span className="text-xs px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full font-mono">
+              {categoriesList.length} Categories
+            </span>
           </h2>
           <p className="text-slate-400 text-xs sm:text-sm mt-1 max-w-2xl">
-            Select an inventory category, download its specialized Excel template, and upload in batches of 500 rows with schema validation and duplicate tracking.
+            Select an inventory category, download its specialized Excel template, or test with instant demo data. Uploads process in 500-item chunks with duplicate tracking.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          {/* Try with Demo Data (Instant Test) */}
+          <button
+            onClick={handleTryDemoData}
+            className="inline-flex items-center gap-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border border-purple-400/40 text-xs font-bold px-3 py-2 rounded-xl transition shadow"
+            title={`Test 1-click sample preview for ${selectedCategory}`}
+          >
+            <i className="fa-solid fa-wand-magic-sparkles text-purple-300"></i>
+            <span>Try with Demo Data</span>
+          </button>
+
+          {/* Export Current Category Listings */}
+          <button
+            onClick={handleExportCategoryInventory}
+            className="inline-flex items-center gap-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 border border-blue-400/40 text-xs font-bold px-3 py-2 rounded-xl transition shadow"
+            title={`Download all current ${selectedCategory} listings as Excel`}
+          >
+            <i className="fa-solid fa-file-export text-blue-300"></i>
+            <span>Export {selectedCategory} (.xlsx)</span>
+          </button>
+
           {/* Rollback to Example Listings */}
           <button
             onClick={handleRollback}
@@ -438,10 +684,11 @@ export default function AdminUploadServices() {
           {/* Download Selected Category Template */}
           <button
             onClick={handleDownloadTemplate}
-            className="inline-flex items-center gap-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold px-3 py-2 rounded-xl transition shadow"
-            title={`Download ${selectedCategory} template`}
+            className="inline-flex items-center gap-1.5 bg-emerald-500/25 hover:bg-emerald-500/35 text-emerald-200 border border-emerald-400/50 text-xs font-bold px-3 py-2 rounded-xl transition shadow"
+            title={`Download ${selectedCategory} blank template`}
           >
-            <i className="fa-solid fa-download"></i> {selectedCategory} Template (.xlsx)
+            <i className="fa-solid fa-download text-emerald-400"></i>
+            <span>{selectedCategory} Template</span>
           </button>
 
           <Link
@@ -458,14 +705,19 @@ export default function AdminUploadServices() {
         <div className="flex items-center justify-between mb-3">
           <div className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
             <i className="fa-solid fa-layer-group text-emerald-400"></i>
-            <span>Step 1: Select Target Inventory Category</span>
+            <span>Step 1: Select Target Inventory Category ({categoriesList.length} Available)</span>
           </div>
-          <span className="text-[11px] text-slate-400">Each category has its own column specification</span>
+          <button
+            onClick={() => setCustomCatModalOpen(true)}
+            className="inline-flex items-center gap-1 text-[11px] bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 px-2.5 py-1 rounded-lg font-bold transition"
+          >
+            <i className="fa-solid fa-plus text-[10px]"></i> Add Custom Category
+          </button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-          {INVENTORY_CATEGORIES.map((cat) => {
-            const isSelected = selectedCategory === cat.key;
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
+          {categoriesList.map((cat) => {
+            const isSelected = selectedCategory.toLowerCase() === cat.key.toLowerCase();
             return (
               <button
                 key={cat.key}
@@ -481,11 +733,13 @@ export default function AdminUploadServices() {
                   <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm ${
                     isSelected ? 'bg-emerald-500 text-white shadow' : 'bg-white/5 text-slate-400 group-hover:text-white'
                   }`}>
-                    <i className={`fa-solid ${cat.icon}`}></i>
+                    <i className={`fa-solid ${cat.icon || 'fa-tag'}`}></i>
                   </div>
-                  {isSelected && (
+                  {isSelected ? (
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  )}
+                  ) : cat.isCustom ? (
+                    <span className="text-[9px] bg-purple-500/30 text-purple-300 px-1 rounded font-bold">Custom</span>
+                  ) : null}
                 </div>
                 <div className={`font-bold text-xs ${isSelected ? 'text-white' : 'text-slate-300'}`}>
                   {cat.label}
@@ -496,6 +750,21 @@ export default function AdminUploadServices() {
               </button>
             );
           })}
+
+          {/* + Add Custom Category Card */}
+          <button
+            type="button"
+            onClick={() => setCustomCatModalOpen(true)}
+            className="p-3 rounded-2xl border border-dashed border-white/20 hover:border-emerald-400/60 hover:bg-emerald-500/10 text-left transition-all flex flex-col justify-center items-center text-center group min-h-[95px]"
+          >
+            <div className="w-8 h-8 rounded-xl bg-white/5 group-hover:bg-emerald-500/20 text-slate-400 group-hover:text-emerald-300 flex items-center justify-center text-sm mb-1.5 transition">
+              <i className="fa-solid fa-plus"></i>
+            </div>
+            <div className="text-xs font-bold text-slate-300 group-hover:text-emerald-300 transition">
+              + Custom Category
+            </div>
+            <div className="text-[10px] text-slate-500">Auto-schema uploader</div>
+          </button>
         </div>
 
         {/* Selected Category Column Info Banner */}
@@ -512,12 +781,20 @@ export default function AdminUploadServices() {
             ))}
           </div>
 
-          <button
-            onClick={handleDownloadTemplate}
-            className="text-emerald-400 hover:text-emerald-300 text-xs font-bold inline-flex items-center gap-1 transition"
-          >
-            <i className="fa-solid fa-download"></i> Get {selectedCategory} Excel Template
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleTryDemoData}
+              className="text-purple-300 hover:text-purple-200 text-xs font-bold inline-flex items-center gap-1 transition"
+            >
+              <i className="fa-solid fa-wand-magic-sparkles"></i> 1-Click Test Demo
+            </button>
+            <button
+              onClick={handleDownloadTemplate}
+              className="text-emerald-400 hover:text-emerald-300 text-xs font-bold inline-flex items-center gap-1 transition"
+            >
+              <i className="fa-solid fa-download"></i> Get {selectedCategory} Template (.xlsx)
+            </button>
+          </div>
         </div>
       </div>
 
@@ -880,19 +1157,41 @@ export default function AdminUploadServices() {
                         </span>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-white font-bold max-w-[200px] truncate">
-                      {row.title}
+                    <td className="py-2 px-3 min-w-[200px]">
+                      <input
+                        type="text"
+                        value={row.title || ''}
+                        onChange={(e) => handleCellEdit(parseResult.rows.indexOf(row), 'title', e.target.value)}
+                        className="bg-transparent border-b border-white/10 hover:border-white/30 focus:border-laxBlue-400 focus:bg-[#071343] text-white font-bold outline-none w-full px-1.5 py-1 rounded transition text-xs"
+                        title="Click to edit title directly"
+                      />
                     </td>
-                    <td className="py-3 px-4">
-                      <span className="bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded text-[10px] font-bold">
+                    <td className="py-2 px-3">
+                      <span className="bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded text-[10px] font-bold whitespace-nowrap">
                         {row.category}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-slate-300 max-w-[140px] truncate">
-                      {row.location}
+                    <td className="py-2 px-3 min-w-[140px]">
+                      <input
+                        type="text"
+                        value={row.location || ''}
+                        onChange={(e) => handleCellEdit(parseResult.rows.indexOf(row), 'location', e.target.value)}
+                        className="bg-transparent border-b border-white/10 hover:border-white/30 focus:border-laxBlue-400 focus:bg-[#071343] text-slate-300 outline-none w-full px-1.5 py-1 rounded transition text-xs"
+                        title="Click to edit location directly"
+                      />
                     </td>
-                    <td className="py-3 px-4 text-emerald-400 font-bold font-grotesk">
-                      ₹{row.price ? Number(row.price).toLocaleString('en-IN') : '0'}
+                    <td className="py-2 px-3 min-w-[120px]">
+                      <div className="flex items-center gap-0.5 bg-black/30 px-1.5 py-0.5 rounded border border-white/10 focus-within:border-emerald-400">
+                        <span className="text-emerald-400 font-bold">₹</span>
+                        <input
+                          type="number"
+                          value={row.price || ''}
+                          onChange={(e) => handleCellEdit(parseResult.rows.indexOf(row), 'price', e.target.value)}
+                          className="bg-transparent text-emerald-400 font-bold font-grotesk outline-none w-full text-xs"
+                          placeholder="Price"
+                          title="Click to edit price directly"
+                        />
+                      </div>
                     </td>
                     <td className="py-3 px-4 text-slate-300">
                       <span className="bg-white/10 px-2 py-0.5 rounded text-[10px]">
@@ -1168,6 +1467,114 @@ export default function AdminUploadServices() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* CREATE CUSTOM CATEGORY MODAL */}
+      {customCatModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#071343] border border-emerald-500/40 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative">
+            <button
+              onClick={() => {
+                setCustomCatModalOpen(false);
+                setNewCatName('');
+                setNewCatDesc('');
+              }}
+              className="absolute top-5 right-5 text-slate-400 hover:text-white text-lg transition"
+            >
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+
+            <form onSubmit={handleAddCustomCategory} className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xl">
+                  <i className="fa-solid fa-layer-group"></i>
+                </div>
+                <div>
+                  <h3 className="font-grotesk font-bold text-lg text-white">Add Custom Category</h3>
+                  <p className="text-xs text-slate-400">Auto-creates dynamic Excel template & validator</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                  Category Name <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={newCatName}
+                  onChange={(e) => setNewCatName(e.target.value)}
+                  placeholder="e.g. Residential RWA, Auto Hoods, Petrol Pump"
+                  autoFocus
+                  required
+                  className="w-full bg-[#040A29] border border-white/15 focus:border-emerald-400 rounded-xl py-2.5 px-3.5 text-xs text-white placeholder-slate-500 outline-none transition"
+                />
+              </div>
+
+              {/* Quick suggestions */}
+              <div>
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  Quick Ideas:
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {['Residential RWA', 'Highway Toll Plazas', 'Petrol Pumps', 'EV Charging Hubs', 'Golf Clubs', 'Supermarkets'].map((idea) => (
+                    <button
+                      key={idea}
+                      type="button"
+                      onClick={() => setNewCatName(idea)}
+                      className="text-[10px] bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-300 text-slate-300 border border-white/10 px-2 py-0.5 rounded-lg transition"
+                    >
+                      + {idea}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                  Description / Venues (Optional)
+                </label>
+                <textarea
+                  value={newCatDesc}
+                  onChange={(e) => setNewCatDesc(e.target.value)}
+                  rows="2"
+                  placeholder="e.g. High-density society lift branding, clubhouse gate arches..."
+                  className="w-full bg-[#040A29] border border-white/15 focus:border-emerald-400 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 outline-none transition resize-none"
+                />
+              </div>
+
+              <div className="bg-emerald-950/30 border border-emerald-500/20 rounded-xl p-3 text-[11px] text-emerald-300/90 space-y-1">
+                <div className="font-bold flex items-center gap-1.5 text-emerald-400">
+                  <i className="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                  <span>Zero Manual Setup Required</span>
+                </div>
+                <p className="text-slate-300 text-[10px] leading-relaxed">
+                  Laxico will automatically assign a specialized column schema for this category. Once added, you can instantly download its pre-formatted Excel template and bulk upload inventory directly into Supabase.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCustomCatModalOpen(false);
+                    setNewCatName('');
+                    setNewCatDesc('');
+                  }}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-white/10 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!newCatName.trim()}
+                  className="grad-btn text-white font-extrabold text-xs px-5 py-2 rounded-xl shadow-lg transition flex items-center gap-1.5 disabled:opacity-40"
+                >
+                  <i className="fa-solid fa-plus text-[10px]"></i> Create & Select Category
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
