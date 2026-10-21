@@ -30,12 +30,48 @@ import AdminAnalytics from './pages/admin/AdminAnalytics';
 import AdminDatabase from './pages/admin/AdminDatabase';
 import AdminSettings from './pages/admin/AdminSettings';
 
-// Scroll to top on route change
-function ScrollToTop() {
+// Route metadata updater (Scroll, Dynamic Canonical URL, Title, OG URL)
+function RouteMetadataUpdater() {
   const { pathname } = useLocation();
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // 1. Dynamic Canonical URL to match exact current page
+    const cleanPath = pathname === '/' ? '' : pathname.replace(/\/$/, '');
+    const canonicalHref = `https://lexicoad-two.vercel.app${cleanPath}`;
+
+    let canonical = document.querySelector("link[rel='canonical']");
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute('href', canonicalHref);
+
+    // 2. Dynamic OpenGraph URL
+    const ogUrl = document.querySelector("meta[property='og:url']");
+    if (ogUrl) {
+      ogUrl.setAttribute('content', canonicalHref);
+    }
+
+    // 3. Dynamic Page Titles for SEO
+    const pageTitles = {
+      '/': 'Laxico Advertising — Billboard & Poster Placements Across India',
+      '/services': 'Outdoor Media Services & Inventory — Laxico Advertising',
+      '/portfolio': 'Portfolio & Live Campaign Gallery — Laxico Advertising',
+      '/contact': 'Request Media Plan & Pricing Quote — Laxico Advertising',
+      '/about': 'About Laxico Advertising — India-Wide Outdoor Network',
+      '/lexico': 'Admin Portal Login — Laxico Advertising'
+    };
+
+    if (pageTitles[pathname]) {
+      document.title = pageTitles[pathname];
+    } else if (pathname.startsWith('/services/')) {
+      document.title = 'Service Details & Availability — Laxico Advertising';
+    }
   }, [pathname]);
+
   return null;
 }
 
@@ -43,8 +79,14 @@ function ScrollToTop() {
 function PublicLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-[#F6F8FF] text-[#071343] font-jakarta">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:bg-laxRed-600 focus:text-white focus:px-4 focus:py-2.5 focus:rounded-xl focus:shadow-2xl focus:font-extrabold focus:outline-none"
+      >
+        Skip to main content
+      </a>
       <Navbar />
-      <main className="flex-1">
+      <main id="main-content" role="main" tabIndex="-1" className="flex-1 focus:outline-none">
         <Outlet />
       </main>
       <Footer />
@@ -55,7 +97,7 @@ function PublicLayout() {
 export default function App() {
   return (
     <SiteProvider>
-      <ScrollToTop />
+      <RouteMetadataUpdater />
       {/* Global Overlays */}
       <ToastBox />
       <LightboxModal />

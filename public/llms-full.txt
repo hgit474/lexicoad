@@ -1,0 +1,49 @@
+# Laxico Advertising — Full Documentation for AI Agents
+
+> Comprehensive documentation of services, placement types, inventory specifications, booking process, and pricing structures for Laxico Advertising across India.
+
+## Company Overview
+- Name: Laxico Advertising Pvt. Ltd.
+- Industry: Outdoor Advertising (OOH), Digital Out-of-Home (DOOH), Transit Media
+- Operating Regions: Delhi NCR, Mumbai, Bengaluru, Hyderabad, Chennai, Pune, Kolkata, Ahmedabad, Jaipur, Lucknow, Chandigarh, Kochi
+- Primary Website: https://lexicoad-two.vercel.app/
+- GST Number: 29CTIPS2521P1ZZ
+- UDYAM Registration: UDYAM-KR-03-0664055
+- Headquarters: No 1 Nandini Complex, Chandra Layout, Bangalore, Karnataka 560040, India
+- Contact: +91-9742313705 | lexicoadvertising@gmail.com
+
+## Media Inventory & Rates
+1. Highway Unipoles & City Hoardings
+   - Locations: NH-48 (Delhi-Gurugram), Western Express Highway (Mumbai), Outer Ring Road (Bengaluru), HITEC City (Hyderabad)
+   - Standard Sizes: 40x20 ft, 50x25 ft, 60x30 ft, 20x10 ft
+   - Illumination: Frontlit LED, Backlit Flex
+   - Pricing: Starting from ₹1,20,000 / month
+
+2. Metro Station Domination & Train Wraps
+   - Networks: Delhi Metro (DMRC Blue/Yellow lines), Namma Metro Bengaluru, Mumbai Metro
+   - Placements: Concourse lightboxes, ticket counter panels, entry/exit archways, coach interiors, full exterior train wraps
+   - Pricing: Starting from ₹85,000 / month
+
+3. Airport Terminal Advertising
+   - Hubs: Indira Gandhi International Airport (DEL T3), Kempegowda International Airport (BLR T1/T2), Chhatrapati Shivaji Maharaj International Airport (BOM T2)
+   - Formats: Static lightboxes, digital video walls, conveyor belt hoardings, aerobridge wraps
+   - Pricing: Starting from ₹1,80,000 / month
+
+4. Digital OOH (DOOH) Screens
+   - Venues: DLF Cyber Hub, Phoenix Marketcity, Brigade Gateway, Ambience Mall
+   - Format: 4K P2.5/P3 Outdoor LED Billboards
+   - Frequency: 10-second slots, 120+ plays / day
+   - Pricing: Starting from ₹65,000 / month
+
+5. Retail Mall & Atrium Drops
+   - Venues: Top tier A malls across metro cities
+   - Formats: Giant atrium hanging banners, escalator side graphics, standees, elevator wraps
+   - Pricing: Starting from ₹45,000 / month
+
+## Client Verification & Execution Workflow
+- Step 1: Media Selection & Availability Check via online platform
+- Step 2: Location Lock & Rate Confirmation
+- Step 3: Artwork Pre-flight Check & In-House Plant Printing (flex / vinyl)
+- Step 4: Physical Mounting & Electrical Illumination within 48 hours
+- Step 5: Day and Night Geo-tagged Photo Proof of Display delivered to client dashboard
+- Step 6: Fortnightly maintenance and structural integrity monitoring

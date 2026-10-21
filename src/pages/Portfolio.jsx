@@ -62,34 +62,47 @@ export default function Portfolio() {
           </p>
 
           <div className="grid sm:grid-cols-3 gap-3 mt-6 max-w-3xl">
-            <select
-              value={serviceTypeFilter}
-              onChange={e => setServiceTypeFilter(e.target.value)}
-              className="rounded-2xl px-4 py-3 text-sm font-bold bg-white text-laxBlue-950 outline-none shadow cursor-pointer"
-            >
-              {serviceTypes.map(t => (
-                <option key={t} value={t}>
-                  {t === 'All' ? 'All service types' : t}
-                </option>
-              ))}
-            </select>
+            <div>
+              <label htmlFor="portfolio-service-filter" className="sr-only">Filter by service type</label>
+              <select
+                id="portfolio-service-filter"
+                aria-label="Filter campaigns by service type"
+                value={serviceTypeFilter}
+                onChange={e => setServiceTypeFilter(e.target.value)}
+                className="w-full rounded-2xl px-4 py-3 text-sm font-bold bg-white text-laxBlue-950 outline-none shadow cursor-pointer"
+              >
+                {serviceTypes.map(t => (
+                  <option key={t} value={t}>
+                    {t === 'All' ? 'All service types' : t}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            <select
-              value={locationFilter}
-              onChange={e => setLocationFilter(e.target.value)}
-              className="rounded-2xl px-4 py-3 text-sm font-bold bg-white text-laxBlue-950 outline-none shadow cursor-pointer"
-            >
-              <option value="All">All locations</option>
-              {locations.map(l => (
-                <option key={l.id} value={l.id}>
-                  {l.name} — {l.city}
-                </option>
-              ))}
-            </select>
+            <div>
+              <label htmlFor="portfolio-location-filter" className="sr-only">Filter by location</label>
+              <select
+                id="portfolio-location-filter"
+                aria-label="Filter campaigns by location"
+                value={locationFilter}
+                onChange={e => setLocationFilter(e.target.value)}
+                className="w-full rounded-2xl px-4 py-3 text-sm font-bold bg-white text-laxBlue-950 outline-none shadow cursor-pointer"
+              >
+                <option value="All">All locations</option>
+                {locations.map(l => (
+                  <option key={l.id} value={l.id}>
+                    {l.name} — {l.city}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <div className="relative">
-              <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+              <label htmlFor="portfolio-search-query" className="sr-only">Search campaigns by brand or client</label>
+              <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true"></i>
               <input
+                id="portfolio-search-query"
+                aria-label="Search campaigns by brand, client, or keyword"
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}

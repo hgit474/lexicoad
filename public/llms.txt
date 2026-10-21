@@ -1,0 +1,25 @@
+# Laxico Advertising
+
+> Leading full-stack outdoor advertising (OOH/DOOH) media network in India. Managing 250+ prime billboards, highway unipoles, metro station dominations, airport arrival displays, bus shelter kiosks, and digital LED screens across 12 major Indian cities.
+
+## Media Services & Channels
+- [All Media Services](https://lexicoad-two.vercel.app/services): Complete directory of outdoor advertising channels, dimensions, verified footfall metrics, and live rates.
+- [Highway Unipoles & City Hoardings](https://lexicoad-two.vercel.app/services): High-impact arterial road unipoles, cantilever hoardings, and highway gantries with verified vehicle traffic data.
+- [Metro Station Branding](https://lexicoad-two.vercel.app/services): Concourse media walls, station pillar wraps, and metro train interior & exterior branding across DMRC, BMRCL, and Mumbai Metro.
+- [Airport Advertising](https://lexicoad-two.vercel.app/services): Premium T3 arrival corridors, aerobridge wraps, digital luggage belt screens, and terminal lightbox placements.
+- [Digital DOOH LED Screens](https://lexicoad-two.vercel.app/services): Network of high-resolution digital screens in technology parks, cyber hubs, and luxury shopping centers.
+- [Transit & Bus Media](https://lexicoad-two.vercel.app/services): Bus shelter branding, intercity fleet branding, and railway platform hoardings.
+
+## Proof of Work & Campaigns
+- [Campaign Portfolio](https://lexicoad-two.vercel.app/portfolio): Live and completed campaigns for brands including Nike, Zomato, Samsung, HDFC Bank, Coca-Cola, Amazon, Tata, and Swiggy.
+- [Verified Locations Directory](https://lexicoad-two.vercel.app/services): Database of 248+ prime inventory points with geo-tagged photos and footfall audits.
+
+## Company & Inquiries
+- [Instant Cost Estimator & Quote Request](https://lexicoad-two.vercel.app/contact): Transparent campaign estimation tool, GST invoicing, and 48-hour turnarounds.
+- [About Laxico](https://lexicoad-two.vercel.app/about): In-house printing facility in Delhi, government-approved permits (MCD, DMRC, AAI), day and night photo monitoring.
+
+## Contact Information
+- Website: https://lexicoad-two.vercel.app/
+- Phone: +91-9742313705
+- Email: lexicoadvertising@gmail.com
+- Head Office: No 1 Nandini Complex, Chandra Layout, Bangalore, Karnataka 560040, India

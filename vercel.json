@@ -2,8 +2,10 @@
   "rewrites": [
     { "source": "/robots.txt", "destination": "/robots.txt" },
     { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
+    { "source": "/llms.txt", "destination": "/llms.txt" },
+    { "source": "/llms-full.txt", "destination": "/llms-full.txt" },
     { "source": "/logo.png", "destination": "/logo.png" },
-    { "source": "/((?!assets/|robots\\.txt|sitemap\\.xml|logo\\.png).*)", "destination": "/index.html" }
+    { "source": "/((?!assets/|robots\\.txt|sitemap\\.xml|llms\\.txt|llms-full\\.txt|logo\\.png).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
