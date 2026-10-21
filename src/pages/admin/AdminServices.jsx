@@ -10,6 +10,7 @@ import {
 } from '../../services/dataService';
 import { useSite } from '../../context/SiteContext';
 import { MEDIA_GENRES } from '../../components/BrowseByGenre';
+import GenreBadgesModal from '../../components/admin/GenreBadgesModal';
 
 export default function AdminServices() {
   const location = useLocation();
@@ -22,6 +23,7 @@ export default function AdminServices() {
 
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
+  const [badgeModalOpen, setBadgeModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({
     name: '',
@@ -270,6 +272,16 @@ export default function AdminServices() {
               </option>
             ))}
           </select>
+
+          <button
+            onClick={() => setBadgeModalOpen(true)}
+            className="bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs sm:text-sm font-extrabold px-3.5 py-3 rounded-xl flex items-center gap-2 shadow shrink-0 transition"
+            title="Manage HOT, TRENDING, and POPULAR tags for media genres"
+          >
+            <i className="fa-solid fa-tags text-laxRed-400"></i>
+            <span className="hidden sm:inline">Genre Badges</span>
+            <span className="sm:hidden">Badges</span>
+          </button>
 
           <button
             onClick={openAddModal}
@@ -685,6 +697,12 @@ export default function AdminServices() {
           </div>
         </div>
       )}
+
+      {/* Genre Badges Manager Modal */}
+      <GenreBadgesModal
+        isOpen={badgeModalOpen}
+        onClose={() => setBadgeModalOpen(false)}
+      />
     </div>
   );
 }

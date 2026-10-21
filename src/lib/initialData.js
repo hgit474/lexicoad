@@ -61,7 +61,21 @@ export const initialSettings = {
     instagram: 'https://instagram.com',
     twitter: 'https://twitter.com',
     youtube: 'https://youtube.com'
-  }
+  },
+  genre_badges: JSON.stringify({
+    Airport: { active: true, text: 'HOT', color: 'red' },
+    Cinema: { active: true, text: 'HOT', color: 'red' },
+    Digital: { active: true, text: 'HOT', color: 'red' },
+    Outdoor: { active: true, text: 'HOT', color: 'red' },
+    Transit: { active: true, text: 'HOT', color: 'red' },
+    Retail: { active: false, text: 'POPULAR', color: 'purple' },
+    'Street Furniture': { active: false, text: 'TRENDING', color: 'amber' },
+    BTL: { active: false, text: 'NEW', color: 'emerald' },
+    Print: { active: false, text: 'CLASSIC', color: 'blue' },
+    Radio: { active: false, text: 'TRENDING', color: 'amber' },
+    Sports: { active: false, text: 'HOT', color: 'red' },
+    Television: { active: false, text: 'PRIME', color: 'purple' }
+  })
 };
 
 export const initialServices = [

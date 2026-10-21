@@ -6,9 +6,11 @@ import {
   updateSupabaseCredentials,
   testSupabaseConnection
 } from '../../lib/supabase';
+import GenreBadgesModal from '../../components/admin/GenreBadgesModal';
 
 export default function AdminSettings() {
   const { settings, updateSettings, showToast } = useSite();
+  const [badgeModalOpen, setBadgeModalOpen] = useState(false);
 
   // CMS Form State
   const [form, setForm] = useState({
@@ -285,6 +287,32 @@ export default function AdminSettings() {
                 placeholder="NIKE, ZOMATO, SAMSUNG, HDFC BANK"
               />
               <p className="text-[11px] text-slate-500 mt-1.5">These names appear in the scrolling strip below the hero carousel.</p>
+            </div>
+
+            {/* Genre Badges (HOT / TRENDING) Manager Trigger Card */}
+            <div className="sm:col-span-2 lg:col-span-3 rounded-2xl bg-gradient-to-r from-laxRed-950/30 via-purple-950/20 to-transparent border border-laxRed-500/20 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-laxRed-500/20 text-laxRed-400 flex items-center justify-center text-lg border border-laxRed-500/30 shrink-0">
+                  <i className="fa-solid fa-tags"></i>
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-white flex items-center gap-2">
+                    Media Genre Badges (HOT / TRENDING / POPULAR)
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-laxRed-500/20 text-laxRed-300 border border-laxRed-500/30">CMS</span>
+                  </div>
+                  <div className="text-xs text-slate-400 mt-0.5">
+                    Customize the tags, labels, and colors displayed on the 12 media channels in the "Browse Media by Genre" section.
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setBadgeModalOpen(true)}
+                className="grad-btn text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 shadow shrink-0"
+              >
+                <i className="fa-solid fa-pen-to-square"></i>
+                <span>Manage Badges</span>
+              </button>
             </div>
           </div>
 
@@ -844,6 +872,12 @@ export default function AdminSettings() {
           </div>
         </div>
       </div>
+
+      {/* Genre Badges Manager Modal */}
+      <GenreBadgesModal
+        isOpen={badgeModalOpen}
+        onClose={() => setBadgeModalOpen(false)}
+      />
     </div>
   );
 }

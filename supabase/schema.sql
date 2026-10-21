@@ -85,6 +85,7 @@ ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS contact_response_title TEXT D
 ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS contact_approved_title TEXT DEFAULT '100% Approved';
 ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS contact_faqs JSONB DEFAULT '[]'::jsonb;
 ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS map_link TEXT DEFAULT 'https://maps.google.com/?q=No+1+Nandini+Complex+Chandra+Layout+Bangalore+560040';
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS genre_badges JSONB DEFAULT '{}'::jsonb;
 
 -- 2. MEDIA_GENRES TABLE
 CREATE TABLE IF NOT EXISTS media_genres (
@@ -137,7 +138,7 @@ ALTER TABLE services ADD COLUMN IF NOT EXISTS print_spec VARCHAR(255) DEFAULT '7
 ALTER TABLE services ADD COLUMN IF NOT EXISTS reporting VARCHAR(255) DEFAULT 'Weekly geo-tagged photos';
 ALTER TABLE services ADD COLUMN IF NOT EXISTS inquiry_process TEXT DEFAULT 'Call within 4 working hours|Quote + media plan|Go live in 48 hrs';
 
--- 3. LOCATIONS TABLE
+-- 4. LOCATIONS TABLE
 CREATE TABLE IF NOT EXISTS locations (
     id TEXT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -146,11 +147,22 @@ CREATE TABLE IF NOT EXISTS locations (
     footfall INTEGER DEFAULT 100000,
     size VARCHAR(100) DEFAULT 'Standard',
     status VARCHAR(50) DEFAULT 'Available', -- Available, Occupied, Maintenance
+    price_mult NUMERIC(4, 2) DEFAULT 1.00,
+    lat NUMERIC(10, 8) DEFAULT 28.61390000,
+    lng NUMERIC(11, 8) DEFAULT 77.20900000,
+    address TEXT DEFAULT '',
     image TEXT NOT NULL,
+    images JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 4. SERVICE_LOCATIONS JUNCTION TABLE
+ALTER TABLE locations ADD COLUMN IF NOT EXISTS price_mult NUMERIC(4, 2) DEFAULT 1.00;
+ALTER TABLE locations ADD COLUMN IF NOT EXISTS lat NUMERIC(10, 8) DEFAULT 28.61390000;
+ALTER TABLE locations ADD COLUMN IF NOT EXISTS lng NUMERIC(11, 8) DEFAULT 77.20900000;
+ALTER TABLE locations ADD COLUMN IF NOT EXISTS address TEXT DEFAULT '';
+ALTER TABLE locations ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]'::jsonb;
+
+-- 5. SERVICE_LOCATIONS JUNCTION TABLE
 CREATE TABLE IF NOT EXISTS service_locations (
     id TEXT PRIMARY KEY,
     service_id TEXT REFERENCES services(id) ON DELETE CASCADE,
@@ -158,21 +170,31 @@ CREATE TABLE IF NOT EXISTS service_locations (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 5. CLIENTS TABLE
+-- 6. CLIENTS TABLE
 CREATE TABLE IF NOT EXISTS clients (
     id TEXT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     contact VARCHAR(100),
     phone VARCHAR(50),
     email VARCHAR(255),
+    industry VARCHAR(100) DEFAULT 'Retail',
+    logo_url TEXT,
+    total_campaigns INTEGER DEFAULT 1,
+    active BOOLEAN DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 6. CAMPAIGNS TABLE (PLACEMENTS)
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS industry VARCHAR(100) DEFAULT 'Retail';
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS logo_url TEXT;
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS total_campaigns INTEGER DEFAULT 1;
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS active BOOLEAN DEFAULT true;
+
+-- 7. CAMPAIGNS TABLE (PLACEMENTS)
 CREATE TABLE IF NOT EXISTS campaigns (
     id TEXT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     client VARCHAR(255) NOT NULL,
+    client_name VARCHAR(255),
     service_id TEXT REFERENCES services(id) ON DELETE SET NULL,
     location_id TEXT REFERENCES locations(id) ON DELETE SET NULL,
     start_date DATE NOT NULL,
@@ -180,11 +202,17 @@ CREATE TABLE IF NOT EXISTS campaigns (
     budget INTEGER DEFAULT 100000,
     status VARCHAR(50) DEFAULT 'Scheduled', -- Live, Scheduled, Paused, Completed
     artwork TEXT NOT NULL,
+    artwork_url TEXT,
+    proof_images JSONB DEFAULT '[]'::jsonb,
     notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 7. INQUIRIES TABLE (LEAD PIPELINE)
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS client_name VARCHAR(255);
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS artwork_url TEXT;
+ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS proof_images JSONB DEFAULT '[]'::jsonb;
+
+-- 8. INQUIRIES TABLE (LEAD PIPELINE)
 CREATE TABLE IF NOT EXISTS inquiries (
     id TEXT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -195,22 +223,35 @@ CREATE TABLE IF NOT EXISTS inquiries (
     location_id TEXT REFERENCES locations(id) ON DELETE SET NULL,
     duration VARCHAR(50) DEFAULT '1 Month',
     budget VARCHAR(100) DEFAULT '₹50K – ₹2L',
+    has_artwork BOOLEAN DEFAULT false,
     message TEXT,
     stage VARCHAR(50) DEFAULT 'New', -- New, Contacted, Quoted, Converted, Closed
     date DATE DEFAULT CURRENT_DATE,
     followup VARCHAR(50) DEFAULT '—',
+    notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 8. MEDIA LIBRARY TABLE
+ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS has_artwork BOOLEAN DEFAULT false;
+ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS followup VARCHAR(50) DEFAULT '—';
+
+-- 9. MEDIA LIBRARY TABLE
 CREATE TABLE IF NOT EXISTS media (
     id TEXT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     tag VARCHAR(100) DEFAULT 'Showcase',
+    category VARCHAR(100) DEFAULT 'Campaigns',
+    caption TEXT,
     service_id TEXT REFERENCES services(id) ON DELETE SET NULL,
+    location_id TEXT REFERENCES locations(id) ON DELETE SET NULL,
     url TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+ALTER TABLE media ADD COLUMN IF NOT EXISTS category VARCHAR(100) DEFAULT 'Campaigns';
+ALTER TABLE media ADD COLUMN IF NOT EXISTS caption TEXT;
+ALTER TABLE media ADD COLUMN IF NOT EXISTS location_id TEXT REFERENCES locations(id) ON DELETE SET NULL;
 -- 9. PUBLIC IMAGE STORAGE (used by the Admin upload controls)
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('site-media', 'site-media', true)
@@ -312,15 +353,21 @@ ON CONFLICT (id) DO NOTHING;
 
 -- SEED: services
 INSERT INTO services (id, name, type, genre, sub_type, chain_or_brand, audience_metric, min_spend, price, rating, popularity, status, dims, durations, image, description) VALUES
-('svc_cinema_pvr', 'PVR INOX On-Screen 30s Slide & Video Ads', 'Cinema', 'Cinema', 'On-Screen 30s Ad Slot', 'PVR INOX & Cinepolis', '85,000+ Viewers / Week / Screen', 15000, 35000, 4.9, 99, 'Active', '2K / 4K DCP 5.1 Surround', '1 Week, 2 Weeks, 1 Month, 3 Months', 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=800', 'Run cinematic audio-visual slides and high-impact video commercials across PVR INOX and Cinepolis auditoriums with captive audiences.'),
-('svc_airport_aero', 'Aerobridge Glass Wrap & Arrival Conveyor Screens', 'Airport', 'Airport', 'Aerobridge & Baggage Conveyor', 'Delhi T3, Mumbai T2 & BLR T1', '1.2L+ High-Net-Worth Flyers / Day', 50000, 125000, 4.9, 96, 'Active', 'Full Aerobridge Wrap + LED', '1 Month, 3 Months, 6 Months, 12 Months', 'https://images.unsplash.com/photo-1542296332-2e4473faf563?q=80&w=800', 'Exclusive branded aerobridge glass vinyls and baggage carousel digital screens delivering deep engagement with premium business travelers.'),
-('svc_metro', 'Metro Station Ads & Train Wraps', 'Transit', 'Transit', 'Station Branding & Train Wraps', 'DMRC, BMRCL & Mumbai Metro', '3.5L+ Commuters / Station / Day', 25000, 45000, 4.9, 98, 'Active', '20 × 10 ft • Backlit + Digital', '1 Week, 2 Weeks, 1 Month, 3 Months, 6 Months, 12 Months', 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?q=80&w=800&auto=format&fit=crop', 'Dominate concourses, platforms, entry gates and ticket counters across metro hubs with backlit boxes and full train vinyl wraps.'),
-('svc_bus_dtc', 'AC Low Floor Bus External Wrap & Back Panel', 'Transit', 'Transit', 'Full Bus Wrap & Rear Glass', 'DTC & BEST Mumbai Fleets', '2.8L+ Daily Street Impressions / Bus', 12000, 22000, 4.7, 88, 'Active', 'Full Body Wrap + Back Panel', '1 Month, 3 Months, 6 Months', 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?q=80&w=800', 'High-frequency mobile billboard advertising cruising along high-density commercial routes, IT corridors, and residential arterial roads.'),
-('svc_dooh_led', 'Prime Junction DOOH Digital LED Billboard Wall', 'Digital', 'DOOH', 'Outdoor P6 LED Video Wall', 'Cyber Hub, BKC & MG Road', '4.5L+ Vehicular Impressions / Day', 30000, 85000, 4.8, 95, 'Active', '40 × 20 ft • Dynamic LED Video', '1 Week, 2 Weeks, 1 Month, 3 Months', 'https://images.unsplash.com/photo-1508873696983-2df5293cb32f?q=80&w=800', 'Vibrant digital billboard wall featuring high-refresh rates, dynamic content rotation, and automated day-parting targeting peak commute hours.'),
-('svc_highway', 'Highway Billboards & Heavy Traffic Unipoles', 'Outdoor', 'Outdoor', 'Large Unipole Hoarding', 'NH-48, DND Flyway, Outer Ring Road', '10L+ Vehicular Impressions / Week', 35000, 75000, 4.8, 95, 'Active', '48 × 20 ft • Front-lit Unipole', '1 Month, 3 Months, 6 Months, 12 Months', 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=800&auto=format&fit=crop', 'Iconic large-format unipoles on NH-48, Eastern Expressway, Yamuna Expressway and city gateways with front illumination.'),
-('svc_mall', 'Mall Atrium Displays & Digital Totems', 'Retail', 'Retail', 'Atrium Banners & Entrance Totem', 'Select Citywalk, Phoenix & Nexus', '75,000+ Shoppers / Weekend', 20000, 55000, 4.6, 80, 'Active', 'Custom • Atrium + Facade', '1 Week, 2 Weeks, 1 Month, 3 Months', 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?q=80&w=800&auto=format&fit=crop', 'Atrium hangings, facade glow-signs, food-court table wraps and entrance totems in top tier malls.'),
-('svc_railway', 'Railway Station Hoardings & Foot Over Bridges', 'Transit', 'Transit', 'Platform & FOB Large Display', 'CST, New Delhi & Howrah Stations', '4L+ Footfall Daily per Station', 25000, 62000, 4.7, 84, 'Active', '40 × 20 ft • Concourse + FOB', '1 Month, 3 Months, 6 Months, 12 Months', 'https://images.unsplash.com/photo-1565019011521-b0575cbb57c8?q=80&w=800&auto=format&fit=crop', 'Concourse hoardings, foot-over-bridge panels and platform boards at leading A1 rail junctions.')
-ON CONFLICT (id) DO NOTHING;
+('svc_cinema_pvr', 'PVR INOX Multiplex Cinema Ads', 'Cinema', 'Cinema', 'On-Screen Video & Slide Ads', 'PVR INOX', '280 Seats/Screen • 4.2L+ Monthly Footfall', 11400, 32000, 4.9, 97, 'Active', '2K / 4K DCP • 10–30s Spots', '1 Week, 2 Weeks, 1 Month, 3 Months', 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=800&auto=format&fit=crop', 'Captive, high-impact cinema advertising across premium PVR and INOX audi screens. On-screen slides, Dolby Atmos cinema video commercials, and lobby standees during blockbuster releases.'),
+('svc_cinema_cinepolis', 'Cinepolis Fun Republic On-Screen Ads', 'Cinema', 'Cinema', 'Digital Screen & Slide Ad', 'Cinépolis', '252 Seats/Screen • High Affluent Youth Dwell', 6080, 18500, 4.8, 91, 'Active', 'Full Cinema Screen • High Lumen DCP', '1 Week, 2 Weeks, 1 Month', 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=800&auto=format&fit=crop', 'High-visibility digital slides and video commercials before movie trailers and interval. Reach young, tech-savvy cinema-goers across premier Cinepolis locations.'),
+('svc_metro', 'Metro Station Ads & Train Wraps', 'Transit', 'Transit', 'Concourse & Train Branding', 'Metro Rail Network', '2.5L+ Daily Commuters per Hub', 15000, 45000, 4.9, 98, 'Active', '20 × 10 ft • Backlit + Digital', '1 Week, 2 Weeks, 1 Month, 3 Months, 6 Months, 12 Months', 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?q=80&w=800&auto=format&fit=crop', 'Dominate concourses, platforms, entry gates and ticket counters across DMRC & metro networks. Backlit boxes, platform screen doors, staircase wraps and train-wrap options.'),
+('svc_bus', 'Bus Shelter Posters & Mupis', 'Transit', 'Transit', 'Bus Queue Shelter Mupi', 'City Transit Network', '45,000+ Daily Eye-Level Vehicular Views', 9000, 18000, 4.7, 86, 'Active', '6 × 4 ft • Backlit Mupi', '2 Weeks, 1 Month, 3 Months, 6 Months', 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?q=80&w=800&auto=format&fit=crop', 'Street-level frequency across high-traffic bus queue shelters. Backlit mupis with eye-level dwell time of 4–8 minutes. Sold in targeted clusters for prime coverage.'),
+('svc_airport', 'Airport Banners & Aerobridge Wraps', 'Airport', 'Airport', 'Arrival & Aerobridge Branding', 'International Airport Hubs', '95,000+ Daily Affluent Flyers', 45000, 95000, 4.9, 94, 'Active', '30 × 12 ft • Arrival + Departure', '1 Month, 3 Months, 6 Months, 12 Months', 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=800&auto=format&fit=crop', 'Premium arrival, departure and baggage-belt banners at T3, T2 and leading airports. Reach affluent business flyers and CXOs with average dwell of 25+ minutes.'),
+('svc_highway', 'Highway Unipoles & City Hoardings', 'Outdoor', 'Outdoor', 'Large Format Unipole', 'National Highway & Expressway', '1.2M+ Vehicular Impressions Weekly', 35000, 75000, 4.8, 95, 'Active', '48 × 20 ft • Front-lit Unipole', '1 Month, 3 Months, 6 Months, 12 Months', 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=800&auto=format&fit=crop', 'Iconic large-format unipoles on NH-48, Eastern Expressway, Airport Road and city arterial gateways. Front-lit illumination for 24/7 brand recall.'),
+('svc_led', 'Tech Park & Mall Digital DOOH Screens', 'Digital', 'Digital', 'Digital DOOH LED Wall', 'Corporate Parks & Malls', '1.8L+ Daily Tech Professionals & Shoppers', 20000, 88000, 4.9, 92, 'Active', 'P6 LED • 15-sec loop, 120 plays/day', '1 Week, 2 Weeks, 1 Month, 3 Months', 'https://images.unsplash.com/photo-1534430480872-3498386e7856?q=80&w=800&auto=format&fit=crop', 'Programmatic-grade LED walls at Cyber City, BKC, Manyata Tech Park & Whitefield. Day-parting, live data feeds and instant creative swaps. 120 spots/day guaranteed.'),
+('svc_mall', 'Mall Atrium Drops & Facade Displays', 'Retail', 'Retail', 'Atrium Drop & Pillar Wrap', 'Grade-A Malls', '3.5L+ Weekend Shopper Footfall', 18000, 55000, 4.6, 83, 'Active', 'Custom • Multi-Tier Atrium', '1 Week, 2 Weeks, 1 Month, 3 Months', 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?q=80&w=800&auto=format&fit=crop', 'Atrium hangings, facade glow-signs, food-court table wraps and entrance totems in top tier-1 malls. Exceptional engagement for D2C product launches and festive sales.'),
+('svc_railway', 'Railway Station Hoardings & FOBs', 'Transit', 'Transit', 'Platform & Foot-Over-Bridge', 'Indian Railways Network', '4.5L+ Mass Daily Footfall', 25000, 62000, 4.7, 85, 'Active', '40 × 20 ft • Concourse + FOB', '1 Month, 3 Months, 6 Months, 12 Months', 'https://images.unsplash.com/photo-1565019011521-b0575cbb57c8?q=80&w=800&auto=format&fit=crop', 'Concourse hoardings, foot-over-bridge panels and platform boards at CST, New Delhi, Howrah & major junctions. Unmatched reach for mass FMCG and consumer banking.'),
+('svc_pole', 'Arterial Street Pole Kiosks', 'Street Furniture', 'Street Furniture', 'Double-Sided Backlit Pole', 'Municipal Arterial Roads', '80,000+ Vehicles Daily / Corridor', 12000, 14000, 4.5, 76, 'Active', '8 × 4 ft • Double-sided, Backlit', '1 Month, 3 Months, 6 Months', 'https://images.unsplash.com/photo-1444723121867-7a241cacace9?q=80&w=800&auto=format&fit=crop', 'Double-sided backlit kiosks on arterial lamp posts. Hyperlocal repetitive domination along prime consumer stretches — ideal for real-estate, hospitals and retail openings.'),
+('svc_btl_activation', 'Gated Society & Corporate BTL Activations', 'BTL', 'BTL', 'Canopy Setup & Product Sampling', 'Premium Societies & Tech Parks', '2,500+ Qualified High-Net-Worth Households', 15000, 38000, 4.8, 88, 'Active', '10 × 10 ft Promotional Canopy + Promoters', '1 Weekend, 2 Weekends, 1 Month', 'https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=800&auto=format&fit=crop', 'Direct interactive kiosk activations, product sampling, and test-drive booths in premier residential townships and tech park cafeterias with verified lead capture.'),
+('svc_print_newspaper', 'Leading Newspaper Jackets & Display Ads', 'Print', 'Print', 'Front Page Jacket & Display Ad', 'National & Regional Dailies', '8.5L+ Verified Daily Circulation', 30000, 85000, 4.7, 82, 'Active', 'Full Page / Half Page / Jacket', '1 Insertion, 3 Insertions, 6 Insertions', 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop', 'Full page jackets, display ads, and custom inserts in leading English & regional newspapers. Maximum credibility and immediate city-wide buzz for brand launches.')
+ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  price = EXCLUDED.price;
 
 INSERT INTO locations (id, name, city, zone, footfall, size, status, image) VALUES
 ('loc_1', 'Central Metro Hub — Concourse', 'New Delhi', 'Central', 250000, '20 × 10 ft Backlit ×6', 'Occupied', 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?q=80&w=800&auto=format&fit=crop'),

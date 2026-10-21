@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSite } from '../context/SiteContext';
 
 export const MEDIA_GENRES = [
   {
@@ -100,8 +101,35 @@ export const MEDIA_GENRES = [
   }
 ];
 
+export const DEFAULT_GENRE_BADGES = {
+  Airport: { active: true, text: 'HOT', color: 'red' },
+  Cinema: { active: true, text: 'HOT', color: 'red' },
+  Digital: { active: true, text: 'HOT', color: 'red' },
+  Outdoor: { active: true, text: 'HOT', color: 'red' },
+  Transit: { active: true, text: 'HOT', color: 'red' },
+  Retail: { active: false, text: 'POPULAR', color: 'purple' },
+  'Street Furniture': { active: false, text: 'TRENDING', color: 'amber' },
+  BTL: { active: false, text: 'NEW', color: 'emerald' },
+  Print: { active: false, text: 'CLASSIC', color: 'blue' },
+  Radio: { active: false, text: 'TRENDING', color: 'amber' },
+  Sports: { active: false, text: 'HOT', color: 'red' },
+  Television: { active: false, text: 'PRIME', color: 'purple' }
+};
+
 export default function BrowseByGenre({ activeGenre = 'All', onSelectGenre, services = [] }) {
   const navigate = useNavigate();
+  const { settings } = useSite();
+
+  // Parse genre badges from CMS settings
+  let badges = DEFAULT_GENRE_BADGES;
+  if (settings?.genre_badges) {
+    try {
+      const parsed = typeof settings.genre_badges === 'string' ? JSON.parse(settings.genre_badges) : settings.genre_badges;
+      badges = { ...DEFAULT_GENRE_BADGES, ...parsed };
+    } catch {
+      badges = DEFAULT_GENRE_BADGES;
+    }
+  }
 
   const handleGenreClick = (genreId) => {
     if (onSelectGenre) {
@@ -114,6 +142,25 @@ export default function BrowseByGenre({ activeGenre = 'All', onSelectGenre, serv
   const getGenreCount = (genreId) => {
     if (!services.length) return null;
     return services.filter(s => (s.type || '').toLowerCase() === genreId.toLowerCase()).length;
+  };
+
+  const getBadgeClasses = (color = 'red', isActive) => {
+    if (isActive) return 'bg-white text-laxBlue-950 shadow-md font-extrabold';
+    switch (color) {
+      case 'amber':
+      case 'orange':
+        return 'bg-amber-50 text-amber-700 border border-amber-200';
+      case 'purple':
+        return 'bg-purple-50 text-purple-700 border border-purple-200';
+      case 'emerald':
+      case 'green':
+        return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+      case 'blue':
+        return 'bg-blue-50 text-blue-700 border border-blue-200';
+      case 'red':
+      default:
+        return 'bg-red-50 text-laxRed-600 border border-red-200';
+    }
   };
 
   return (
@@ -147,6 +194,7 @@ export default function BrowseByGenre({ activeGenre = 'All', onSelectGenre, serv
         {MEDIA_GENRES.map(genre => {
           const isActive = activeGenre.toLowerCase() === genre.id.toLowerCase();
           const count = getGenreCount(genre.id);
+          const badgeConfig = badges[genre.id] || (genre.popular ? { active: true, text: 'HOT', color: 'red' } : null);
 
           return (
             <button
@@ -159,11 +207,9 @@ export default function BrowseByGenre({ activeGenre = 'All', onSelectGenre, serv
                   : 'bg-white text-laxBlue-950 border-blue-100/80 hover:border-laxBlue-400 hover:shadow-md hover:-translate-y-0.5'
               }`}
             >
-              {genre.popular && (
-                <span className={`absolute top-2 right-2 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full ${
-                  isActive ? 'bg-laxRed-500 text-white' : 'bg-red-50 text-laxRed-600 border border-red-200'
-                }`}>
-                  HOT
+              {badgeConfig?.active && (
+                <span className={`absolute top-2 right-2 text-[9px] font-black tracking-wide uppercase px-1.5 py-0.5 rounded-full ${getBadgeClasses(badgeConfig.color, isActive)}`}>
+                  {badgeConfig.text || 'HOT'}
                 </span>
               )}
 
