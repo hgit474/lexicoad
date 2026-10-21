@@ -122,8 +122,8 @@ export default function AdminLocations() {
       showToast('Location saved successfully', 'success');
       setModalOpen(false);
       await loadData();
-    } catch {
-      showToast('Error saving location', 'error');
+    } catch (err) {
+      showToast(err?.message || 'Error saving location', 'error');
     }
   };
 

@@ -182,8 +182,8 @@ export default function AdminServices() {
       showToast('Service saved + locations mapped', 'success');
       setModalOpen(false);
       await loadData();
-    } catch {
-      showToast('Error saving service', 'error');
+    } catch (err) {
+      showToast(err?.message || 'Error saving service', 'error');
     }
   };
 

@@ -136,8 +136,8 @@ export default function AdminCampaigns() {
       id: editingId || `cp_${Math.random().toString(36).slice(2, 9)}`,
       title: form.title.trim(),
       client: form.client.trim(),
-      service_id: form.service_id,
-      location_id: form.location_id,
+      service_id: form.service_id || null,
+      location_id: form.location_id || null,
       start_date: form.start_date,
       end_date: form.end_date,
       budget: parseInt(form.budget) || 100000,
@@ -151,8 +151,8 @@ export default function AdminCampaigns() {
       showToast('Campaign saved successfully', 'success');
       setModalOpen(false);
       await loadData();
-    } catch {
-      showToast('Error saving campaign', 'error');
+    } catch (err) {
+      showToast(err?.message || 'Error saving campaign', 'error');
     }
   };
 
