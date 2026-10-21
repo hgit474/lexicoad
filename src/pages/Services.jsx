@@ -112,12 +112,43 @@ export default function Services() {
     });
   }, [services, activeGenre, selectedCity, selectedSubType, maxBudget, searchQuery, sortBy, serviceLocations, locations]);
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(6);
+
+  // Reset page when filters or search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeGenre, selectedCity, selectedSubType, maxBudget, searchQuery, sortBy, itemsPerPage]);
+
+  const totalPages = useMemo(() => {
+    if (itemsPerPage === 'all') return 1;
+    return Math.max(1, Math.ceil(filteredServices.length / Number(itemsPerPage)));
+  }, [filteredServices.length, itemsPerPage]);
+
+  const paginatedServices = useMemo(() => {
+    if (itemsPerPage === 'all') return filteredServices;
+    const size = Number(itemsPerPage);
+    const start = (currentPage - 1) * size;
+    return filteredServices.slice(start, start + size);
+  }, [filteredServices, currentPage, itemsPerPage]);
+
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    setCurrentPage(newPage);
+    const catalogEl = document.getElementById('services-catalog-top');
+    if (catalogEl) {
+      catalogEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   const resetAllFilters = () => {
     setActiveGenre('All');
     setSelectedCity('All');
     setSelectedSubType('All');
     setMaxBudget(100000);
     setSearchQuery('');
+    setCurrentPage(1);
     searchParams.delete('type');
     searchParams.delete('genre');
     setSearchParams(searchParams);
@@ -337,11 +368,16 @@ export default function Services() {
           {/* Right Inventory Listing */}
           <main className="lg:col-span-3">
             {/* Top Toolbar: Result Count, Sort By, View Mode */}
-            <div className="bg-white rounded-2xl border border-blue-100 px-4 py-3 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
+            <div id="services-catalog-top" className="bg-white rounded-2xl border border-blue-100 px-4 py-3 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-3 scroll-mt-24">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm font-extrabold text-laxBlue-950">
                   {filteredServices.length} Media Properties
                 </span>
+                {totalPages > 1 && (
+                  <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                )}
                 {activeGenre !== 'All' && (
                   <span className="chip bg-blue-50 text-laxBlue-700 border border-blue-100 text-[11px] font-bold">
                     {activeGenre}
@@ -410,7 +446,7 @@ export default function Services() {
             {/* Grid View */}
             {viewMode === 'grid' && (
               <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredServices.map(service => {
+                {paginatedServices.map(service => {
                   const cities = getServiceCities(service);
                   const minSpend = service.min_spend || Math.round(service.price * 0.35);
 
@@ -537,7 +573,7 @@ export default function Services() {
             {/* Compact List View */}
             {viewMode === 'list' && (
               <div className="space-y-4">
-                {filteredServices.map(service => {
+                {paginatedServices.map(service => {
                   const cities = getServiceCities(service);
                   const minSpend = service.min_spend || Math.round(service.price * 0.35);
 
@@ -617,6 +653,85 @@ export default function Services() {
                     </div>
                   );
                 })}
+              </div>
+            )}
+
+            {/* Pagination & Next Page Controls */}
+            {filteredServices.length > 0 && (
+              <div className="mt-10 bg-white rounded-2xl border border-blue-100 p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                {/* Result count & Per Page Selector */}
+                <div className="flex items-center gap-3 text-xs text-slate-500 font-semibold w-full sm:w-auto justify-between sm:justify-start">
+                  <span>
+                    Showing <strong className="text-laxBlue-950 font-bold">{Math.min((currentPage - 1) * Number(itemsPerPage === 'all' ? filteredServices.length : itemsPerPage) + 1, filteredServices.length)}–{Math.min(currentPage * Number(itemsPerPage === 'all' ? filteredServices.length : itemsPerPage), filteredServices.length)}</strong> of <strong className="text-laxBlue-950 font-bold">{filteredServices.length}</strong> media options
+                  </span>
+
+                  <div className="flex items-center gap-1.5 ml-2">
+                    <span className="text-slate-400 hidden md:inline">Per page:</span>
+                    <select
+                      value={itemsPerPage}
+                      onChange={e => setItemsPerPage(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+                      className="bg-slate-50 border border-slate-200 text-laxBlue-950 font-bold text-xs rounded-lg px-2 py-1 outline-none cursor-pointer"
+                    >
+                      <option value={6}>6</option>
+                      <option value={9}>9</option>
+                      <option value={12}>12</option>
+                      <option value="all">All</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Navigation Buttons: Previous, Page Numbers, Next Page */}
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2 flex-wrap justify-center">
+                    {/* Previous Button */}
+                    <button
+                      type="button"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition ${
+                        currentPage === 1
+                          ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200/50'
+                          : 'bg-white hover:bg-slate-50 text-laxBlue-950 border border-slate-200 shadow-xs hover:border-slate-300'
+                      }`}
+                    >
+                      <i className="fa-solid fa-chevron-left text-[10px]"></i>
+                      <span>Previous</span>
+                    </button>
+
+                    {/* Page Numbers */}
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                        <button
+                          key={page}
+                          type="button"
+                          onClick={() => handlePageChange(page)}
+                          className={`w-9 h-9 rounded-xl text-xs font-extrabold transition flex items-center justify-center ${
+                            currentPage === page
+                              ? 'grad-btn text-white shadow-md'
+                              : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Next Page Button */}
+                    <button
+                      type="button"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition ${
+                        currentPage === totalPages
+                          ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200/50'
+                          : 'grad-btn text-white shadow-md hover:opacity-95'
+                      }`}
+                    >
+                      <span>Next Page</span>
+                      <i className="fa-solid fa-chevron-right text-[10px]"></i>
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </main>
