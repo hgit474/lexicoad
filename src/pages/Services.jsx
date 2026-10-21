@@ -5,14 +5,12 @@ import { useSite } from '../context/SiteContext';
 import BrowseByGenre from '../components/BrowseByGenre';
 import InquiryModal from '../components/InquiryModal';
 import ServiceFilters from '../components/ServiceFilters';
-import FilterConfigModal from '../components/admin/FilterConfigModal';
 import { getParsedFilterConfig } from '../lib/filterConfig';
 
 export default function Services() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { settings, isAdmin } = useSite();
+  const { settings } = useSite();
   const filterConfig = useMemo(() => getParsedFilterConfig(settings), [settings]);
-  const [filterModalOpen, setFilterModalOpen] = useState(false);
 
   const [services, setServices] = useState([]);
   const [locations, setLocations] = useState([]);
@@ -369,8 +367,6 @@ export default function Services() {
               onFilterChange={setFilters}
               onResetFilters={resetAllFilters}
               config={filterConfig}
-              isAdmin={isAdmin}
-              onOpenAdminConfig={() => setFilterModalOpen(true)}
             />
 
             {/* Direct Assistance Card */}
@@ -400,17 +396,6 @@ export default function Services() {
                   <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
                     Page {currentPage} of {totalPages}
                   </span>
-                )}
-                {isAdmin && (
-                  <button
-                    type="button"
-                    onClick={() => setFilterModalOpen(true)}
-                    className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-lg flex items-center gap-1 transition ml-1"
-                    title="Customize marketplace filters"
-                  >
-                    <i className="fa-solid fa-sliders text-[10px]"></i>
-                    <span>Customize Filters</span>
-                  </button>
                 )}
               </div>
 
@@ -904,12 +889,6 @@ export default function Services() {
         servicesList={services}
         locationsList={locations}
         onSuccess={() => setQuoteModalOpen(false)}
-      />
-
-      {/* Admin Filter Configurator Modal */}
-      <FilterConfigModal
-        isOpen={filterModalOpen}
-        onClose={() => setFilterModalOpen(false)}
       />
     </div>
   );

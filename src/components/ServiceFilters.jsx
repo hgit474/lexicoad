@@ -13,8 +13,6 @@ export default function ServiceFilters({
   onFilterChange,
   onResetFilters,
   config = {},
-  onOpenAdminConfig,
-  isAdmin = false,
   className = ''
 }) {
   // Accordion collapsed/expanded states
@@ -749,23 +747,6 @@ export default function ServiceFilters({
           </div>
         )}
       </div>
-
-      {/* Admin Panel Customizer Trigger */}
-      {isAdmin && onOpenAdminConfig && (
-        <div className="p-3 bg-slate-50 border-t border-slate-200 rounded-b-2xl flex items-center justify-between">
-          <span className="text-[11px] font-semibold text-slate-500 flex items-center gap-1.5">
-            <i className="fa-solid fa-lock text-slate-400"></i> Admin Controls
-          </span>
-          <button
-            type="button"
-            onClick={onOpenAdminConfig}
-            className="text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 transition"
-          >
-            <i className="fa-solid fa-sliders text-xs"></i>
-            <span>Customize Filters</span>
-          </button>
-        </div>
-      )}
     </div>
   );
 }

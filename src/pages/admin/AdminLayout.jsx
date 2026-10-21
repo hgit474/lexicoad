@@ -131,15 +131,14 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-[#040A29] text-white flex flex-col font-jakarta w-full max-w-full overflow-x-hidden">
-      <div className="flex flex-1 w-full max-w-full min-w-0">
-        {/* Sidebar */}
-        <aside
-          id="adminSidebar"
-          className={`w-[270px] shrink-0 min-h-screen bg-[#0a1440] border-r border-white/10 p-5 flex flex-col gap-2 fixed lg:sticky top-0 h-screen overflow-y-auto z-50 transition-transform duration-300 ${
-            sidebarOpen ? 'translate-x-0' : '-translate-x-[110%] lg:translate-x-0'
-          }`}
-        >
+    <div className="h-screen w-full overflow-hidden bg-[#040A29] text-white flex font-jakarta">
+      {/* Sidebar */}
+      <aside
+        id="adminSidebar"
+        className={`w-[270px] shrink-0 h-full bg-[#0a1440] border-r border-white/10 p-5 flex flex-col gap-2 fixed lg:static top-0 bottom-0 z-50 overflow-y-auto transition-transform duration-300 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-[110%] lg:translate-x-0'
+        }`}
+      >
           <div className="flex items-center justify-between px-1 mb-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl grad-btn flex items-center justify-center text-white font-grotesk font-bold text-xl shadow-lg overflow-hidden shrink-0">
@@ -298,10 +297,10 @@ export default function AdminLayout() {
           />
         )}
 
-        {/* Main Content Area */}
-        <div className="flex-1 min-w-0 w-full max-w-full overflow-x-hidden">
-          {/* Topbar */}
-          <header className="sticky top-0 z-30 bg-[#040A29]/95 backdrop-blur border-b border-white/10 px-3 sm:px-6 py-3 flex items-center justify-between gap-2 sm:gap-3 w-full max-w-full">
+      {/* Main Content Area */}
+      <div className="flex-1 min-w-0 h-full overflow-y-auto overflow-x-hidden flex flex-col">
+        {/* Topbar */}
+        <header className="sticky top-0 z-30 bg-[#040A29]/95 backdrop-blur border-b border-white/10 px-3 sm:px-6 py-3 flex items-center justify-between gap-2 sm:gap-3 w-full shrink-0">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <button
                 className="lg:hidden w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center shrink-0 transition"
@@ -349,11 +348,10 @@ export default function AdminLayout() {
             </div>
           </header>
 
-          <main className="p-3 sm:p-6 lg:p-8 w-full max-w-full min-w-0 overflow-x-hidden">
+          <main className="p-3 sm:p-6 lg:p-8 flex-1 min-w-0">
             <Outlet context={{ refreshCounts: loadCounts }} />
           </main>
         </div>
-      </div>
     </div>
   );
 }
