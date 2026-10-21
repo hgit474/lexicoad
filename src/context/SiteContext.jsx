@@ -96,8 +96,16 @@ export const SiteProvider = ({ children }) => {
   const login = (identifier, password) => {
     const cleanId = (identifier || '').trim().toLowerCase();
     const cleanPass = (password || '').trim().toLowerCase();
+    
+    // Allow configuration via Environment Variables
+    const envUser = (import.meta.env.VITE_ADMIN_USER || '').trim().toLowerCase();
+    const envPass = (import.meta.env.VITE_ADMIN_PASS || '').trim().toLowerCase();
+
     const validIds = ['lexicoadmin', 'lexicoadmin@laxico.com', 'lexicoadvertising@gmail.com', 'admin'];
+    if (envUser) validIds.push(envUser);
+
     const validPasswords = ['laxico@4321'];
+    if (envPass) validPasswords.push(envPass);
 
     if (validIds.includes(cleanId) && validPasswords.includes(cleanPass)) {
       setIsAdmin(true);
