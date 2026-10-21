@@ -8,6 +8,7 @@ import Footer from './components/Footer';
 import ToastBox from './components/ToastBox';
 import LightboxModal from './components/LightboxModal';
 import LoginModal from './components/LoginModal';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Public Pages
 import Home from './pages/Home';
@@ -213,62 +214,64 @@ function AdminProtectedRoute({ children }) {
 export default function App() {
   return (
     <SiteProvider>
-      <RouteMetadataUpdater />
-      {/* Global Overlays */}
-      <ToastBox />
-      <LightboxModal />
-      <LoginModal />
+      <ErrorBoundary>
+        <RouteMetadataUpdater />
+        {/* Global Overlays */}
+        <ToastBox />
+        <LightboxModal />
+        <LoginModal />
 
-      <Routes>
-        {/* Public Website Routes */}
-        <Route element={<PublicLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/services/:id" element={<ServiceDetails />} />
-          <Route path="/category/:category" element={<CategoryListings />} />
-          <Route path="/category" element={<CategoryListings />} />
-          <Route path="/listings/category/:category" element={<CategoryListings />} />
-          <Route path="/listings/:category" element={<CategoryListings />} />
-          <Route path="/listings" element={<CategoryListings />} />
-          <Route path="/portfolio" element={<Portfolio />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/privacy" element={<Privacy />} />
-        </Route>
+        <Routes>
+          {/* Public Website Routes */}
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/services/:id" element={<ServiceDetails />} />
+            <Route path="/category/:category" element={<CategoryListings />} />
+            <Route path="/category" element={<CategoryListings />} />
+            <Route path="/listings/category/:category" element={<CategoryListings />} />
+            <Route path="/listings/:category" element={<CategoryListings />} />
+            <Route path="/listings" element={<CategoryListings />} />
+            <Route path="/portfolio" element={<Portfolio />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+          </Route>
 
-        {/* Admin Login Route (/lexico) */}
-        <Route path="/lexico" element={<AdminLogin />} />
-        <Route path="/laxico" element={<Navigate to="/lexico" replace />} />
-        <Route path="/admin/login" element={<Navigate to="/lexico" replace />} />
+          {/* Admin Login Route (/lexico) */}
+          <Route path="/lexico" element={<AdminLogin />} />
+          <Route path="/laxico" element={<Navigate to="/lexico" replace />} />
+          <Route path="/admin/login" element={<Navigate to="/lexico" replace />} />
 
-        {/* Admin Dashboard & Management Routes (Strictly Protected) */}
-        <Route
-          path="/admin"
-          element={
-            <AdminProtectedRoute>
-              <AdminLayout />
-            </AdminProtectedRoute>
-          }
-        >
-          <Route index element={<AdminDashboard />} />
-          <Route path="services" element={<AdminServices />} />
-          <Route path="listings" element={<AdminListings />} />
-          <Route path="upload-services" element={<AdminUploadServices />} />
-          <Route path="locations" element={<AdminLocations />} />
-          <Route path="campaigns" element={<AdminCampaigns />} />
-          <Route path="inquiries" element={<AdminInquiries />} />
-          <Route path="media" element={<AdminMedia />} />
-          <Route path="analytics" element={<AdminAnalytics />} />
-          <Route path="database" element={<AdminDatabase />} />
-          <Route path="settings" element={<AdminSettings />} />
-        </Route>
+          {/* Admin Dashboard & Management Routes (Strictly Protected) */}
+          <Route
+            path="/admin"
+            element={
+              <AdminProtectedRoute>
+                <AdminLayout />
+              </AdminProtectedRoute>
+            }
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="services" element={<AdminServices />} />
+            <Route path="listings" element={<AdminListings />} />
+            <Route path="upload-services" element={<AdminUploadServices />} />
+            <Route path="locations" element={<AdminLocations />} />
+            <Route path="campaigns" element={<AdminCampaigns />} />
+            <Route path="inquiries" element={<AdminInquiries />} />
+            <Route path="media" element={<AdminMedia />} />
+            <Route path="analytics" element={<AdminAnalytics />} />
+            <Route path="database" element={<AdminDatabase />} />
+            <Route path="settings" element={<AdminSettings />} />
+          </Route>
 
-        {/* Fallback */}
-        <Route path="*" element={<PublicLayout />}>
-          <Route path="*" element={<Home />} />
-        </Route>
-      </Routes>
+          {/* Fallback */}
+          <Route path="*" element={<PublicLayout />}>
+            <Route path="*" element={<Home />} />
+          </Route>
+        </Routes>
+      </ErrorBoundary>
     </SiteProvider>
   );
 }
