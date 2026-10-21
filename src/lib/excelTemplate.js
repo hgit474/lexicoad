@@ -22,57 +22,57 @@ export const SAMPLE_TEMPLATE_ROWS = [
   [
     'Transit',
     'Transport',
-    'City Express Low-Floor AC Bus Branding',
-    'Delhi NCR',
-    45000,
-    'Bus',
-    650000,
-    'High-frequency commuter bus wrapping covering prime arterial routes.',
-    'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?q=80&w=800&auto=format&fit=crop'
-  ],
-  [
-    'Transit',
-    'Transport',
-    'Delhi Metro Blue Line Full Train Wrap',
-    'Delhi / NCR',
-    185000,
-    'Metro',
-    1200000,
-    'Full exterior wrap across 6-coach train traversing Dwarka to Noida/Vaishali.',
-    'https://images.unsplash.com/photo-1474487548417-781cb71495f3?q=80&w=800&auto=format&fit=crop'
-  ],
-  [
-    'Transit',
-    'Transport',
-    'Suburban Express Electric Train Panel',
-    'Mumbai',
-    95000,
+    'Mumbai Western Line EMU Full Train Wrap',
+    'Mumbai (Churchgate to Virar)',
+    165000,
     'Train',
-    900000,
-    'Internal commuter panel advertising across western railway network.',
+    1450000,
+    'High-impact commuter wrap across 12-car local train network operating 18 hours daily across prime commercial corridors.',
     'https://images.unsplash.com/photo-1565019011521-b0575cbb57c8?q=80&w=800&auto=format&fit=crop'
   ],
   [
     'Transit',
-    'Metro Networks',
-    'Metro Station Platform Screen Doors (PSD)',
-    'Bengaluru (Namma Metro)',
-    75000,
-    'Metro',
-    550000,
-    'Illuminated platform screen door branding at high-traffic interchange stations.',
-    'https://images.unsplash.com/photo-1514565131-fce0801e5785?q=80&w=800&auto=format&fit=crop'
+    'Bus Fleet',
+    'Delhi DTC Electric Low-Floor Bus Full Wrap',
+    'Delhi NCR (Ring Road & Connaught Place)',
+    48000,
+    'Bus',
+    680000,
+    'Complete exterior vinyl wrap on air-conditioned electric buses covering high-dwell central Delhi routes.',
+    'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?q=80&w=800&auto=format&fit=crop'
   ],
   [
     'Outdoor',
     'Billboards & Unipoles',
-    'Cyber City Arterial Unipole (Backlit)',
-    'Gurugram',
-    125000,
+    'Gurugram Cyber City Highway Mega Unipole',
+    'Gurugram (NH-48 Corridor)',
+    135000,
     'Billboard',
-    980000,
-    'Front-facing highway unipole catching top corporate commuters.',
+    1100000,
+    'Front-lit iconic 60x30 ft arterial highway unipole facing non-stop corporate executive vehicular traffic.',
     'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=800&auto=format&fit=crop'
+  ],
+  [
+    'Outdoor',
+    'Digital Hoardings',
+    'Bandra Reclamation Iconic Curved DOOH LED',
+    'Mumbai (Western Express Highway)',
+    220000,
+    'Digital Screen',
+    1750000,
+    'P6 high-brightness curved digital screen with dynamic day/night creative scheduling and motion video support.',
+    'https://images.unsplash.com/photo-1534430480872-3498386e7856?q=80&w=800&auto=format&fit=crop'
+  ],
+  [
+    'Airport',
+    'Terminal Displays',
+    'IGI Terminal 3 Departure Security Concourse Totem',
+    'New Delhi Airport (T3 International)',
+    285000,
+    'Digital Totem',
+    920000,
+    'Ultra-HD 85-inch digital freestanding totem network positioned directly before international departures security gates.',
+    'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=800&auto=format&fit=crop'
   ]
 ];
 
