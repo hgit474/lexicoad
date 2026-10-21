@@ -198,16 +198,43 @@ export default function AdminLayout() {
             </span>
           </NavLink>
 
-          <NavLink
-            to="/admin/upload-services"
-            onClick={() => setSidebarOpen(false)}
-            className={({ isActive }) => `admin-link ${isActive ? 'active' : ''}`}
-          >
-            <i className="fa-solid fa-file-excel w-5 text-emerald-400"></i> Upload Services
-            <span className="ml-auto text-[10px] bg-emerald-400/15 text-emerald-300 px-1.5 py-0.5 rounded font-bold">
-              .XLSX
-            </span>
-          </NavLink>
+          <div className="flex flex-col">
+            <NavLink
+              to="/admin/upload-services"
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) => `admin-link ${isActive ? 'active' : ''}`}
+            >
+              <i className="fa-solid fa-file-excel w-5 text-emerald-400"></i> Upload Services
+              <span className="ml-auto text-[10px] bg-emerald-400/15 text-emerald-300 px-1.5 py-0.5 rounded font-bold">
+                .XLSX
+              </span>
+            </NavLink>
+            {location.pathname.includes('/admin/upload-services') && (
+              <div className="ml-7 my-1 pl-2 border-l border-white/10 flex flex-col gap-1 text-[11px]">
+                {[
+                  { key: 'Transit', label: 'Transit', icon: 'fa-train-subway' },
+                  { key: 'Bus', label: 'Bus', icon: 'fa-bus' },
+                  { key: 'Cinema', label: 'Cinema', icon: 'fa-film' },
+                  { key: 'Outdoor', label: 'Outdoor', icon: 'fa-signs-post' },
+                  { key: 'Airport', label: 'Airport', icon: 'fa-plane-departure' },
+                  { key: 'Digital', label: 'Digital', icon: 'fa-tv' }
+                ].map(cat => (
+                  <NavLink
+                    key={cat.key}
+                    to={`/admin/upload-services?category=${cat.key}`}
+                    className={
+                      (location.search.includes(`category=${cat.key}`) || (!location.search && cat.key === 'Transit'))
+                        ? 'py-1 px-2 rounded-lg transition flex items-center justify-between bg-emerald-500/20 text-emerald-300 font-bold'
+                        : 'py-1 px-2 rounded-lg transition flex items-center justify-between text-slate-400 hover:text-white hover:bg-white/5'
+                    }
+                  >
+                    <span><i className={`fa-solid ${cat.icon} text-[10px] mr-1.5`}></i>{cat.label}</span>
+                    <span className="text-[9px] text-slate-500">.xlsx</span>
+                  </NavLink>
+                ))}
+              </div>
+            )}
+          </div>
 
           <NavLink
             to="/admin/locations"

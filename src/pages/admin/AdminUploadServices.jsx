@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate, useOutletContext } from 'react-router-dom';
+import { Link, useNavigate, useOutletContext, useLocation, useSearchParams } from 'react-router-dom';
 import { useSite } from '../../context/SiteContext';
 import {
   bulkUpsertListingsByCategory,
@@ -28,10 +28,24 @@ const INVENTORY_CATEGORIES = [
 export default function AdminUploadServices() {
   const { showToast } = useSite();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const outletCtx = useOutletContext();
 
-  // Active Category Selection
-  const [selectedCategory, setSelectedCategory] = useState('Transit');
+  // Active Category Selection (from URL ?category= or state or default Transit)
+  const initialCat = searchParams.get('category') || location.state?.category || 'Transit';
+  const initialValid = INVENTORY_CATEGORIES.find(c => c.key.toLowerCase() === initialCat.toLowerCase())?.key || 'Transit';
+  const [selectedCategory, setSelectedCategory] = useState(initialValid);
+
+  useEffect(() => {
+    const catParam = searchParams.get('category') || location.state?.category;
+    if (catParam) {
+      const match = INVENTORY_CATEGORIES.find(c => c.key.toLowerCase() === catParam.toLowerCase());
+      if (match && match.key !== selectedCategory) {
+        setSelectedCategory(match.key);
+      }
+    }
+  }, [searchParams, location.state]);
 
   // File & Upload States
   const [dragActive, setDragActive] = useState(false);
@@ -211,6 +225,7 @@ export default function AdminUploadServices() {
   const handleCategorySwitch = (catKey) => {
     if (selectedCategory === catKey) return;
     setSelectedCategory(catKey);
+    setSearchParams({ category: catKey }, { replace: true });
     // If a file is currently selected, re-parse with the newly selected category validator
     if (selectedFile) {
       setParseResult(null);

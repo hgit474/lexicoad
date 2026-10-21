@@ -10,7 +10,7 @@ import {
   rollbackToExampleListings,
   uploadImage
 } from '../../services/dataService';
-import { downloadListingsTemplate } from '../../lib/excelTemplate';
+import { downloadListingsTemplate, downloadCategoryTemplate } from '../../lib/excelTemplate';
 import AdminPagination from '../../components/admin/AdminPagination';
 
 export default function AdminListings() {
@@ -356,19 +356,30 @@ export default function AdminListings() {
             <span>Wipe All</span>
           </button>
 
+          {/* Download Template (Category aware) */}
           <button
-            onClick={() => downloadListingsTemplate()}
+            onClick={() => {
+              if (selectedCategory !== 'All') {
+                downloadCategoryTemplate(selectedCategory);
+              } else {
+                downloadListingsTemplate();
+              }
+            }}
             className="inline-flex items-center gap-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-bold px-3 py-2 rounded-xl transition shadow"
-            title="Download formatted .xlsx template"
+            title={`Download ${selectedCategory !== 'All' ? selectedCategory : 'all-categories'} .xlsx template`}
           >
-            <i className="fa-solid fa-file-excel"></i> Template
+            <i className="fa-solid fa-file-excel"></i>
+            <span>{selectedCategory !== 'All' ? `${selectedCategory} Template` : 'Template'}</span>
           </button>
 
+          {/* Upload Excel (Category aware) */}
           <Link
-            to="/admin/upload-services"
-            className="inline-flex items-center gap-1.5 bg-laxBlue-600/30 hover:bg-laxBlue-600/50 text-blue-200 border border-blue-500/30 text-xs font-bold px-3 py-2 rounded-xl transition"
+            to={selectedCategory !== 'All' ? `/admin/upload-services?category=${encodeURIComponent(selectedCategory)}` : '/admin/upload-services'}
+            className="inline-flex items-center gap-1.5 bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-200 border border-emerald-500/30 text-xs font-bold px-3 py-2 rounded-xl transition shadow"
+            title={`Bulk upload ${selectedCategory !== 'All' ? selectedCategory : ''} inventory`}
           >
-            <i className="fa-solid fa-cloud-arrow-up"></i> Upload Excel
+            <i className="fa-solid fa-cloud-arrow-up"></i>
+            <span>{selectedCategory !== 'All' ? `Upload ${selectedCategory}` : 'Bulk Upload'}</span>
           </Link>
 
           <button
@@ -377,6 +388,43 @@ export default function AdminListings() {
           >
             <i className="fa-solid fa-plus"></i> Add Listing
           </button>
+        </div>
+      </div>
+
+      {/* PER-CATEGORY BULK UPLOAD QUICK SELECTOR */}
+      <div className="bg-[#071343]/60 border border-white/10 rounded-2xl p-3 sm:p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+            <i className="fa-solid fa-file-excel"></i> Bulk Upload by Category:
+          </span>
+          <span className="text-[11px] text-slate-400 hidden sm:inline">
+            Each category has its own custom columns, template & validator
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5 w-full lg:w-auto">
+          {[
+            { key: 'Transit', label: 'Transit', icon: 'fa-train-subway' },
+            { key: 'Bus', label: 'Bus', icon: 'fa-bus' },
+            { key: 'Cinema', label: 'Cinema', icon: 'fa-film' },
+            { key: 'Outdoor', label: 'Outdoor', icon: 'fa-signs-post' },
+            { key: 'Airport', label: 'Airport', icon: 'fa-plane-departure' },
+            { key: 'Digital', label: 'Digital', icon: 'fa-tv' }
+          ].map(c => (
+            <Link
+              key={c.key}
+              to={`/admin/upload-services?category=${c.key}`}
+              className={`inline-flex items-center gap-1.5 border text-xs font-bold px-3 py-1.5 rounded-xl transition ${
+                selectedCategory.toLowerCase() === c.key.toLowerCase()
+                  ? 'bg-emerald-500/25 border-emerald-400 text-white shadow'
+                  : 'bg-white/5 hover:bg-emerald-500/20 hover:border-emerald-400/40 border-white/10 text-slate-300 hover:text-emerald-300'
+              }`}
+              title={`Open ${c.label} bulk spreadsheet uploader`}
+            >
+              <i className={`fa-solid ${c.icon} text-[11px]`}></i>
+              <span>{c.label}</span>
+              <span className="text-[10px] opacity-60">Upload ↗</span>
+            </Link>
+          ))}
         </div>
       </div>
 
