@@ -303,7 +303,7 @@ export default function Services() {
               )}
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 min-w-0">
               <select
                 value={filters.cities[0] || 'All'}
                 onChange={e => {
@@ -311,7 +311,7 @@ export default function Services() {
                   setFilters(prev => ({ ...prev, cities: val === 'All' ? [] : [val] }));
                 }}
                 aria-label="Filter media by city"
-                className="flex-1 md:w-44 px-3 py-3 text-xs sm:text-sm font-bold bg-slate-50 rounded-xl outline-none text-laxBlue-950 cursor-pointer border border-slate-200/80"
+                className="flex-1 min-w-0 md:w-44 px-3 py-3 text-xs sm:text-sm font-bold bg-slate-50 rounded-xl outline-none text-laxBlue-950 cursor-pointer border border-slate-200/80 truncate"
               >
                 <option value="All">📍 All Cities</option>
                 {allCitiesList.map(city => (
@@ -324,7 +324,7 @@ export default function Services() {
               <button
                 type="button"
                 onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
-                className="md:hidden px-4 py-3 bg-laxBlue-950 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0"
+                className="md:hidden px-3.5 sm:px-4 py-3 bg-laxBlue-950 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 whitespace-nowrap"
               >
                 <i className="fa-solid fa-sliders"></i>
                 <span>Filters {activeFiltersCount > 0 && `(${activeFiltersCount})`}</span>
@@ -334,7 +334,7 @@ export default function Services() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
+      <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6 w-full min-w-0">
         {/* Browse Media By Genre Grid */}
         <BrowseByGenre
           activeGenre={activeGenre}
@@ -343,7 +343,7 @@ export default function Services() {
         />
 
         {/* Main Catalog View: Left Sidebar + Right Inventory */}
-        <div className="grid lg:grid-cols-4 gap-6 items-start mt-3 sm:mt-4">
+        <div className="grid lg:grid-cols-4 gap-6 items-start mt-3 sm:mt-4 w-full min-w-0">
           {/* Left Filter Sidebar (The Media Ant style) */}
           <aside className={`
             lg:block lg:sticky lg:top-24 z-30
@@ -389,9 +389,9 @@ export default function Services() {
           </aside>
 
           {/* Right Inventory Listing */}
-          <main className="lg:col-span-3">
+          <main className="lg:col-span-3 min-w-0 w-full max-w-full">
             {/* Top Toolbar: Result Count, Sort By, View Mode */}
-            <div id="services-catalog-top" className="bg-white rounded-2xl border border-blue-100 px-4 py-3 shadow-sm mb-4 flex flex-wrap items-center justify-between gap-3 scroll-mt-24">
+            <div id="services-catalog-top" className="bg-white rounded-2xl border border-blue-100 px-3.5 sm:px-4 py-3 shadow-sm mb-4 flex flex-wrap items-center justify-between gap-3 scroll-mt-24 min-w-0 w-full">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm font-extrabold text-laxBlue-950">
                   {filteredServices.length} Media Properties
@@ -414,13 +414,13 @@ export default function Services() {
                 )}
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-end min-w-0">
+                <div className="flex items-center gap-1.5 min-w-0">
                   <span className="text-xs font-bold text-slate-400 hidden sm:inline">Sort:</span>
                   <select
                     value={sortBy}
                     onChange={e => setSortBy(e.target.value)}
-                    className="text-xs font-bold text-laxBlue-950 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg outline-none cursor-pointer"
+                    className="text-xs font-bold text-laxBlue-950 bg-slate-50 border border-slate-200 px-2.5 sm:px-3 py-1.5 rounded-lg outline-none cursor-pointer max-w-[170px] sm:max-w-none truncate"
                   >
                     <option value="popular">Top Searched</option>
                     <option value="low">Min Spend: Low → High</option>
@@ -429,7 +429,7 @@ export default function Services() {
                   </select>
                 </div>
 
-                <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+                <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50 shrink-0">
                   <button
                     onClick={() => setViewMode('grid')}
                     className={`p-1.5 px-2.5 text-xs ${viewMode === 'grid' ? 'bg-laxBlue-950 text-white' : 'text-slate-600'}`}
@@ -587,7 +587,7 @@ export default function Services() {
 
             {/* Grid View */}
             {viewMode === 'grid' && (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 min-w-0 w-full">
                 {paginatedServices.map(service => {
                   const cities = getServiceCities(service);
                   const minSpend = service.min_spend || Math.round(service.price * 0.35);
@@ -595,7 +595,7 @@ export default function Services() {
                   return (
                     <div
                       key={service.id}
-                      className="bg-white rounded-3xl overflow-hidden border border-blue-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group"
+                      className="bg-white rounded-3xl overflow-hidden border border-blue-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group min-w-0 w-full"
                     >
                       {/* Image Header */}
                       <div className="relative h-48 overflow-hidden bg-slate-900">
@@ -614,26 +614,28 @@ export default function Services() {
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent"></div>
 
-                          {/* Chips */}
-                          <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
-                            <span className="chip bg-white/95 text-laxBlue-900 font-bold text-[11px] shadow">
-                              {service.genre || service.type}
-                            </span>
-                            {service.chain_or_brand && (
-                              <span className="chip bg-black/60 text-white backdrop-blur text-[11px] font-semibold border border-white/20">
-                                {service.chain_or_brand}
+                          {/* Chips Bar: Consistent 2-line layout (Line 1: Category & Star, Line 2: Brand) */}
+                          <div className="absolute top-3 inset-x-3 flex items-start justify-between gap-2 pointer-events-none z-10">
+                            {/* Left: Category (Line 1) + Brand (Line 2) strictly stacked */}
+                            <div className="flex flex-col items-start gap-1.5 min-w-0 max-w-[calc(100%-60px)] pointer-events-auto">
+                              <span className="chip bg-white/95 text-laxBlue-900 font-bold text-[10px] sm:text-[11px] shadow max-w-full truncate">
+                                {service.genre || service.type}
                               </span>
-                            )}
-                          </div>
+                              {service.chain_or_brand && (
+                                <span className="chip bg-black/60 text-white backdrop-blur text-[10px] sm:text-[11px] font-semibold border border-white/20 max-w-full truncate">
+                                  {service.chain_or_brand}
+                                </span>
+                              )}
+                            </div>
 
-                          <div className="absolute top-3 right-3">
-                            <span className="chip bg-laxRed-600 text-white font-bold text-[11px] shadow">
+                            {/* Right: Star Rating (Always anchored top-right) */}
+                            <span className="chip bg-laxRed-600 text-white font-bold text-[10px] sm:text-[11px] shadow shrink-0 pointer-events-auto">
                               ★ {service.rating || 4.8}
                             </span>
                           </div>
 
                           <div className="absolute bottom-3 left-3 right-3 text-white">
-                            <h4 className="font-grotesk font-bold text-base line-clamp-1 leading-snug drop-shadow-sm">
+                            <h4 className="font-grotesk font-bold text-sm sm:text-base line-clamp-1 leading-snug drop-shadow-sm">
                               {service.name}
                             </h4>
                           </div>
@@ -641,11 +643,11 @@ export default function Services() {
                       </div>
 
                       {/* Card Body */}
-                      <div className="p-5 flex flex-col flex-1 justify-between">
-                        <div>
+                      <div className="p-4 sm:p-5 flex flex-col flex-1 justify-between min-w-0">
+                        <div className="min-w-0">
                           {/* Audience / Footfall Metric (Media Ant style) */}
                           {service.audience_metric && (
-                            <div className="flex items-center gap-2 text-xs font-extrabold text-slate-700 bg-slate-50 border border-slate-200/60 rounded-xl px-3 py-2 mb-3">
+                            <div className="flex items-center gap-2 text-xs font-extrabold text-slate-700 bg-slate-50 border border-slate-200/60 rounded-xl px-2.5 sm:px-3 py-2 mb-3 min-w-0">
                               <i className="fa-solid fa-users text-laxBlue-700 text-sm shrink-0"></i>
                               <span className="truncate">{service.audience_metric}</span>
                             </div>
@@ -656,7 +658,7 @@ export default function Services() {
                             {cities.slice(0, 3).map(city => (
                               <span
                                 key={city}
-                                className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-laxRed-700 border border-red-100"
+                                className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-laxRed-700 border border-red-100 truncate max-w-[110px]"
                               >
                                 📍 {city}
                               </span>
@@ -674,34 +676,35 @@ export default function Services() {
                           </p>
                         </div>
 
-                        {/* Pricing & Actions */}
-                        <div className="pt-3 border-t border-slate-100 flex items-end justify-between gap-2">
-                          <div>
-                            <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                        {/* Pricing & Actions (Non-clipping, wrap-protected on all mobile screens) */}
+                        <div className="pt-3 border-t border-slate-100 flex flex-wrap sm:flex-nowrap items-end justify-between gap-2 min-w-0">
+                          <div className="min-w-0 flex-1">
+                            <div className="text-[9px] sm:text-[10px] font-extrabold text-slate-400 uppercase tracking-wider truncate">
                               MIN SPEND
                             </div>
-                            <div className="font-grotesk font-bold text-lg text-laxBlue-950">
+                            <div className="font-grotesk font-bold text-base sm:text-lg text-laxBlue-950 truncate leading-tight">
                               ₹{Number(minSpend).toLocaleString('en-IN')}
                             </div>
-                            <div className="text-[10px] text-slate-400 font-semibold">
+                            <div className="text-[10px] text-slate-400 font-semibold truncate">
                               Rates from ₹{Number(service.price).toLocaleString('en-IN')}/mo
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1.5 shrink-0">
                             <button
                               type="button"
                               onClick={() => handleOpenQuote(service)}
-                              className="grad-btn text-white text-xs font-extrabold px-3.5 py-2.5 rounded-xl shadow hover:shadow-md transition"
+                              className="grad-btn text-white text-xs font-extrabold px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl shadow hover:shadow-md transition whitespace-nowrap"
                             >
                               Get Quote
                             </button>
                             <Link
                               to={`/services/${service.id}`}
-                              className="bg-slate-100 hover:bg-slate-200 text-laxBlue-950 text-xs font-extrabold px-2.5 py-2.5 rounded-xl transition"
+                              className="w-8 h-8 sm:w-9 sm:h-9 bg-slate-100 hover:bg-slate-200 text-laxBlue-950 text-xs font-extrabold rounded-xl transition flex items-center justify-center shrink-0"
                               title="Details"
+                              aria-label={`View details for ${service.name}`}
                             >
-                              <i className="fa-solid fa-arrow-right"></i>
+                              <i className="fa-solid fa-arrow-right text-[11px]"></i>
                             </Link>
                           </div>
                         </div>
@@ -776,17 +779,17 @@ export default function Services() {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 shrink-0">
                           <button
                             type="button"
                             onClick={() => handleOpenQuote(service)}
-                            className="grad-btn text-white text-xs font-extrabold px-4 py-2 rounded-xl shadow"
+                            className="grad-btn text-white text-xs font-extrabold px-3.5 py-2 sm:px-4 rounded-xl shadow whitespace-nowrap shrink-0"
                           >
                             Get Quote
                           </button>
                           <Link
                             to={`/services/${service.id}`}
-                            className="bg-slate-100 hover:bg-slate-200 text-laxBlue-950 text-xs font-extrabold px-3 py-2 rounded-xl"
+                            className="bg-slate-100 hover:bg-slate-200 text-laxBlue-950 text-xs font-extrabold px-3 py-2 rounded-xl shrink-0"
                           >
                             View
                           </Link>

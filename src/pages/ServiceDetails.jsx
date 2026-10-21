@@ -222,19 +222,19 @@ export default function ServiceDetails() {
                   e.target.src = `https://picsum.photos/seed/${service.id}/1000/600`;
                 }}
               />
-              <div className="absolute bottom-0 inset-x-0 p-5 bg-gradient-to-t from-black/80 to-transparent flex items-end justify-between">
-                <div>
-                  <div className="text-white font-grotesk font-bold text-2xl">
+              <div className="absolute bottom-0 inset-x-0 p-4 sm:p-5 bg-gradient-to-t from-black/85 via-black/40 to-transparent flex flex-wrap sm:flex-nowrap items-end justify-between gap-2.5 sm:gap-3">
+                <div className="min-w-0">
+                  <div className="text-white font-grotesk font-bold text-xl sm:text-2xl truncate">
                     ₹{Number(service.price).toLocaleString('en-IN')}
-                    <span className="text-sm font-bold text-blue-200">/month / site</span>
+                    <span className="text-xs sm:text-sm font-bold text-blue-200"> /month / site</span>
                   </div>
-                  <div className="text-blue-200 text-xs font-bold">{service.dims}</div>
+                  <div className="text-blue-200 text-xs font-bold truncate">{service.dims}</div>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => setActiveTab(5)}
-                  className="bg-white text-laxBlue-900 font-extrabold text-sm px-5 py-3 rounded-xl hover:bg-laxRed-600 hover:text-white transition shadow"
+                  className="bg-white text-laxBlue-900 font-extrabold text-xs sm:text-sm px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl hover:bg-laxRed-600 hover:text-white transition shadow shrink-0 whitespace-nowrap"
                 >
                   Enquire Now
                 </button>

@@ -355,20 +355,20 @@ export default function CategoryListings() {
                           <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent"></div>
 
                           {/* Media Type Chip */}
-                          <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
-                            <span className="chip bg-white/95 text-laxBlue-900 font-bold text-[11px] shadow">
+                          <div className="absolute top-3 inset-x-3 flex items-start gap-1.5 flex-wrap z-10 pointer-events-none">
+                            <span className="chip bg-white/95 text-laxBlue-900 font-bold text-[10px] sm:text-[11px] shadow max-w-[130px] sm:max-w-[160px] truncate pointer-events-auto">
                               {listing.media_type || listing.subcategory}
                             </span>
-                            <span className="chip bg-black/60 text-white backdrop-blur text-[11px] font-semibold border border-white/20">
+                            <span className="chip bg-black/60 text-white backdrop-blur text-[10px] sm:text-[11px] font-semibold border border-white/20 max-w-[110px] sm:max-w-[140px] truncate pointer-events-auto">
                               {listing.category}
                             </span>
                           </div>
 
                           {/* Location Badge */}
                           <div className="absolute bottom-3 left-3 right-3 text-white">
-                            <div className="text-[11px] font-bold text-red-300 flex items-center gap-1 mb-0.5">
-                              <i className="fa-solid fa-location-dot text-[10px]"></i>
-                              <span>{listing.location || 'Pan India'}</span>
+                            <div className="text-[11px] font-bold text-red-300 flex items-center gap-1 mb-0.5 truncate">
+                              <i className="fa-solid fa-location-dot text-[10px] shrink-0"></i>
+                              <span className="truncate">{listing.location || 'Pan India'}</span>
                             </div>
                             <h3 className="font-grotesk font-bold text-base line-clamp-1 leading-snug drop-shadow-sm">
                               {listing.title}
@@ -377,13 +377,13 @@ export default function CategoryListings() {
                         </div>
 
                         {/* Card Body */}
-                        <div className="p-5 flex flex-col flex-1 justify-between gap-3">
-                          <div>
+                        <div className="p-4 sm:p-5 flex flex-col flex-1 justify-between gap-3 min-w-0">
+                          <div className="min-w-0">
                             {/* Reach Badge */}
                             {listing.reach ? (
-                              <div className="flex items-center gap-2 text-xs font-extrabold text-slate-700 bg-white border border-slate-200/60 rounded-xl px-3 py-2 mb-2 shadow-xs">
+                              <div className="flex items-center gap-2 text-xs font-extrabold text-slate-700 bg-white border border-slate-200/60 rounded-xl px-2.5 sm:px-3 py-2 mb-2 shadow-xs min-w-0">
                                 <i className="fa-solid fa-users text-laxBlue-700 text-sm shrink-0"></i>
-                                <span>{Number(listing.reach).toLocaleString('en-IN')} Reach / Week</span>
+                                <span className="truncate">{Number(listing.reach).toLocaleString('en-IN')} Reach / Week</span>
                               </div>
                             ) : null}
 
@@ -395,13 +395,13 @@ export default function CategoryListings() {
                             )}
                           </div>
 
-                          {/* Pricing & Call to Action */}
-                          <div className="pt-3 border-t border-slate-200/80 flex items-end justify-between gap-2">
-                            <div>
-                              <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                          {/* Pricing & Call to Action (Wrap protected for mobile) */}
+                          <div className="pt-3 border-t border-slate-200/80 flex flex-wrap sm:flex-nowrap items-end justify-between gap-2 min-w-0">
+                            <div className="min-w-0 flex-1">
+                              <div className="text-[9px] sm:text-[10px] font-extrabold text-slate-400 uppercase tracking-wider truncate">
                                 MONTHLY RATE
                               </div>
-                              <div className="font-grotesk font-bold text-lg sm:text-xl text-laxBlue-950">
+                              <div className="font-grotesk font-bold text-base sm:text-xl text-laxBlue-950 truncate leading-tight">
                                 ₹{Number(listing.price).toLocaleString('en-IN')}
                               </div>
                             </div>
@@ -409,7 +409,7 @@ export default function CategoryListings() {
                             <button
                               type="button"
                               onClick={() => handleOpenQuote(listing)}
-                              className="grad-btn text-white text-xs font-extrabold px-4 py-2.5 rounded-xl shadow hover:shadow-md transition flex items-center gap-1.5"
+                              className="grad-btn text-white text-xs font-extrabold px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl shadow hover:shadow-md transition flex items-center gap-1.5 shrink-0 whitespace-nowrap"
                             >
                               <span>Get Quote</span>
                               <i className="fa-solid fa-arrow-right text-[10px]"></i>
